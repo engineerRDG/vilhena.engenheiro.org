@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STATUS CÁSSIA - DELFINOPOLIS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            background-color: #f0f2f5; /* Um fundo suave para a página toda */
+        }
+
+        /* Container para a tabela, com sombra e bordas arredondadas */
+        .table-container {
+            background-color: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden; /* Garante que o conteúdo respeite as bordas arredondadas */
+        }
+
+        /* Estilo do título acima da tabela */
+        .table-title {
+            padding: 20px 24px;
+            margin: 0;
+            font-size: 1.5em; /* Fonte um pouco maior para o título */
+            font-weight: 600;
+            color: #333;
+        }
+
+        /* Estilo da tabela */
+        table {
+            width: 100%;
+            border-collapse: collapse; /* Remove o espaçamento entre as células */
+            font-size: 1.05em; /* Fonte um pouco maior na tabela */
+        }
+
+        /* Estilo das células do cabeçalho (th) e do corpo (td) */
+        th, td {
+            padding: 16px 24px; /* Mais espaçamento interno para deixar a tabela "respirar" */
+            text-align: left;
+            border-top: 1px solid #dee2e6; /* Linha sutil entre as fileiras */
+            white-space: nowrap; /* Impede que o texto quebre em várias linhas, ideal para a rolagem horizontal */
+        }
+
+        /* Estilo específico do cabeçalho da tabela */
+        thead th {
+            background-color: #343a40; /* Cor de fundo escura */
+            color: #ffffff; /* Cor do texto branca */
+            font-weight: 600;
+            border-top: none; /* Remove a borda superior do cabeçalho */
+        }
+
+        /* Estilo de "zebrado" para as linhas do corpo da tabela */
+        tbody tr:nth-child(even) {
+            background-color: #f8f9fa; /* Cor de fundo mais clara para linhas pares */
+        }
+
+        .card-title {
+            min-height: 90px; /* Garante que os cards tenham a mesma altura */
+        }
+    </style>
+</head>
+<body>
+    
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">STATUS - Delfinópolis</a>
+            <span class="navbar-text">
+                Atualizado em: 30/06/2025, 15:00
+            </span>
+        </div>
+    </nav>
+
+    <main class="container mt-4">
+        <div class="row">
+            <div class="col-lg-4 mb-4">
+                <div class="card text-white bg-success h-100">
+                    <div class="card-header">OPERANDO</div>
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            Rio Grande IV
+                            <br><br>
+                            Canastra + Nossa Senhora dos Navegantes X
+                        </h5>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 mb-4">
+                <div class="card text-white bg-info h-100">
+                    <div class="card-header">AGUARDANDO FILA</div>
+                    <div class="card-body">
+                        <h5 class="card-title">São João Batista do Glória</h5>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 mb-4">
+                <div class="card text-white bg-danger h-100">
+                    <div class="card-header">EM MANUTENÇÃO</div>
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            Delfinopolis I
+                            <br><br>
+                            Nossa Senhora dos Navegantes VII
+                        </h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-12">
+                <div class="table-container">
+                <CENTER>
+                    <h3 class="table-title">FORA DE OPERAÇÃO</h3>
+                    </CENTER>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Embarcação</th>
+                                    <th>Condição</th>
+                                    <th>Motivo</th>
+                                    <th>Início</th>
+                                    <th>Previsão</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Delfinopolis I</td>
+                                    <td>Manutenção</td>
+                                    <td>Falta bateria</td>
+                                    <td>28/06/2025 09:00:00</td>
+                                    <td>Aguardando RS</td>
+                                </tr>
+                                <tr>
+                                    <td>Nossa Senhora dos Navegantes VII</td>
+                                    <td>Manutenção</td>
+                                    <td>Problema no eixo de propulsão BB</td>
+                                    <td>28/06/2025 09:00:00</td>
+                                    <td>Aguardando RS</td>
+                                </tr>
+                                <tr>
+                                    <td>São João Batista do Glória</td>
+                                    <td>Disponível</td>
+                                    <td>Baixa demanda</td>
+                                    <td>30/06/2025</td>
+                                    <td></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="container text-center mt-4 mb-4">
+        </footer>
+
+</body>
+</html>
