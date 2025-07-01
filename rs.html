@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de RS - Vilhena Serviços</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"> 
+    
+    <style>
+        body {
+            background-color: #f0f2f5;
+        }
+
+        .navbar-brand img {
+            height: 40px;
+            width: auto;
+        }
+
+        .table-container {
+            background-color: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+            padding: 1.5rem;
+        }
+
+        .nav-buttons {
+            background-color: #ffffff;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 1em;
+        }
+
+        th, td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+            vertical-align: middle;
+        }
+
+        thead th {
+            background-color: #343a40;
+            color: #ffffff;
+            font-weight: 600;
+            border-top: none;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        
+        tbody tr:hover {
+            background-color: #e9ecef;
+        }
+
+        .status-badge {
+            padding: 0.4em 0.7em;
+            font-size: 0.85em;
+            font-weight: 600;
+            border-radius: 15px;
+        }
+    </style>
+</head>
+<body>
+    
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <img src="https://static.wixstatic.com/media/886e87_d769722dd4f34a86a70fc33591489baf~mv2.png/v1/fill/w_201,h_118,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/VILHENA-SERVI%C3%87OS_LOGO2.png" alt="Vilhena Serviços Logo">
+            </a>
+            <span class="navbar-text">
+                Atualizado em: 30/06/2025, 17:00
+            </span>
+        </div>
+    </nav>
+
+    <main class="container mt-4">
+    
+        <div class="nav-buttons">
+            <a href="index.html" class="btn btn-primary"><i class="bi bi-house-gear"></i> Início</a>
+            <a href="controle-rs.html" class="btn btn-secondary"><i class="bi bi-tools"></i> Controle de RS</a>
+            <a href="status.html" class="btn btn-primary"><i class="bi bi-check-circle"></i> Status - Delfinopolis</a>
+            <a href="#" class="btn btn-primary"><i class="bi bi-calendar-week"></i> Cronograma de atendimento</a>
+            <a href="#" class="btn btn-primary"><i class="bi bi-box-seam"></i> Almoxarifado</a>
+            <a href="#" class="btn btn-primary"><i class="bi bi-person-lines-fill"></i> Fornecedores</a>
+        </div>
+
+        <div class="table-container">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="h4 mb-0">Requisições de Serviço</h2>
+                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#novaRSModal">
+                    <i class="bi bi-plus-circle-fill me-2"></i>Nova Requisição de Serviço
+                </button>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-5">
+                    <input type="text" class="form-control" placeholder="Pesquisar por palavra-chave...">
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select">
+                        <option selected>Filtrar por Status...</option>
+                        <option value="1">Aguardando Aprovação</option>
+                        <option value="2">Em Andamento</option>
+                        <option value="3">Concluída</option>
+                        <option value="4">Cancelada</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select">
+                        <option selected>Filtrar por Prioridade...</option>
+                        <option value="1">Urgente</option>
+                        <option value="2">Alta</option>
+                        <option value="3">Média</option>
+                        <option value="4">Baixa</option>
+                    </select>
+                </div>
+                <div class="col-md-1">
+                    <button class="btn btn-primary w-100"><i class="bi bi-search"></i></button>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>N° da RS</th>
+                            <th>Solicitante</th>
+                            <th>Embarcação</th>
+                            <th>Data da Abertura</th>
+                            <th>Prioridade</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>RS-2025-078</td>
+                            <td>Carlos Mendes</td>
+                            <td>Nossa Sra. dos Navegantes VII</td>
+                            <td>28/06/2025</td>
+                            <td><span class="badge text-bg-danger">Urgente</span></td>
+                            <td><span class="status-badge text-bg-warning">Em Andamento</span></td>
+                            <td>
+                                <a href="#" class="btn btn-sm btn-outline-primary" title="Ver Detalhes"><i class="bi bi-eye-fill"></i></a>
+                                <a href="#" class="btn btn-sm btn-outline-secondary" title="Editar"><i class="bi bi-pencil-fill"></i></a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>RS-2025-077</td>
+                            <td>Juliana Paiva</td>
+                            <td>Delfinopolis I</td>
+                            <td>28/06/2025</td>
+                            <td><span class="badge text-bg-danger">Urgente</span></td>
+                            <td><span class="status-badge text-bg-warning">Em Andamento</span></td>
+                            <td>
+                                <a href="#" class="btn btn-sm btn-outline-primary" title="Ver Detalhes"><i class="bi bi-eye-fill"></i></a>
+                                <a href="#" class="btn btn-sm btn-outline-secondary" title="Editar"><i class="bi bi-pencil-fill"></i></a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>RS-2025-076</td>
+                            <td>Fernando Lima</td>
+                            <td>Rio Grande IV</td>
+                            <td>25/06/2025</td>
+                            <td><span class="badge text-bg-info">Média</span></td>
+                            <td><span class="status-badge text-bg-success">Concluída</span></td>
+                            <td>
+                                <a href="#" class="btn btn-sm btn-outline-primary" title="Ver Detalhes"><i class="bi bi-eye-fill"></i></a>
+                                <a href="#" class="btn btn-sm btn-outline-secondary" title="Editar"><i class="bi bi-pencil-fill"></i></a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>RS-2025-075</td>
+                            <td>Ana Clara Souza</td>
+                            <td>Canastra</td>
+                            <td>22/06/2025</td>
+                            <td><span class="badge text-bg-warning">Alta</span></td>
+                            <td><span class="status-badge text-bg-secondary">Aguardando Aprovação</span></td>
+                            <td>
+                                <a href="#" class="btn btn-sm btn-outline-primary" title="Ver Detalhes"><i class="bi bi-eye-fill"></i></a>
+                                <a href="#" class="btn btn-sm btn-outline-secondary" title="Editar"><i class="bi bi-pencil-fill"></i></a>
+                            </td>
+                        </tr>
+                         <tr>
+                            <td>RS-2025-074</td>
+                            <td>Marcos Rocha</td>
+                            <td>São João Batista do Glória</td>
+                            <td>20/06/2025</td>
+                            <td><span class="badge text-bg-secondary">Baixa</span></td>
+                            <td><span class="status-badge text-bg-dark">Cancelada</span></td>
+                            <td>
+                                <a href="#" class="btn btn-sm btn-outline-primary" title="Ver Detalhes"><i class="bi bi-eye-fill"></i></a>
+                                <a href="#" class="btn btn-sm btn-outline-secondary" title="Editar"><i class="bi bi-pencil-fill"></i></a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <div class="modal fade" id="novaRSModal" tabindex="-1" aria-labelledby="novaRSModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="novaRSModalLabel">Criar Nova Requisição de Serviço</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3">
+                            <label for="solicitante" class="form-label">Nome do Solicitante</label>
+                            <input type="text" class="form-control" id="solicitante" value="Usuário Logado" disabled>
+                        </div>
+                        <div class="mb-3">
+                            <label for="embarcacao" class="form-label">Embarcação / Equipamento</label>
+                            <select class="form-select" id="embarcacao">
+                                <option selected>Selecione...</option>
+                                <option value="1">Rio Grande IV</option>
+                                <option value="2">Canastra</option>
+                                <option value="3">Nossa Senhora dos Navegantes X</option>
+                                <option value="4">São João Batista do Glória</option>
+                                <option value="5">Delfinopolis I</option>
+                                <option value="6">Nossa Senhora dos Navegantes VII</option>
+                                <option value="7">Outro</option>
+                            </select>
+                        </div>
+                         <div class="mb-3">
+                            <label for="titulo" class="form-label">Título da Requisição</label>
+                            <input type="text" class="form-control" id="titulo" placeholder="Ex: Problema no eixo de propulsão BB">
+                        </div>
+                        <div class="mb-3">
+                            <label for="descricao" class="form-label">Descrição Detalhada do Problema</label>
+                            <textarea class="form-control" id="descricao" rows="4"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="prioridade" class="form-label">Nível de Prioridade</label>
+                            <select class="form-select" id="prioridade">
+                                <option selected>Selecione a prioridade...</option>
+                                <option value="Urgente">Urgente</option>
+                                <option value="Alta">Alta</option>
+                                <option value="Média">Média</option>
+                                <option value="Baixa">Baixa</option>
+                            </select>
+                        </div>
+                         <div class="mb-3">
+                            <label for="anexos" class="form-label">Anexar Fotos ou Documentos</label>
+                            <input class="form-control" type="file" id="anexos" multiple>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary">Salvar Requisição</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer class="container mt-4 mb-4">
+        <p class="text-end text-muted" style="font-size: 1rem; color: gray;">
+        <b>
+Vilhena Serviços LTDA
+<br>
+</b>
+Departamento de Engenharia e Manutenção
+</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

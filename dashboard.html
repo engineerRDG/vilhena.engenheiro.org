@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Controle - Vilhena Serviços</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        body { background-color: #f0f2f5; }
+        .navbar-brand img { height: 40px; }
+        .nav-buttons { background-color: #fff; padding: 1rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,.08); margin-bottom: 2rem; display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; }
+        .nav-buttons .btn.active { background-color: #6c757d; border-color: #6c757d; color: white; }
+        .content-container { background-color: white; box-shadow: 0 4px 12px rgba(0,0,0,.1); border-radius: 8px; padding: 1.5rem; min-height: 500px; }
+        .loader { border: 8px solid #f3f3f3; border-top: 8px solid #343a40; border-radius: 50%; width: 60px; height: 60px; animation: spin 2s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#"><img src="https://static.wixstatic.com/media/886e87_d769722dd4f34a86a70fc33591489baf~mv2.png/v1/fill/w_201,h_118,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/VILHENA-SERVI%C3%87OS_LOGO2.png" alt="Vilhena Serviços Logo"></a>
+            <span class="navbar-text">Conectado à Base de Dados</span>
+        </div>
+    </nav>
+
+    <main class="container mt-4">
+        <div class="nav-buttons">
+            <button class="btn btn-primary" data-page="status"><i class="bi bi-check-circle me-2"></i>Status</button>
+            <button class="btn btn-primary" data-page="rs"><i class="bi bi-tools me-2"></i>Controle de RS</button>
+            <button class="btn btn-primary" data-page="cronograma"><i class="bi bi-calendar-week me-2"></i>Cronograma</button>
+            <button class="btn btn-primary" data-page="almoxarifado"><i class="bi bi-box-seam me-2"></i>Almoxarifado</button>
+            <button class="btn btn-primary" data-page="fornecedores"><i class="bi bi-person-lines-fill me-2"></i>Fornecedores</button>
+        </div>
+
+        <div id="content-area" class="content-container d-flex justify-content-center align-items-center">
+            </div>
+    </main>
+
+    <footer class="container mt-4 mb-4">
+        <p class="text-end text-muted"><b>Vilhena Serviços LTDA</b><br>Departamento de Engenharia e Manutenção</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // COLE A URL DA SUA API AQUI!
+        const API_URL = 'https://script.google.com/macros/s/AKfycbyrvWTA_p0p8G7I8YVEe_ARFD-Ii-rRAvPKRAO1Vxaqzg-9tHiRuJTI6ypY7NgMA8rsxQ/exec';
+
+        const contentArea = document.getElementById('content-area');
+        const navButtons = document.querySelectorAll('.nav-buttons .btn');
+
+        // Função para mostrar o spinner de carregamento
+        const showLoader = () => {
+            contentArea.innerHTML = '<div class="loader"></div>';
+        };
+
+        // Função principal para buscar e renderizar os dados
+        const loadContent = async (page) => {
+            showLoader();
+            
+            // Atualiza o botão ativo na navegação
+            navButtons.forEach(button => {
+                button.classList.toggle('active', button.dataset.page === page);
+            });
+
+            try {
+                const response = await fetch(`${API_URL}?page=${page}`);
+                const result = await response.json();
+
+                if (!result.success) {
+                    throw new Error(result.message);
+                }
+                
+                // Escolhe qual função de renderização usar
+                switch (page) {
+                    case 'status': renderStatus(result.data); break;
+                    case 'rs': renderTable(result.data, ['ID', 'Solicitante', 'Embarcacao', 'DataAbertura', 'Prioridade', 'Status']); break;
+                    case 'almoxarifado': renderTable(result.data, ['Codigo', 'Item', 'Categoria', 'Quantidade', 'EstoqueMinimo', 'Localizacao']); break;
+                    case 'fornecedores': renderTable(result.data, ['Nome', 'CNPJ', 'Categoria', 'Avaliacao', 'ContatoNome', 'ContatoTelefone']); break;
+                    case 'cronograma': renderCronograma(result.data); break;
+                    default: contentArea.innerHTML = '<h2>Selecione uma opção no menu acima.</h2>';
+                }
+            } catch (error) {
+                contentArea.innerHTML = `<div class="alert alert-danger"><strong>Erro ao carregar dados:</strong> ${error.message}</div>`;
+                console.error(error);
+            }
+        };
+
+        // Função genérica para renderizar tabelas
+        const renderTable = (data, headers) => {
+            if (data.length === 0) {
+                contentArea.innerHTML = '<p class="text-muted">Nenhum dado encontrado.</p>';
+                return;
+            }
+
+            const tableHeaders = headers.map(h => `<th>${h}</th>`).join('');
+            const tableRows = data.map(row => 
+                `<tr>${headers.map(h => `<td>${row[h] || ''}</td>`).join('')}</tr>`
+            ).join('');
+
+            contentArea.innerHTML = `
+                <div class="table-responsive w-100">
+                    <table class="table table-striped table-hover">
+                        <thead><tr>${tableHeaders}</tr></thead>
+                        <tbody>${tableRows}</tbody>
+                    </table>
+                </div>
+            `;
+        };
+        
+        // Função específica para renderizar a tela de Status
+        const renderStatus = (data) => {
+            const operando = data.filter(d => d.Condicao === 'OPERANDO');
+            const disponivel = data.filter(d => d.Condicao === 'DISPONÍVEL');
+            const manutencao = data.filter(d => d.Condicao === 'MANUTENÇÃO');
+
+            const createCardList = (items) => items.map(i => i.Embarcacao).join('<br>');
+
+            contentArea.innerHTML = `
+                <div class="w-100">
+                    <div class="row">
+                         <div class="col-lg-4 mb-4">
+                            <div class="card text-white bg-success h-100">
+                                <div class="card-header">OPERANDO</div>
+                                <div class="card-body"><h5 class="card-title">${createCardList(operando) || 'N/A'}</h5></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 mb-4">
+                            <div class="card text-white bg-info h-100">
+                                <div class="card-header">DISPONÍVEL</div>
+                                <div class="card-body"><h5 class="card-title">${createCardList(disponivel) || 'N/A'}</h5></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 mb-4">
+                            <div class="card text-white bg-danger h-100">
+                                <div class="card-header">EM MANUTENÇÃO</div>
+                                <div class="card-body"><h5 class="card-title">${createCardList(manutencao) || 'N/A'}</h5></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        };
+
+        // Função específica para renderizar o Cronograma
+        const renderCronograma = (data) => {
+            const dias = ['Segunda', 'Terca', 'Quarta', 'Quinta', 'Sexta', 'Sabado', 'Domingo'];
+            const eventosPorDia = {};
+            dias.forEach(d => eventosPorDia[d] = []);
+            data.forEach(evento => {
+                if(eventosPorDia[evento.Dia]) {
+                    eventosPorDia[evento.Dia].push(evento);
+                }
+            });
+
+            const renderEventos = (eventos) => eventos.map(e => `
+                <div class="alert alert-primary p-2 mb-2">
+                    <strong>${e.Titulo}</strong><br>
+                    <small>${e.Embarcacao} - Téc: ${e.Tecnico}</small>
+                </div>
+            `).join('');
+
+            const tableCols = dias.map(dia => `<td>${renderEventos(eventosPorDia[dia])}</td>`).join('');
+            const tableHeaders = dias.map(dia => `<th>${dia}-feira</th>`).join('');
+
+            contentArea.innerHTML = `
+                <div class="table-responsive w-100">
+                    <table class="table table-bordered text-center" style="table-layout: fixed;">
+                        <thead><tr>${tableHeaders}</tr></thead>
+                        <tbody><tr>${tableCols}</tr></tbody>
+                    </table>
+                </div>
+            `;
+        };
+
+        // Adiciona os listeners para os botões de navegação
+        navButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                loadContent(button.dataset.page);
+            });
+        });
+
+        // Carrega a página inicial (Status) ao iniciar
+        document.addEventListener('DOMContentLoaded', () => {
+            loadContent('status');
+        });
+    </script>
+</body>
+</html>
