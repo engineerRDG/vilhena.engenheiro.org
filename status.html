@@ -3,190 +3,321 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>STATUS CÁSSIA - DELFINOPOLIS</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    
+    <title>Status Operacional - Vilhena Serviços</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
     <style>
         body {
-            background-color: #f0f2f5; /* Um fundo suave para a página toda */
+            background-color: #f8f9fa;
+            color: #343a40;
         }
 
-        /* Estilo para a logo no cabeçalho */
         .navbar-brand img {
-            height: 40px; /* Altura da logo */
-            width: auto; /* Largura automática para manter a proporção */
+            height: 40px;
         }
 
-        /* Container para a tabela, com sombra e bordas arredondadas */
-        .table-container {
-            background-color: white;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-            overflow: hidden; /* Garante que o conteúdo respeite as bordas arredondadas */
+        .page-title {
+            font-weight: 700;
+            color: #343a40;
         }
 
-        /* Estilo do título acima da tabela */
-        .table-title {
-            padding: 20px 24px;
-            margin: 0;
-            font-size: 1.5em; /* Fonte um pouco maior para o título */
-            font-weight: 600;
-            color: #333;
+        .status-card {
+            border: 1px solid #dee2e6;
+            border-left-width: 5px;
+            border-radius: .35rem;
+            box-shadow: 0 .15rem 1.75rem 0 rgba(58,59,69,.15);
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background-color: #ffffff;
         }
 
-        /* Estilo da tabela */
-        table {
+        .status-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 .5rem 1rem rgba(0,0,0,.15);
+        }
+
+        .status-card .card-body {
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .status-content {
+            text-align: center;
+            flex-grow: 1;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .status-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            color: #343a40;
+            margin-bottom: 0.5rem;
+        }
+
+        .status-text {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin: 0.5rem 0;
+        }
+
+        .status-condition {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #6c757d;
+            margin-bottom: 0.5rem;
+        }
+
+        .status-detail {
+            font-size: 0.95rem;
+            color: #6c757d;
+            min-height: 24px;
+        }
+
+        .status-timeline {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             width: 100%;
-            border-collapse: collapse; /* Remove o espaçamento entre as células */
-            font-size: 1.05em; /* Fonte um pouco maior na tabela */
         }
 
-        /* Estilo das células do cabeçalho (th) e do corpo (td) */
-        th, td {
-            padding: 16px 24px; /* Mais espaçamento interno para deixar a tabela "respirar" */
-            text-align: left;
-            border-top: 1px solid #dee2e6; /* Linha sutil entre as fileiras */
-            white-space: nowrap; /* Impede que o texto quebre em várias linhas, ideal para a rolagem horizontal */
+        .timeline-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
-        /* Estilo específico do cabeçalho da tabela */
-        thead th {
-            background-color: #343a40; /* Cor de fundo escura */
-            color: #ffffff; /* Cor do texto branca */
-            font-weight: 600;
-            border-top: none; /* Remove a borda superior do cabeçalho */
+        .status-operando { border-left-color: #28a745; background-color: #d4edda; }
+        .status-disponivel { border-left-color: #17a2b8; background-color: #d1ecf1; }
+        .status-manutencao { border-left-color: #dc3545; background-color: #f8d7da; }
+        .status-paralisada { border-left-color: #6c757d; background-color: #e2e3e5; }
+
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 2rem;
         }
 
-        /* Estilo de "zebrado" para as linhas do corpo da tabela */
-        tbody tr:nth-child(even) {
-            background-color: #f8f9fa; /* Cor de fundo mais clara para linhas pares */
+        .loading-spinner.active {
+            display: block;
         }
 
-        .card-title {
-            min-height: 90px; /* Garante que os cards tenham a mesma altura */
+        @media (max-width: 576px) {
+            .status-card .card-body {
+                padding: 1rem;
+            }
+            .status-title {
+                font-size: 1rem;
+            }
+            .status-text {
+                font-size: 1.4rem;
+            }
+            .status-condition {
+                font-size: 1rem;
+            }
+            .status-detail {
+                font-size: 0.85rem;
+            }
         }
     </style>
 </head>
 <body>
-    
-    <nav class="navbar navbar-dark bg-dark">
+    <nav class="navbar navbar-dark bg-dark" aria-label="Barra de navegação">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">
                 <img src="https://raw.githubusercontent.com/engineerRDG/vilhena.engenheiro.org/refs/heads/main/imagem/logo.png" alt="Vilhena Serviços Logo">
             </a>
-            <span class="navbar-text">
-                Atualizado em: 28/07/2025, 09:18
-            </span>
+            <span class="navbar-text text-white-50" id="update-timestamp"></span>
         </div>
     </nav>
-<br>
-<center>
-<h2>STATUS - Delfinópolis</h2>
-</center>
-<br>
+
     <main class="container mt-4">
-        <div class="row">
-            <div class="col-lg-4 mb-4">
-                <div class="card text-white bg-success h-100">
-                    <div class="card-header">OPERANDO</div>
-                    <div class="card-body">
-                        <h5 class="card-title">
-                            Canastra + Nossa Senhora dos Navegantes X
- </h5>
-                    </div>
-                </div>
+        <header class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom">
+            <h1 class="h3 page-title mb-0">OPERAÇÃO CÁSSIA - DELFINÓPOLIS</h1>
+            <div id="sheet-update-info" class="text-muted text-end"></div>
+        </header>
+
+        <div class="loading-spinner" id="loading-spinner">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Carregando dados...</span>
             </div>
-            <div class="col-lg-4 mb-4">
-                <div class="card text-white bg-info h-100">
-                    <div class="card-header">DISPONÍVEL</div>
-                    <div class="card-body">
-                        <h5 class="card-title">
-                        Delfinopolis I
-                           <br>
-                            <br>
-                            Rio Grande IV
-                         <br>
-                        <br>
-                        São João Batista do Glória
-                       </h5>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-4 mb-4">
-                <div class="card text-white bg-danger h-100">
-                    <div class="card-header">EM MANUTENÇÃO</div>
-                    <div class="card-body">
-                        <h5 class="card-title">
-                            Nossa Senhora dos Navegantes VII
-</h5>
-                    </div>
-                </div>
-            </div>
+            <p class="mt-3 text-muted">Buscando informações da planilha...</p>
         </div>
 
-        <div class="row mt-3">
-            <div class="col-12">
-                <div class="table-container">
-                <CENTER>
-                    <h3 class="table-title">FORA DE OPERAÇÃO</h3>
-                    </CENTER>
-                    <div class="table-responsive">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Embarcação</th>
-                                    <th>Condição</th>
-                                    <th>Motivo</th>
-                                    <th>Início</th>
-                                    <th>Previsão</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Nossa Senhora dos Navegantes VII</td>
-                                    <td>Manutenção</td>
-                                    <td>Docada para manutenção</td>
-                                    <td>18/07/2025 09:00:00</td>
-                                   <td>-</td>
-                                </tr>
-                                    <tr>
-                                    <td>Delfinopolis I</td>
-                                    <td>Disponível</td>
-                                    <td>Baixa Demanda</td>
-                                    <td>28/07/2025 09:00:00</td>
-                                    <td>-</td>
-                                </tr>
-                                                                    <tr>
-                                    <td>Rio Grande IV</td>
-                                    <td>Disponível</td>
-                                    <td>Baixa Demanda</td>
-                                    <td>28/07/2025 09:00:00</td>
-                                    <td>-</td>
-                                </tr>
-                                                                    <tr>
-                                    <td>São João Batista do Glória</td>
-                                    <td>Disponível</td>
-                                    <td>Baixa Demanda</td>
-                                    <td>28/07/2025 09:00:00</td>
-                                    <td>-</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <div id="status-container" class="row g-4"></div>
     </main>
 
-    <footer class="container mt-4 mb-4">
-        <p class="text-end text-muted" style="font-size: 1rem; color: gray;">
-        <b>
-Vilhena Serviços LTDA
-<br>
-</b>
-Departamento de Engenharia e Manutenção
-</p>
+    <footer class="container mt-5 mb-4">
+        <div class="text-end text-muted">
+            <strong>Vilhena Serviços LTDA</strong><br>
+            <small>Departamento de Engenharia e Manutenção</small>
+        </div>
     </footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+    <script>
+        const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRLCYTZTrWAEgxvreN2OxK_baOqRlaPF0OqA1f90-I4CHahqbv6TQRXHc0YSq9XOQjqM5faahUv-drN/pub?gid=426952514&single=true&output=csv';
+
+        const elements = {
+            statusContainer: document.getElementById('status-container'),
+            sheetUpdateInfo: document.getElementById('sheet-update-info'),
+            updateTimestamp: document.getElementById('update-timestamp'),
+            loadingSpinner: document.getElementById('loading-spinner')
+        };
+
+        function normalizeKey(str) {
+            if (!str) return '';
+            return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().replace(/\s+/g, '_');
+        }
+
+        function parseCsvLine(line) {
+            const values = [];
+            let current = '';
+            let inQuotes = false;
+            for (const char of line) {
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    values.push(current.trim().replace(/"/g, ''));
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            values.push(current.trim().replace(/"/g, ''));
+            return values;
+        }
+
+        async function fetchData() {
+            elements.loadingSpinner.classList.add('active');
+            try {
+                const response = await fetch(`${sheetUrl}&t=${new Date().getTime()}`);
+                if (!response.ok) throw new Error('Não foi possível acessar a planilha. Verifique se está publicada na web como CSV.');
+
+                const csvText = await response.text();
+                const lines = csvText.trim().split('\n');
+                const headerLine = lines.shift();
+                const headers = headerLine.split(',').map(h => normalizeKey(h.trim()));
+
+                const data = lines.map(line => {
+                    const values = parseCsvLine(line);
+                    const row = {};
+                    headers.forEach((header, index) => {
+                        row[header] = values[index] || '';
+                    });
+                    return row;
+                });
+
+                updateStatusCards(data);
+
+            } catch (error) {
+                console.error("Erro ao buscar dados:", error);
+                elements.statusContainer.innerHTML = `
+                    <div class="col-12">
+                        <div class="alert alert-danger" role="alert">
+                            <strong>Erro:</strong> ${error.message}
+                        </div>
+                    </div>`;
+            } finally {
+                elements.loadingSpinner.classList.remove('active');
+            }
+        }
+
+        function updateStatusCards(data) {
+            if (!data || data.length === 0) {
+                elements.statusContainer.innerHTML = `
+                    <div class="col-12">
+                        <div class="alert alert-warning" role="alert">
+                            Nenhum dado encontrado na planilha.
+                        </div>
+                    </div>`;
+                return;
+            }
+
+            const sheetUpdateTime = data[0]['ULTIMA_ATUALIZACAO'];
+            if (sheetUpdateTime) {
+                elements.sheetUpdateInfo.innerHTML = `
+                    <small class="d-block">Última atualização:</small>
+                    <strong class="d-block">${sheetUpdateTime}</strong>`;
+            }
+
+            // Ordenar os dados
+            data.sort((a, b) => {
+                const statusA = (a.STATUS || '').trim().toUpperCase();
+                const statusB = (b.STATUS || '').trim().toUpperCase();
+                const priorityA = statusA === 'OPERANDO' ? 0 : statusA === 'MANUTENCAO' ? 2 : 1;
+                const priorityB = statusB === 'OPERANDO' ? 0 : statusB === 'MANUTENCAO' ? 2 : 1;
+                if (priorityA !== priorityB) return priorityA - priorityB;
+                return (a.EMBARCACAO || '').localeCompare(b.EMBARCACAO || '');
+            });
+
+            const cardsHtml = data.map(item => {
+                const status = (item.STATUS || '').trim().toUpperCase();
+                console.log('Status:', status); // Depuração
+                let statusClass = 'status-paralisada';
+
+                if (status === 'OPERANDO') {
+                    statusClass = 'status-operando';
+                } else if (status === 'DISPONIVEL') {
+                    statusClass = 'status-disponivel';
+                } else if (status === 'MANUTENCAO') {
+                    statusClass = 'status-manutencao';
+                }
+                console.log('Status Class:', statusClass); // Depuração
+
+                const condicaoHtml = item.CONDICAO ? `
+                    <div class="status-condition">${item.CONDICAO}</div>` : '';
+
+                const timelineHtml = `
+                    <div class="status-timeline">
+                        <div class="timeline-item">
+                            <i class="bi bi-clock"></i>
+                            <span><strong>Início:</strong> ${item.INICIO || 'Não informado'}</span>
+                        </div>
+                        <div class="timeline-item">
+                            <i class="bi bi-calendar-check"></i>
+                            <span><strong>Previsão:</strong> ${item.PREVISAO || 'Não informado'}</span>
+                        </div>
+                    </div>
+                `;
+
+                const embarcacao = item.EMBARCACAO ? item.EMBARCACAO : '';
+
+                return `
+                    <div class="col-xl-6 col-md-12 mb-4">
+                        <div class="card status-card ${statusClass}" aria-labelledby="status-${item.EMBARCACAO || 'card'}" role="region">
+                            <div class="card-body">
+                                <div class="status-content">
+                                    <div class="status-title" id="status-${item.EMBARCACAO || 'card'}">${embarcacao}</div>
+                                    <div class="status-text">${item.STATUS || 'Não informado'}</div>
+                                    ${condicaoHtml}
+                                    <div class="status-detail">${item.MOTIVO || ''}</div>
+                                </div>
+                                ${timelineHtml}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            elements.statusContainer.innerHTML = cardsHtml;
+            elements.updateTimestamp.innerHTML = '';
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchData();
+            setInterval(fetchData, 60000);
+        });
+    </script>
 </body>
 </html>
