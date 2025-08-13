@@ -3,130 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Status Delfinópolis - Vilhena Serviços</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <title>Dashboard de Controle de RS - Vilhena Serviços</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
     <style>
-        body {
-            background-color: #f8f9fa;
-            color: #343a40;
-        }
-
-        .navbar-brand img {
-            height: 40px;
-        }
-
-        .page-title {
-            font-weight: 700;
-            color: #343a40;
-        }
-
-        .status-card {
-            border: 1px solid #dee2e6;
-            border-left-width: 5px;
-            border-radius: .35rem;
-            box-shadow: 0 .15rem 1.75rem 0 rgba(58,59,69,.15);
-            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            background-color: #ffffff;
-        }
-
-        .status-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 .5rem 1rem rgba(0,0,0,.15);
-        }
-
-        .status-card .card-body {
-            padding: 1.5rem;
-            display: flex;
-            flex-direction: column;
-            flex-grow: 1;
-        }
-
-        .status-content {
-            text-align: center;
-            flex-grow: 1;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-        }
-
-        .status-title {
-            font-weight: 700;
-            font-size: 1.1rem;
-            text-transform: uppercase;
-            color: #343a40;
-            margin-bottom: 0.5rem;
-        }
-
-        .status-text {
-            font-size: 1.6rem;
-            font-weight: 700;
-            margin: 0.5rem 0;
-        }
-
-        .status-condition {
-            font-size: 1.1rem;
-            font-weight: 500;
-            color: #6c757d;
-            margin-bottom: 0.5rem;
-        }
-
-        .status-detail {
-            font-size: 0.95rem;
-            color: #6c757d;
-            min-height: 24px;
-        }
-
-        .status-timeline {
-            margin-top: 1rem;
-            padding-top: 1rem;
-            font-size: 0.9rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-        }
-
-        .timeline-item {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .status-operando { border-left-color: #28a745; background-color: #d4edda; }
-        .status-disponivel { border-left-color: #17a2b8; background-color: #d1ecf1; }
-        .status-manutencao { border-left-color: #dc3545; background-color: #f8d7da; }
-        .status-paralisada { border-left-color: #6c757d; background-color: #e2e3e5; }
-
-        .loading-spinner {
-            display: none;
-            text-align: center;
-            padding: 2rem;
-        }
-
-        .loading-spinner.active {
-            display: block;
-        }
-
-        @media (max-width: 576px) {
-            .status-card .card-body {
-                padding: 1rem;
-            }
-            .status-title {
-                font-size: 1rem;
-            }
-            .status-text {
-                font-size: 1.4rem;
-            }
-            .status-condition {
-                font-size: 1rem;
-            }
-            .status-detail {
-                font-size: 0.85rem;
-            }
+        body { background-color: #f0f2f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .navbar-brand img, .navbar-right-logo { height: 40px; width: auto; } /* Estilo unificado para os logos */
+        .content-container { background-color: white; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); border-radius: 8px; padding: 2rem; margin-bottom: 2rem; }
+        .welcome-section { text-align: center; padding: 1.5rem; background: linear-gradient(135deg, #495057, #343a40); color: white; border-radius: 8px; margin-bottom: 2rem; }
+        .welcome-section h1 { font-weight: 700; }
+        .kpi-card .kpi-value { font-size: 2.5rem; font-weight: 700; }
+        .kpi-card .text-xs { font-size: 0.8rem; letter-spacing: 0.5px; }
+        .text-gray-300 { color: #dee2e6 !important; }
+        .table-hover tbody tr:hover { background-color: rgba(0, 0, 0, 0.05); }
+        .table-light { background-color: #f8f9fa !important; color: #6c757d; }
+        .filter-container .form-select-sm {
+            max-width: 170px;
         }
     </style>
 </head>
@@ -141,19 +35,60 @@
     </nav>
 
     <main class="container mt-4">
-        <header class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom">
-            <h1 class="h3 page-title mb-0">OPERAÇÃO CÁSSIA - DELFINÓPOLIS</h1>
-            <div id="sheet-update-info" class="text-muted text-end"></div>
-        </header>
-
-        <div class="loading-spinner" id="loading-spinner">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Carregando dados...</span>
-            </div>
-            <p class="mt-3 text-muted">Buscando informações da planilha...</p>
+        <div class="welcome-section">
+            <h1>Controle de Requisições de Serviço</h1>
         </div>
 
-        <div id="status-container" class="row g-4"></div>
+        <div class="row mb-4">
+           <div class="col-md-4">
+               <div class="card shadow-sm kpi-card border-warning">
+                   <div class="card-body text-warning">
+                       <div class="row align-items-center"><div class="col">
+                           <div class="text-xs font-weight-bold text-uppercase mb-1">Em Aberto</div>
+                           <div id="kpi-open" class="kpi-value">0</div>
+                       </div><div class="col-auto"><i class="bi bi-hourglass-split fs-1 text-gray-300"></i></div></div>
+                   </div>
+               </div>
+           </div>
+           <div class="col-md-4">
+               <div class="card shadow-sm kpi-card border-info">
+                   <div class="card-body text-info">
+                       <div class="row align-items-center"><div class="col">
+                           <div class="text-xs font-weight-bold text-uppercase mb-1">Em Andamento</div>
+                           <div id="kpi-in-progress" class="kpi-value">0</div>
+                       </div><div class="col-auto"><i class="bi bi-gear fs-1 text-gray-300"></i></div></div>
+                   </div>
+               </div>
+           </div>
+           <div class="col-md-4">
+               <div class="card shadow-sm kpi-card border-success">
+                   <div class="card-body text-success">
+                       <div class="row align-items-center"><div class="col">
+                           <div class="text-xs font-weight-bold text-uppercase mb-1">Concluído</div>
+                           <div id="kpi-completed" class="kpi-value">0</div>
+                       </div><div class="col-auto"><i class="bi bi-check2-circle fs-1 text-gray-300"></i></div></div>
+                   </div>
+               </div>
+           </div>
+       </div>
+
+        <div class="content-container">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                 <h4 class="mb-0">Requisições</h4>
+                <div class="d-flex align-items-center filter-container">
+                    <select id="vessel-filter" class="form-select form-select-sm me-2"><option value="all">Todas as Embarcações</option></select>
+                    <select id="status-filter" class="form-select form-select-sm me-2"><option value="all">Todos os Status</option><option value="Em aberto">Em Aberto</option><option value="Em Andamento">Em Andamento</option><option value="Concluído">Concluído</option></select>
+                    <select id="month-filter" class="form-select form-select-sm"><option value="all">Todos os Meses</option></select>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle"><thead class="table-dark">
+                    <tr><th>RS</th><th>Embarcação</th><th>Serviço</th><th>Status</th><th>Abertura</th><th>Conclusão</th></tr>
+                </thead><tbody id="rs-table-body">
+                   <tr><td colspan="6" class="text-center p-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Carregando...</span></div></td></tr>
+                </tbody></table>
+            </div>
+        </div>
     </main>
 
  <footer class="container mt-4 mb-4 text-end">
@@ -169,161 +104,119 @@
         </p>
     </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+   <script>
+   document.addEventListener('DOMContentLoaded', function() {
+       const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT2PRrHp-jZ7WSS7VT-dqzf1x2k7e1UlQMS1ZHlrqpgiRed9YiBlx9uYO2e-P2eKoTB-PsjH-Cfwy2Y/pub?gid=0&single=true&output=csv';
+       const rsTableBody = document.getElementById('rs-table-body');
+       const monthFilter = document.getElementById('month-filter');
+       const statusFilter = document.getElementById('status-filter');
+       const vesselFilter = document.getElementById('vessel-filter');
+       let allRequests = [];
 
-    <script>
-        const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRLCYTZTrWAEgxvreN2OxK_baOqRlaPF0OqA1f90-I4CHahqbv6TQRXHc0YSq9XOQjqM5faahUv-drN/pub?gid=426952514&single=true&output=csv';
+       function parseDate(dateStr) {
+           if (!dateStr || dateStr.length < 10) return null;
+           const [day, month, year] = dateStr.split('/');
+           return new Date(`${year}-${month}-${day}T00:00:00`);
+       }
 
-        const elements = {
-            statusContainer: document.getElementById('status-container'),
-            sheetUpdateInfo: document.getElementById('sheet-update-info'),
-            updateTimestamp: document.getElementById('update-timestamp'),
-            loadingSpinner: document.getElementById('loading-spinner')
-        };
+       function getMonthYear(dateStr) {
+           const date = parseDate(dateStr);
+           if (!date || isNaN(date)) return null;
+           return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+       }
 
-        function normalizeKey(str) {
-            if (!str) return '';
-            return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().replace(/\s+/g, '_');
-        }
+       function populateVesselFilter(requests) {
+           const vessels = new Set();
+           requests.forEach(req => { if (req.embarcação) vessels.add(req.embarcação); });
+           const sortedVessels = Array.from(vessels).sort((a, b) => a.localeCompare(b));
+           vesselFilter.innerHTML = '<option value="all">Todas as Embarcações</option>';
+           sortedVessels.forEach(vessel => {
+               const option = document.createElement('option');
+               option.value = vessel; option.textContent = vessel;
+               vesselFilter.appendChild(option);
+           });
+       }
 
-        function parseCsvLine(line) {
-            const values = [];
-            let current = '';
-            let inQuotes = false;
-            for (const char of line) {
-                if (char === '"') {
-                    inQuotes = !inQuotes;
-                } else if (char === ',' && !inQuotes) {
-                    values.push(current.trim().replace(/"/g, ''));
-                    current = '';
-                } else {
-                    current += char;
-                }
-            }
-            values.push(current.trim().replace(/"/g, ''));
-            return values;
-        }
+       function populateMonthFilter(requests) {
+           const months = new Set();
+           requests.forEach(req => { const monthYear = getMonthYear(req.abertura); if (monthYear) months.add(monthYear); });
+           const sortedMonths = Array.from(months).sort().reverse();
+           monthFilter.innerHTML = '<option value="all">Todos os Meses</option>';
+           sortedMonths.forEach(month => {
+               const [year, monthNum] = month.split('-');
+               const option = document.createElement('option');
+               const monthName = new Date(year, monthNum - 1).toLocaleString('pt-BR', { month: 'long', year: 'numeric' });
+               option.value = month; option.textContent = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+               monthFilter.appendChild(option);
+           });
+       }
 
-        async function fetchData() {
-            elements.loadingSpinner.classList.add('active');
-            try {
-                const response = await fetch(`${sheetUrl}&t=${new Date().getTime()}`);
-                if (!response.ok) throw new Error('Não foi possível acessar a planilha. Verifique se está publicada na web como CSV.');
+       function getStatusBadge(status) {
+           const s = (status || "Indefinido").trim();
+           if (s === 'Concluída' || s === 'Concluído') return `<span class="badge text-bg-success">${s}</span>`;
+           if (s === 'Em Andamento') return `<span class="badge text-bg-info">${s}</span>`;
+           if (s === 'Em aberto') return `<span class="badge text-bg-warning">${s}</span>`;
+           return `<span class="badge text-bg-secondary">${s}</span>`;
+       }
 
-                const csvText = await response.text();
-                const lines = csvText.trim().split('\n');
-                const headerLine = lines.shift();
-                const headers = headerLine.split(',').map(h => normalizeKey(h.trim()));
+       function renderTable(requests) {
+           rsTableBody.innerHTML = '';
+           if (requests.length === 0) { rsTableBody.innerHTML = `<tr><td colspan="6" class="text-center">Nenhuma requisição encontrada.</td></tr>`; return; }
+           requests.forEach(req => {
+               const row = document.createElement('tr');
+               if (req.status === 'Concluída' || req.status === 'Concluído') row.classList.add('table-light');
+               row.innerHTML = `
+                   <td>${req.rs || ''}</td>
+                   <td>${req.embarcação || ''}</td>
+                   <td>${req.serviço || ''}</td>
+                   <td>${getStatusBadge(req.status)}</td>
+                   <td>${req.abertura || ''}</td>
+                   <td>${req.conclusão || ''}</td>
+               `;
+               rsTableBody.appendChild(row);
+           });
+       }
 
-                const data = lines.map(line => {
-                    const values = parseCsvLine(line);
-                    const row = {};
-                    headers.forEach((header, index) => {
-                        row[header] = values[index] || '';
-                    });
-                    return row;
-                });
+       function updateKPIs(requests) {
+           document.getElementById('kpi-open').textContent = requests.filter(r => r.status === 'Em aberto').length;
+           document.getElementById('kpi-in-progress').textContent = requests.filter(r => r.status === 'Em Andamento').length;
+           document.getElementById('kpi-completed').textContent = requests.filter(r => r.status === 'Concluída' || r.status === 'Concluído').length;
+       }
+       
+       function applyFilters() {
+           let filtered = allRequests;
+           if (vesselFilter.value !== 'all') filtered = filtered.filter(req => req.embarcação === vesselFilter.value);
+           if (monthFilter.value !== 'all') filtered = filtered.filter(req => getMonthYear(req.abertura) === monthFilter.value);
+           if (statusFilter.value !== 'all') {
+               filtered = filtered.filter(req => {
+                   if (statusFilter.value === 'Concluído') return req.status === 'Concluído' || req.status === 'Concluída';
+                   return req.status === statusFilter.value;
+               });
+           }
+           renderTable(filtered);
+       }
 
-                updateStatusCards(data);
+       function fetchData() {
+           Papa.parse(GOOGLE_SHEET_CSV_URL, {
+               download: true, header: true, skipEmptyLines: true, transformHeader: h => h.trim().toLowerCase(),
+               complete: function(results) {
+                   allRequests = results.data;
+                   populateVesselFilter(allRequests);
+                   populateMonthFilter(allRequests);
+                   updateKPIs(allRequests);
+                   applyFilters();
+               },
+               error: err => { console.error('Erro:', err); rsTableBody.innerHTML = `<tr><td colspan="6" class="text-center text-danger"><b>Falha ao carregar dados.</b></td></tr>`; }
+           });
+       }
 
-            } catch (error) {
-                console.error("Erro ao buscar dados:", error);
-                elements.statusContainer.innerHTML = `
-                    <div class="col-12">
-                        <div class="alert alert-danger" role="alert">
-                            <strong>Erro:</strong> ${error.message}
-                        </div>
-                    </div>`;
-            } finally {
-                elements.loadingSpinner.classList.remove('active');
-            }
-        }
+       monthFilter.addEventListener('change', applyFilters);
+       statusFilter.addEventListener('change', applyFilters);
+       vesselFilter.addEventListener('change', applyFilters);
 
-        function updateStatusCards(data) {
-            if (!data || data.length === 0) {
-                elements.statusContainer.innerHTML = `
-                    <div class="col-12">
-                        <div class="alert alert-warning" role="alert">
-                            Nenhum dado encontrado na planilha.
-                        </div>
-                    </div>`;
-                return;
-            }
-
-            const sheetUpdateTime = data[0]['ULTIMA_ATUALIZACAO'];
-            if (sheetUpdateTime) {
-                elements.sheetUpdateInfo.innerHTML = `
-                    <small class="d-block">Última atualização:</small>
-                    <strong class="d-block">${sheetUpdateTime}</strong>`;
-            }
-
-            // Ordenar os dados
-            data.sort((a, b) => {
-                const statusA = (a.STATUS || '').trim().toUpperCase();
-                const statusB = (b.STATUS || '').trim().toUpperCase();
-                const priorityA = statusA === 'OPERANDO' ? 0 : statusA === 'MANUTENCAO' ? 2 : 1;
-                const priorityB = statusB === 'OPERANDO' ? 0 : statusB === 'MANUTENCAO' ? 2 : 1;
-                if (priorityA !== priorityB) return priorityA - priorityB;
-                return (a.EMBARCACAO || '').localeCompare(b.EMBARCACAO || '');
-            });
-
-            const cardsHtml = data.map(item => {
-                const status = (item.STATUS || '').trim().toUpperCase();
-                console.log('Status:', status); // Depuração
-                let statusClass = 'status-paralisada';
-
-                if (status === 'OPERANDO') {
-                    statusClass = 'status-operando';
-                } else if (status === 'DISPONIVEL') {
-                    statusClass = 'status-disponivel';
-                } else if (status === 'MANUTENCAO') {
-                    statusClass = 'status-manutencao';
-                }
-                console.log('Status Class:', statusClass); // Depuração
-
-                const condicaoHtml = item.CONDICAO ? `
-                    <div class="status-condition">${item.CONDICAO}</div>` : '';
-
-                const timelineHtml = `
-                    <div class="status-timeline">
-                        <div class="timeline-item">
-                            <i class="bi bi-clock"></i>
-                            <span><strong>Início:</strong> ${item.INICIO || 'Não informado'}</span>
-                        </div>
-                        <div class="timeline-item">
-                            <i class="bi bi-calendar-check"></i>
-                            <span><strong>Previsão:</strong> ${item.PREVISAO || 'Não informado'}</span>
-                        </div>
-                    </div>
-                `;
-
-                const embarcacao = item.EMBARCACAO ? item.EMBARCACAO : '';
-
-                return `
-                    <div class="col-xl-6 col-md-12 mb-4">
-                        <div class="card status-card ${statusClass}" aria-labelledby="status-${item.EMBARCACAO || 'card'}" role="region">
-                            <div class="card-body">
-                                <div class="status-content">
-                                    <div class="status-title" id="status-${item.EMBARCACAO || 'card'}">${embarcacao}</div>
-                                    <div class="status-text">${item.STATUS || 'Não informado'}</div>
-                                    ${condicaoHtml}
-                                    <div class="status-detail">${item.MOTIVO || ''}</div>
-                                </div>
-                                ${timelineHtml}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-
-            elements.statusContainer.innerHTML = cardsHtml;
-            elements.updateTimestamp.innerHTML = '';
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            fetchData();
-            setInterval(fetchData, 60000);
-        });
-    </script>
+       setInterval(fetchData, 60000);
+       fetchData();
+   });
+   </script>
 </body>
 </html>
