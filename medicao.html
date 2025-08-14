@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Medição - Vilhena Serviços</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body { background-color: #f0f2f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .navbar-brand img, .navbar-right-logo { height: 40px; width: auto; }
+        .content-container { background-color: white; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); border-radius: 8px; padding: 2rem; margin-bottom: 2rem; }
+        .welcome-section { text-align: center; padding: 1.5rem; background: linear-gradient(135deg, #495057, #343a40); color: white; border-radius: 8px; margin-bottom: 2rem; }
+        .welcome-section h1 { font-weight: 700; }
+        
+        .kpi-card .card-body { padding: 1rem; }
+        .kpi-card .kpi-value { font-size: 2rem; font-weight: 700; }
+        .kpi-card .text-xs { font-size: 0.75rem; letter-spacing: 0.5px; text-transform: uppercase; }
+        .kpi-card .bi { font-size: 2.5rem; }
+
+        .text-gray-300 { color: #dee2e6 !important; }
+        .table-hover tbody tr:hover { background-color: rgba(0, 0, 0, 0.05); }
+        .currency { text-align: right; }
+        .filter-container .form-select-sm { max-width: 200px; }
+        
+        .chart-container { height: 225px; position: relative; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-dark bg-black">
+        <div class="container-fluid d-flex justify-content-between align-items-center">
+            <a class="navbar-brand" href="#"><img src="https://www.vilhena.com.br/wp-content/uploads/2021/11/logo-vilhena.png" alt="Vilhena Serviços Logo"></a>
+            <img src="https://d1my6w9ld2remote.cloudfront.net/medias/4/2022/1/eletrobras-logo.png" alt="Logo Eletrobras" class="navbar-right-logo">
+        </div>
+    </nav>
+
+    <main class="container mt-4">
+        <div class="welcome-section"><h1>Controle de Medição</h1></div>
+
+        <div class="row mb-4">
+           <div class="col-md-4 col-lg-4">
+               <div class="card shadow-sm kpi-card border-info h-100">
+                   <div class="card-body text-info"><div class="row align-items-center"><div class="col">
+                       <div class="text-xs font-weight-bold mb-1">Itens no Período</div>
+                       <div id="kpi-total-items" class="kpi-value">0</div>
+                   </div><div class="col-auto"><i class="bi bi-list-ol text-gray-300"></i></div></div></div>
+               </div>
+           </div>
+           <div class="col-md-4 col-lg-4">
+               <div class="card shadow-sm kpi-card border-primary h-100">
+                   <div class="card-body text-primary"><div class="row align-items-center"><div class="col">
+                       <div id="kpi-value-label" class="text-xs font-weight-bold mb-1">Valor Medido</div>
+                       <div id="kpi-total-value" class="kpi-value">R$ 0,00</div>
+                   </div><div class="col-auto"><i class="bi bi-cash-coin text-gray-300"></i></div></div></div>
+               </div>
+           </div>
+           <div class="col-md-4 col-lg-4">
+               <div class="card shadow-sm kpi-card border-success h-100">
+                   <div class="card-body text-success"><div class="row align-items-center"><div class="col">
+                       <div class="text-xs font-weight-bold mb-1">Mês de referência</div>
+                       <div id="kpi-month" class="kpi-value" style="font-size: 1.5rem;">-</div>
+                   </div><div class="col-auto"><i class="bi bi-calendar-check text-gray-300"></i></div></div></div>
+               </div>
+           </div>
+       </div>
+
+        <div class="content-container">
+            <div class="row text-center">
+                <div class="col-lg-6 mb-4">
+                    <h5 class="mb-3">RS por Embarcação</h5>
+                    <div class="chart-container"><canvas id="vesselPerformanceChart"></canvas></div>
+                </div>
+                <div class="col-lg-6 mb-4">
+                    <h5 class="mb-3">Análise de Pareto</h5>
+                    <div class="chart-container"><canvas id="paretoChart"></canvas></div>
+                </div>
+                <div class="col-lg-6 mb-4 mb-lg-0">
+                    <h5 class="mb-3">RS Concluídas por Mês</h5>
+                    <div class="chart-container"><canvas id="uniqueItemsChart"></canvas></div>
+                </div>
+                <div class="col-lg-6">
+                    <h5 class="mb-3">Itens Mais Solicitados</h5>
+                    <div class="chart-container"><canvas id="topContractsChart"></canvas></div>
+                </div>
+            </div>
+            
+            <hr class="my-4">
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="mb-0">Lista de itens medidos</h4>
+                <div class="d-flex align-items-center filter-container">
+                    <label for="month-filter" class="form-label me-2 mb-0">Filtrar por Mês:</label>
+                    <select id="month-filter" class="form-select form-select-sm"></select>
+                </div>
+            </div>
+
+            <div id="data-display" class="table-responsive">
+                <div class="text-center p-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Carregando...</span></div><p class="mt-2">Carregando dados...</p></div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="container mt-4 mb-4 text-end">
+        <p class="text-muted" style="font-size: 0.9rem;"><b>Vilhena Serviços LTDA</b><br>Departamento de Engenharia e Manutenção</p>
+        <p class="text-body-tertiary" style="font-size: 0.6rem;"><b>Rodrigo M. Araujo</b><br>Engenheiro Mecânico<br>Engenheiro de Segurança do Trabalho</p>
+    </footer>
+
+   <script>
+   document.addEventListener('DOMContentLoaded', function() {
+       const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT2PRrHp-jZ7WSS7VT-dqzf1x2k7e1UlQMS1ZHlrqpgiRed9YiBlx9uYO2e-P2eKoTB-PsjH-Cfwy2Y/pub?output=csv';
+       const dataDisplay = document.getElementById('data-display');
+       const monthFilter = document.getElementById('month-filter');
+       let allValidData = [];
+       let chartInstances = {};
+
+       const formatCurrency = (value) => !isNaN(value) ? value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'R$ 0,00';
+       const parseCurrency = (value) => typeof value !== 'string' || value.trim() === '' ? NaN : parseFloat(value.replace('R$', '').trim().replace(/\./g, '').replace(',', '.'));
+       const parseDate = (dateStr) => !dateStr || typeof dateStr !== 'string' ? null : new Date(dateStr.trim().split('/').reverse().join('-') + 'T00:00:00');
+
+       function destroyChart(chartId) {
+           if (chartInstances[chartId]) chartInstances[chartId].destroy();
+       }
+
+       function updateKPIs(data, selectedMonthValue) {
+           document.getElementById('kpi-total-items').textContent = data.length;
+           const totalValue = data.reduce((sum, item) => sum + item.valorNumerico, 0);
+           document.getElementById('kpi-total-value').textContent = formatCurrency(totalValue);
+
+           const kpiMonthElement = document.getElementById('kpi-month');
+           const kpiValueLabel = document.getElementById('kpi-value-label');
+
+           if (selectedMonthValue === 'all') {
+               kpiMonthElement.textContent = 'TODOS OS MESES';
+               kpiValueLabel.textContent = 'Total Medido';
+           } else {
+               kpiMonthElement.textContent = monthFilter.options[monthFilter.selectedIndex].text;
+               kpiValueLabel.textContent = 'Valor medido no mês';
+           }
+       }
+       
+       function populateMonthFilter(data) {
+            const months = new Set(data.map(item => `${item.dataConclusao.getFullYear()}-${(item.dataConclusao.getMonth() + 1).toString().padStart(2, '0')}`));
+            const sortedMonths = Array.from(months).sort().reverse();
+            monthFilter.innerHTML = '';
+            sortedMonths.forEach(monthKey => {
+               const [year, monthNum] = monthKey.split('-');
+               const monthName = new Date(year, monthNum - 1).toLocaleString('pt-BR', { month: 'long', year: 'numeric' });
+               const option = document.createElement('option');
+               option.value = monthKey; option.textContent = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+               monthFilter.appendChild(option);
+           });
+           const allMonthsOption = document.createElement('option');
+           allMonthsOption.value = 'all'; allMonthsOption.textContent = 'Todos os Meses';
+           monthFilter.appendChild(allMonthsOption);
+           monthFilter.value = 'all';
+       }
+
+       // ATUALIZADO: colunas da tabela foram alteradas
+       function renderTable(data) {
+            if (data.length === 0) { dataDisplay.innerHTML = `<div class="alert alert-warning mt-3">Nenhum item encontrado para o filtro selecionado.</div>`; return; }
+            let tableHTML = `<table class="table table-hover align-middle mb-0"><thead class="table-light"><tr><th>Item</th><th>Item Contrato</th><th>Data Conclusão</th><th class="currency">Valor</th></tr></thead><tbody>`;
+            data.forEach(item => {
+                tableHTML += `<tr>
+                    <td>${item.item || ''}</td>
+                    <td>${item['item contrato'] || ''}</td>
+                    <td>${item.conclusão || ''}</td>
+                    <td class="currency">${formatCurrency(item.valorNumerico)}</td>
+                </tr>`;
+            });
+            tableHTML += `</tbody></table>`;
+            dataDisplay.innerHTML = tableHTML;
+       }
+
+       function getContractItemCounts(data) {
+           const counts = data.reduce((acc, item) => {
+               const key = item['item contrato'] || 'Não especificado';
+               acc[key] = (acc[key] || 0) + 1; return acc;
+           }, {});
+           return Object.entries(counts).map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count);
+       }
+       
+       function renderVesselPerformanceChart(data) {
+            const ctx = document.getElementById('vesselPerformanceChart').getContext('2d');
+            destroyChart('vesselPerformanceChart');
+            if (!data.length || !data[0].hasOwnProperty('embarcação')) {
+                ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                ctx.font = "16px 'Segoe UI'"; ctx.fillStyle = "#6c757d"; ctx.textAlign = "center";
+                ctx.fillText("Coluna 'embarcação' não encontrada.", ctx.canvas.width / 2, ctx.canvas.height / 2);
+                return;
+            }
+
+            const vesselData = data.reduce((acc, item) => {
+                const vessel = item.embarcação || 'Não especificada';
+                if (!acc[vessel]) acc[vessel] = { rs: new Set(), valor: 0 };
+                acc[vessel].rs.add(item.rs || item.item);
+                acc[vessel].valor += item.valorNumerico;
+                return acc;
+            }, {});
+
+            const processedData = Object.entries(vesselData).map(([name, d]) => ({ name, rsCount: d.rs.size, totalValue: d.valor })).sort((a,b) => b.totalValue - a.totalValue);
+
+            const labels = processedData.map(d => d.name);
+            const rsData = processedData.map(d => d.rsCount);
+            const valorData = processedData.map(d => d.totalValue);
+
+            chartInstances['vesselPerformanceChart'] = new Chart(ctx, {
+                type: 'bar', data: { labels, datasets: [
+                    { label: 'Valor (R$)', data: valorData, backgroundColor: 'rgba(54, 162, 235, 0.7)', yAxisID: 'y' },
+                    { label: 'Nº de RS', data: rsData, backgroundColor: 'rgba(255, 159, 64, 0.7)', yAxisID: 'y1' }
+                ]},
+                options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+                    plugins: { legend: { position: 'bottom' }, tooltip: { mode: 'index', intersect: false } },
+                    scales: {
+                        y: { stacked: true },
+                        y1: { stacked: true, display: false },
+                    }
+                }
+            });
+       }
+
+       function renderUniqueItemsChart(data) {
+           const ctx = document.getElementById('uniqueItemsChart').getContext('2d');
+           destroyChart('uniqueItemsChart');
+           if (data.length === 0) return;
+           const groupedByMonth = data.reduce((acc, item) => {
+               const monthKey = `${item.dataConclusao.getFullYear()}-${(item.dataConclusao.getMonth() + 1).toString().padStart(2, '0')}`;
+               if (!acc[monthKey]) acc[monthKey] = { date: item.dataConclusao, items: new Set() };
+               acc[monthKey].items.add(item.rs || item.item); return acc;
+           }, {});
+           const sortedKeys = Object.keys(groupedByMonth).sort((a,b) => groupedByMonth[a].date - groupedByMonth[b].date);
+           const labels = sortedKeys.map(key => new Date(key + '-02').toLocaleString('pt-BR', { month: 'short', year: 'numeric' }));
+           const chartData = sortedKeys.map(key => groupedByMonth[key].items.size);
+           chartInstances['uniqueItemsChart'] = new Chart(ctx, {
+               type: 'bar', data: { labels, datasets: [{ label: 'Nº de RS Únicas', data: chartData, backgroundColor: 'rgba(75, 192, 192, 0.7)' }] },
+               options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+           });
+       }
+
+       function renderTopContractsChart(data) {
+           const ctx = document.getElementById('topContractsChart').getContext('2d');
+           destroyChart('topContractsChart');
+           if (data.length === 0) return;
+           const contractCounts = getContractItemCounts(data);
+           let topData = contractCounts.slice(0, 8);
+           if (contractCounts.length > 8) {
+               const otherCount = contractCounts.slice(8).reduce((sum, item) => sum + item.count, 0);
+               topData.push({ name: 'Outros', count: otherCount });
+           }
+           const labels = topData.map(d => d.name);
+           const chartData = topData.map(d => d.count);
+           chartInstances['topContractsChart'] = new Chart(ctx, {
+               type: 'bar', data: { labels, datasets: [{ label: 'Nº de Itens', data: chartData, backgroundColor: 'rgba(255, 159, 64, 0.7)' }] },
+               options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+           });
+       }
+
+       function renderParetoChart(data) {
+            const ctx = document.getElementById('paretoChart').getContext('2d');
+            destroyChart('paretoChart');
+            if (data.length === 0) return;
+            const contractCounts = getContractItemCounts(data);
+            const totalCount = contractCounts.reduce((sum, item) => sum + item.count, 0);
+            let cumulativeCount = 0;
+            const paretoData = contractCounts.map(item => { cumulativeCount += item.count; return { ...item, cumulativePct: (cumulativeCount / totalCount) * 100 }; });
+            const labels = paretoData.map(d => d.name);
+            const barData = paretoData.map(d => d.count);
+            const lineData = paretoData.map(d => d.cumulativePct.toFixed(1));
+            chartInstances['paretoChart'] = new Chart(ctx, {
+                type: 'bar', data: { labels, datasets: [
+                    { label: 'Nº de Itens', data: barData, backgroundColor: 'rgba(54, 162, 235, 0.7)', yAxisID: 'y' },
+                    { label: 'Cumulativo %', data: lineData, type: 'line', borderColor: 'rgba(255, 99, 132, 1)', backgroundColor: 'rgba(255, 99, 132, 0.2)', yAxisID: 'y1', tension: 0.1 }
+                ]},
+                options: { responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
+                    scales: { x: { ticks: { display: false } }, 
+                        y: { type: 'linear', display: true, position: 'left', title: { display: true, text: 'Quantidade' } },
+                        y1: { type: 'linear', display: true, position: 'right', min: 0, max: 100, title: { display: true, text: '%' }, grid: { drawOnChartArea: false } }
+                    }
+                }
+            });
+       }
+
+       function applyFilters() {
+            const selectedMonthValue = monthFilter.value;
+            const filteredData = (selectedMonthValue === 'all') ? allValidData : allValidData.filter(item => `${item.dataConclusao.getFullYear()}-${(item.dataConclusao.getMonth() + 1).toString().padStart(2, '0')}` === selectedMonthValue);
+            
+            updateKPIs(filteredData, selectedMonthValue);
+            renderTable(filteredData);
+            renderUniqueItemsChart(filteredData);
+            renderTopContractsChart(filteredData);
+            renderParetoChart(filteredData);
+            renderVesselPerformanceChart(filteredData);
+       }
+
+       function fetchData() {
+           Papa.parse(GOOGLE_SHEET_CSV_URL, {
+               download: true, header: true, skipEmptyLines: true, transformHeader: h => h.trim().toLowerCase(),
+               complete: function(results) {
+                   allValidData = results.data.map(item => ({ ...item, dataConclusao: parseDate(item.conclusão), valorNumerico: parseCurrency(item.valor) })).filter(item => item.dataConclusao && !isNaN(item.valorNumerico));
+                   if (!allValidData || allValidData.length === 0) {
+                        dataDisplay.innerHTML = `<div class="alert alert-danger">Dados carregados, mas nenhuma linha com 'conclusão' e 'valor' válidos foi encontrada. Verifique as colunas na planilha.</div>`;
+                        return;
+                   }
+                   populateMonthFilter(allValidData);
+                   applyFilters();
+               },
+               error: err => { console.error('Erro:', err); dataDisplay.innerHTML = `<div class="alert alert-danger"><b>Falha ao carregar dados da planilha.</b> Verifique a URL e se a planilha foi "Publicada na web" como CSV.</div>`; }
+           });
+       }
+
+       monthFilter.addEventListener('change', applyFilters);
+       fetchData();
+   });
+   </script>
+</body>
+</html>
