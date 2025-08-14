@@ -32,8 +32,10 @@
 <body>
     <nav class="navbar navbar-dark bg-black">
         <div class="container-fluid d-flex justify-content-between align-items-center">
-            <a class="navbar-brand" href="#"><img src="https://www.vilhena.com.br/wp-content/uploads/2021/11/logo-vilhena.png" alt="Vilhena Serviços Logo"></a>
-            <img src="https://d1my6w9ld2remote.cloudfront.net/medias/4/2022/1/eletrobras-logo.png" alt="Logo Eletrobras" class="navbar-right-logo">
+            <a class="navbar-brand" href="#">
+                <img src="https://raw.githubusercontent.com/engineerRDG/vilhena.engenheiro.org/refs/heads/main/imagem/logo.png" alt="Vilhena Serviços Logo">
+            </a>
+<img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwISJrhwauLlEf_Kk7s2-69gk3Gy7gcCewCw&amp;s" alt="Logo Secundário" class="navbar-right-logo">
         </div>
     </nav>
 
@@ -90,7 +92,7 @@
             <hr class="my-4">
 
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <h4 class="mb-0">Lista de Itens Medidos</h4>
+                <h4 class="mb-0">Lista de itens medidos</h4>
                 <div class="d-flex align-items-center filter-container">
                     <label for="month-filter" class="form-label me-2 mb-0">Filtrar por Mês:</label>
                     <select id="month-filter" class="form-select form-select-sm"></select>
@@ -158,11 +160,17 @@
            monthFilter.value = 'all';
        }
 
+       // ATUALIZADO: colunas da tabela foram alteradas
        function renderTable(data) {
             if (data.length === 0) { dataDisplay.innerHTML = `<div class="alert alert-warning mt-3">Nenhum item encontrado para o filtro selecionado.</div>`; return; }
             let tableHTML = `<table class="table table-hover align-middle mb-0"><thead class="table-light"><tr><th>Item</th><th>Item Contrato</th><th>Data Conclusão</th><th class="currency">Valor</th></tr></thead><tbody>`;
             data.forEach(item => {
-                tableHTML += `<tr><td>${item.item || ''}</td><td>${item['item contrato'] || ''}</td><td>${item.conclusão || ''}</td><td class="currency">${formatCurrency(item.valorNumerico)}</td></tr>`;
+                tableHTML += `<tr>
+                    <td>${item.item || ''}</td>
+                    <td>${item['item contrato'] || ''}</td>
+                    <td>${item.conclusão || ''}</td>
+                    <td class="currency">${formatCurrency(item.valorNumerico)}</td>
+                </tr>`;
             });
             tableHTML += `</tbody></table>`;
             dataDisplay.innerHTML = tableHTML;
@@ -293,8 +301,6 @@
            Papa.parse(GOOGLE_SHEET_CSV_URL, {
                download: true, header: true, skipEmptyLines: true, transformHeader: h => h.trim().toLowerCase(),
                complete: function(results) {
-                   // Adicionado log para depuração:
-                   // console.log("Dados brutos da planilha:", results.data.slice(0, 5));
                    allValidData = results.data.map(item => ({ ...item, dataConclusao: parseDate(item.conclusão), valorNumerico: parseCurrency(item.valor) })).filter(item => item.dataConclusao && !isNaN(item.valorNumerico));
                    if (!allValidData || allValidData.length === 0) {
                         dataDisplay.innerHTML = `<div class="alert alert-danger">Dados carregados, mas nenhuma linha com 'conclusão' e 'valor' válidos foi encontrada. Verifique as colunas na planilha.</div>`;
