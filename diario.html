@@ -6,86 +6,64 @@
     <title>Calendário de Atividades - Vilhena Serviços</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <style>
         body { background-color: #f0f2f5; }
-        .navbar-brand img { height: 40px; }
+        .navbar-brand img, .footer-logo { height: 40px; width: auto; }
         .container-box {
-            background-color: white;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-            padding: 1.5rem;
+            background-color: white; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 8px; padding: 1.5rem;
         }
         .schedule-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap; /* Permite que os itens quebrem a linha em telas menores */
-            gap: 1rem;
-            margin-bottom: 1.5rem;
+            display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;
         }
-        .calendar-table {
-            width: 100%;
-            border-collapse: collapse;
-            table-layout: fixed;
-        }
+        .calendar-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
         .calendar-table thead th {
-            background-color: #343a40;
-            color: #ffffff;
-            text-align: center;
-            padding: 12px;
-            font-weight: bold;
+            background-color: #343a40; color: #ffffff; text-align: center;
+            padding: 12px; font-weight: bold;
         }
         .calendar-day {
-            border: 1px solid #dee2e6;
-            vertical-align: top;
-            height: 140px;
-            padding: 8px;
-            overflow-y: auto; /* Permite rolagem se houver muitos eventos */
+            border: 1px solid #dee2e6; vertical-align: top; height: 140px;
+            padding: 8px; overflow-y: auto;
         }
         .calendar-day.other-month { background-color: #f8f9fa; }
-        .day-number {
-            font-size: 1.1em;
-            font-weight: bold;
-            color: #343a40;
-            margin-bottom: 5px;
-        }
+        .day-number { font-size: 1.1em; font-weight: bold; color: #343a40; margin-bottom: 5px; }
         .calendar-day.other-month .day-number { color: #adb5bd; }
         .event-pill {
-            color: white;
-            padding: 4px 8px;
-            border-radius: 12px;
-            margin-top: 5px;
-            font-size: 0.8em;
-            font-weight: bold;
-            display: block;
-            cursor: pointer;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            color: white; padding: 4px 8px; border-radius: 12px; margin-top: 5px;
+            font-size: 0.8em; font-weight: bold; display: block; cursor: pointer;
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
         }
         .event-pill:hover { opacity: 0.85; }
-        
-        /* CORES CORRIGIDAS E MELHORADAS PARA LEGIBILIDADE */
         .event-seguranca { background-color: #ffc107; color: #000; }
-        .event-engenharia { background-color: #0003c7; }
-        .event-manutencao { background-color: #0a58ca; } /* Azul mais escuro */
-        .event-financeiro { background-color: #148529; } /* Verde mais escuro */
-        .event-atividade { background-color: #646464; }
-        .event-programacao { background-color: #b403b4; }
-        .event-compras { background-color: #03b49c; }
-        .event-rs { background-color: #d90429; } /* Vermelho mais escuro para melhor contraste */
-
+        .event-engenharia { background-color: #0d6efd; }
+        .event-manutencao { background-color: #0a58ca; }
+        .event-financeiro { background-color: #198754; }
+        .event-atividade { background-color: #6c757d; }
+        .event-programacao { background-color: #6f42c1; }
+        .event-compras { background-color: #0dcaf0; }
+        .event-rs { background-color: #dc3545; }
     </style>
 </head>
 <body>
-
-    <nav class="navbar navbar-dark bg-dark">
-        <div class="container">
+    <nav class="navbar navbar-dark bg-black">
+        <div class="container-fluid">
             <a class="navbar-brand" href="#">
                 <img src="https://raw.githubusercontent.com/engineerRDG/vilhena.engenheiro.org/main/imagem/logo.png" alt="Vilhena Serviços Logo">
             </a>
-            <span class="navbar-text">Calendário de Atividades</span>
+            <div class="dropdown">
+                <button class="btn btn-light btn-sm fw-bold" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Menu
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="rs.html">RS</a></li>
+                    <li><a class="dropdown-item" href="medicao.html">Medição</a></li>
+                    <li><a class="dropdown-item" href="status.html">Delfinópolis</a></li>
+                    <li><a class="dropdown-item" href="diario.html">Diário</a></li>
+                </ul>
+            </div>
         </div>
     </nav>
 
@@ -100,108 +78,77 @@
                     <div class="col-md-4">
                         <select id="department-filter" class="form-select">
                             <option value="all">Todos os Departamentos</option>
-                            </select>
+                        </select>
                     </div>
                 </div>
             </div>
             <div class="table-responsive">
                 <table class="calendar-table">
-                    <thead>
-                        <tr>
-                            <th>Segunda</th> <th>Terça</th> <th>Quarta</th> <th>Quinta</th> <th>Sexta</th> <th>Sábado</th> <th>Domingo</th>
-                        </tr>
-                    </thead>
+                    <thead><tr><th>Segunda</th><th>Terça</th><th>Quarta</th><th>Quinta</th><th>Sexta</th><th>Sábado</th><th>Domingo</th></tr></thead>
                     <tbody id="calendar-body"></tbody>
                 </table>
             </div>
         </div>
     </main>
 
-    <footer class="container mt-5 mb-4">
-        <div class="text-end text-muted">
-            <strong>Vilhena Serviços LTDA</strong><br>
-            <small>Departamento de Engenharia e Manutenção</small>
+    <footer class="container mt-4 mb-4 d-flex justify-content-between align-items-center">
+        <img src="https://raw.githubusercontent.com/engineerRDG/vilhena.engenheiro.org/refs/heads/main/imagem/eletrobras.png" alt="Logo Eletrobras" class="footer-logo">
+        <div class="text-end">
+            <p class="text-muted mb-1" style="font-size: 0.9rem;">
+                <b>Vilhena Serviços LTDA</b><br>
+                Departamento de Engenharia e Manutenção
+            </p>
+            <p class="text-body-tertiary mb-0" style="font-size: 0.6rem;">
+                <b>Rodrigo M. Araujo</b><br>
+                Engenheiro Mecânico<br>
+                Engenheiro de Segurança do Trabalho
+            </p>
         </div>
     </footer>
 
     <div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="eventModalLabel">Detalhes da Atividade</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-                </div>
+                <div class="modal-header"><h5 class="modal-title" id="eventModalLabel">Detalhes da Atividade</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button></div>
                 <div class="modal-body" id="modal-description-content"></div>
             </div>
         </div>
     </div>
     
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    
     <script>
-        // --- ELEMENTOS E VARIÁVEIS GLOBAIS ---
         const monthYearHeader = document.getElementById('month-year-header');
         const calendarBody = document.getElementById('calendar-body');
         const prevMonthBtn = document.getElementById('prev-month-btn');
         const nextMonthBtn = document.getElementById('next-month-btn');
         const eventModal = document.getElementById('eventModal');
         const departmentFilter = document.getElementById('department-filter');
-
-        let currentDate = new Date(2025, 6, 28); // Inicia no mês atual
+        let currentDate = new Date();
         let allEvents = {};
         let activeDepartmentFilter = 'all';
-
         const googleSheetURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTu9skDnnYmILUpQ4UvWblPFbq1D4k7Dy4FPK5k-21kgAurdYAJbxyXhbofQGUDHwSefc6w18tDOqPj/pub?gid=502983351&single=true&output=csv';
+        const departments = ['Segurança', 'Engenharia', 'Manutencao', 'Financeiro', 'Atividade', 'Programacao', 'RS', 'Compras'];
 
-        const departments = ['Segurança', 'Engenharia', 'Manutencao', 'Financeiro', 'Atividade', 'Programacao', 'RS'];
-
-        // --- FUNÇÕES ---
-
-        /**
-         * Normaliza o nome do departamento para ser usado como classe CSS.
-         * Remove acentos, espaços e converte para minúsculas.
-         * Ex: "Segurança do Trabalho" -> "seguranca"
-         */
         function normalizeDepartment(name) {
             if (!name) return '';
-            return name.trim()
-                .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-                .toLowerCase().split(' ')[0]; // Pega apenas a primeira palavra para simplificar
+            return name.trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().split(' ')[0];
         }
 
-        /**
-         * Analisa uma linha de CSV de forma robusta, tratando vírgulas dentro de campos com aspas.
-         */
         function parseCsvLine(line) {
-            const values = [];
-            let current = '';
-            let inQuotes = false;
+            const values = []; let current = ''; let inQuotes = false;
             for (const char of line) {
-                if (char === '"') {
-                    inQuotes = !inQuotes;
-                } else if (char === ',' && !inQuotes) {
-                    values.push(current.trim());
-                    current = '';
-                } else {
-                    current += char;
-                }
+                if (char === '"') inQuotes = !inQuotes;
+                else if (char === ',' && !inQuotes) { values.push(current.trim().replace(/"/g, '')); current = ''; }
+                else current += char;
             }
-            values.push(current.trim());
-            return values;
+            values.push(current.trim().replace(/"/g, '')); return values;
         }
 
-        /**
-         * Busca e processa os dados da planilha.
-         */
         async function loadEventsFromSheet() {
             try {
-                // Adiciona um timestamp para evitar cache
                 const response = await fetch(`${googleSheetURL}&t=${new Date().getTime()}`);
                 if (!response.ok) throw new Error('Falha na resposta da rede.');
-                
                 const csvText = await response.text();
                 const rows = csvText.trim().split('\n').slice(1);
-
                 const eventsData = {};
                 rows.forEach(row => {
                     const [date, title, description, department] = parseCsvLine(row);
@@ -209,113 +156,67 @@
                         const [year, month, day] = date.split('-').map(Number);
                         const eventKey = `${year}-${month}-${day}`;
                         if (!eventsData[eventKey]) eventsData[eventKey] = [];
-                        
-                        eventsData[eventKey].push({
-                            title: title,
-                            description: description,
-                            department: normalizeDepartment(department)
-                        });
+                        eventsData[eventKey].push({ title, description, department: normalizeDepartment(department) });
                     }
                 });
                 allEvents = eventsData;
-                renderCalendar(); // Redesenha o calendário com os novos dados
+                renderCalendar();
             } catch (error) {
                 console.error('Erro ao carregar eventos:', error);
-                calendarBody.innerHTML = `<tr><td colspan="7" class="text-center text-danger p-4"><b>Falha ao carregar os dados.</b><br>Verifique a conexão e o link da planilha.</td></tr>`;
+                calendarBody.innerHTML = `<tr><td colspan="7" class="text-center text-danger p-4"><b>Falha ao carregar os dados.</b></td></tr>`;
             }
         }
 
-        /**
-         * Desenha o calendário na tela.
-         */
         function renderCalendar() {
             const year = currentDate.getFullYear();
             const month = currentDate.getMonth();
             const monthName = new Date(year, month).toLocaleString('pt-BR', { month: 'long' });
             monthYearHeader.textContent = `${monthName.charAt(0).toUpperCase() + monthName.slice(1)}, ${year}`;
-            
             calendarBody.innerHTML = '';
             const firstDayOfMonth = new Date(year, month, 1).getDay();
             const daysInMonth = new Date(year, month + 1, 0).getDate();
             let dayOfWeek = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
             let currentDay = 1;
-            
             let calendarHtml = '<tr>';
-            for (let i = 0; i < dayOfWeek; i++) {
-                calendarHtml += '<td class="calendar-day other-month"></td>';
-            }
-
+            for (let i = 0; i < dayOfWeek; i++) calendarHtml += '<td class="calendar-day other-month"></td>';
             while (currentDay <= daysInMonth) {
-                if (dayOfWeek === 7) {
-                    dayOfWeek = 0;
-                    calendarHtml += '</tr><tr>';
-                }
-
+                if (dayOfWeek === 7) { dayOfWeek = 0; calendarHtml += '</tr><tr>'; }
                 const eventKey = `${year}-${month + 1}-${currentDay}`;
                 let eventsHtml = '';
                 if (allEvents[eventKey]) {
-                    // Filtra os eventos pelo departamento ativo antes de renderizar
-                    const filteredEvents = allEvents[eventKey].filter(event => 
-                        activeDepartmentFilter === 'all' || event.department === activeDepartmentFilter
-                    );
-
+                    const filteredEvents = allEvents[eventKey].filter(event => activeDepartmentFilter === 'all' || event.department === activeDepartmentFilter);
                     filteredEvents.forEach(event => {
                         eventsHtml += `<div class="event-pill event-${event.department}" data-bs-toggle="modal" data-bs-target="#eventModal" data-title="${event.title}" data-description="${event.description}">${event.title}</div>`;
                     });
                 }
                 calendarHtml += `<td class="calendar-day"><div class="day-number">${currentDay}</div>${eventsHtml}</td>`;
-                currentDay++;
-                dayOfWeek++;
+                currentDay++; dayOfWeek++;
             }
-
-            while (dayOfWeek < 7 && dayOfWeek !== 0) {
-                calendarHtml += '<td class="calendar-day other-month"></td>';
-                dayOfWeek++;
-            }
+            while (dayOfWeek < 7 && dayOfWeek !== 0) { calendarHtml += '<td class="calendar-day other-month"></td>'; dayOfWeek++; }
             calendarHtml += '</tr>';
             calendarBody.innerHTML = calendarHtml;
         }
         
-        /**
-         * Popula o dropdown de filtro com os departamentos.
-         */
         function populateFilter() {
             departments.forEach(dep => {
                 const option = document.createElement('option');
-                option.value = normalizeDepartment(dep);
-                option.textContent = dep;
+                option.value = normalizeDepartment(dep); option.textContent = dep;
                 departmentFilter.appendChild(option);
             });
         }
 
-        // --- EVENT LISTENERS ---
-        prevMonthBtn.addEventListener('click', () => {
-            currentDate.setMonth(currentDate.getMonth() - 1);
-            renderCalendar();
-        });
-
-        nextMonthBtn.addEventListener('click', () => {
-            currentDate.setMonth(currentDate.getMonth() + 1);
-            renderCalendar();
-        });
-
-        departmentFilter.addEventListener('change', (e) => {
-            activeDepartmentFilter = e.target.value;
-            renderCalendar();
-        });
-
+        prevMonthBtn.addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth() - 1); renderCalendar(); });
+        nextMonthBtn.addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth() + 1); renderCalendar(); });
+        departmentFilter.addEventListener('change', (e) => { activeDepartmentFilter = e.target.value; renderCalendar(); });
         eventModal.addEventListener('show.bs.modal', function (event) {
             const trigger = event.relatedTarget;
-            const title = trigger.getAttribute('data-title');
-            const description = trigger.getAttribute('data-description');
-            eventModal.querySelector('.modal-title').textContent = title;
-            eventModal.querySelector('.modal-body').textContent = description;
+            eventModal.querySelector('.modal-title').textContent = trigger.getAttribute('data-title');
+            eventModal.querySelector('.modal-body').textContent = trigger.getAttribute('data-description');
         });
 
-        // --- INICIALIZAÇÃO ---
         populateFilter();
-        loadEventsFromSheet(); // Carrega os dados imediatamente
-        setInterval(loadEventsFromSheet, 60000); // Configura a atualização automática a cada 1 minuto
+        loadEventsFromSheet();
+        setInterval(loadEventsFromSheet, 60000);
     </script>
 </body>
 </html>
