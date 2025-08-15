@@ -19,9 +19,6 @@
         .text-gray-300 { color: #dee2e6 !important; }
         .table-hover tbody tr:hover { background-color: rgba(0, 0, 0, 0.05); }
         .table-light { background-color: #f8f9fa !important; color: #6c757d; }
-        .filter-container .form-select-sm {
-            max-width: 170px;
-        }
     </style>
 </head>
 <body>
@@ -73,12 +70,13 @@
        </div>
 
         <div class="content-container">
-            <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
                  <h4 class="mb-0">Requisições</h4>
-                <div class="d-flex align-items-center filter-container">
-                    <select id="vessel-filter" class="form-select form-select-sm me-2"><option value="all">Todas as Embarcações</option></select>
-                    <select id="status-filter" class="form-select form-select-sm me-2"><option value="all">Todos os Status</option><option value="Em aberto">Em Aberto</option><option value="Em Andamento">Em Andamento</option><option value="Concluído">Concluído</option></select>
-                    <select id="month-filter" class="form-select form-select-sm"><option value="all">Todos os Meses</option></select>
+                <div class="input-group input-group-sm" style="width: auto;">
+                    <input type="search" id="search-input" class="form-control" placeholder="Pesquisar RS ou Serviço..." style="max-width: 200px;">
+                    <select id="vessel-filter" class="form-select" style="max-width: 150px;"></select>
+                    <select id="status-filter" class="form-select" style="max-width: 150px;"></select>
+                    <select id="month-filter" class="form-select" style="max-width: 150px;"></select>
                 </div>
             </div>
             <div class="table-responsive">
@@ -111,6 +109,7 @@
        const monthFilter = document.getElementById('month-filter');
        const statusFilter = document.getElementById('status-filter');
        const vesselFilter = document.getElementById('vessel-filter');
+       const searchInput = document.getElementById('search-input');
        let allRequests = [];
 
        function parseDate(dateStr) {
@@ -129,7 +128,8 @@
            const vessels = new Set();
            requests.forEach(req => { if (req.embarcação) vessels.add(req.embarcação); });
            const sortedVessels = Array.from(vessels).sort((a, b) => a.localeCompare(b));
-           vesselFilter.innerHTML = '<option value="all">Todas as Embarcações</option>';
+           // Texto do filtro alterado
+           vesselFilter.innerHTML = '<option value="all">Embarcações</option>';
            sortedVessels.forEach(vessel => {
                const option = document.createElement('option');
                option.value = vessel; option.textContent = vessel;
@@ -141,7 +141,8 @@
            const months = new Set();
            requests.forEach(req => { const monthYear = getMonthYear(req.abertura); if (monthYear) months.add(monthYear); });
            const sortedMonths = Array.from(months).sort().reverse();
-           monthFilter.innerHTML = '<option value="all">Todos os Meses</option>';
+           // Texto do filtro alterado
+           monthFilter.innerHTML = '<option value="all">Meses</option>';
            sortedMonths.forEach(month => {
                const [year, monthNum] = month.split('-');
                const option = document.createElement('option');
@@ -150,6 +151,20 @@
                monthFilter.appendChild(option);
            });
        }
+
+       function populateStatusFilter(requests) {
+           const statuses = new Set();
+           requests.forEach(req => { if (req.status) statuses.add(req.status); });
+           const sortedStatuses = Array.from(statuses).sort();
+           // Texto do filtro alterado
+           statusFilter.innerHTML = '<option value="all">Status</option>';
+           sortedStatuses.forEach(status => {
+                const option = document.createElement('option');
+                option.value = status; option.textContent = status;
+                statusFilter.appendChild(option);
+           });
+       }
+
 
        function getStatusBadge(status) {
            const s = (status || "Indefinido").trim();
@@ -185,13 +200,20 @@
        
        function applyFilters() {
            let filtered = allRequests;
+           const searchTerm = searchInput.value.toLowerCase().trim();
+
+           if (searchTerm) {
+               filtered = filtered.filter(req => {
+                   const rs = (req.rs || '').toLowerCase();
+                   const service = (req.serviço || '').toLowerCase();
+                   return rs.includes(searchTerm) || service.includes(searchTerm);
+               });
+           }
+
            if (vesselFilter.value !== 'all') filtered = filtered.filter(req => req.embarcação === vesselFilter.value);
            if (monthFilter.value !== 'all') filtered = filtered.filter(req => getMonthYear(req.abertura) === monthFilter.value);
            if (statusFilter.value !== 'all') {
-               filtered = filtered.filter(req => {
-                   if (statusFilter.value === 'Concluído') return req.status === 'Concluído' || req.status === 'Concluída';
-                   return req.status === statusFilter.value;
-               });
+               filtered = filtered.filter(req => req.status === statusFilter.value);
            }
            renderTable(filtered);
        }
@@ -200,9 +222,10 @@
            Papa.parse(GOOGLE_SHEET_CSV_URL, {
                download: true, header: true, skipEmptyLines: true, transformHeader: h => h.trim().toLowerCase(),
                complete: function(results) {
-                   allRequests = results.data;
+                   allRequests = results.data.filter(r => r.rs); // Garante que só linhas com RS sejam processadas
                    populateVesselFilter(allRequests);
                    populateMonthFilter(allRequests);
+                   populateStatusFilter(allRequests); // Popula o filtro de status dinamicamente
                    updateKPIs(allRequests);
                    applyFilters();
                },
@@ -210,6 +233,7 @@
            });
        }
 
+       searchInput.addEventListener('input', applyFilters);
        monthFilter.addEventListener('change', applyFilters);
        statusFilter.addEventListener('change', applyFilters);
        vesselFilter.addEventListener('change', applyFilters);
