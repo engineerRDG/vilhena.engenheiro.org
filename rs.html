@@ -7,10 +7,14 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <style>
         body { background-color: #f0f2f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .navbar-brand img, .navbar-right-logo { height: 40px; width: auto; } /* Estilo unificado para os logos */
+        .navbar-brand img, .footer-logo { 
+            height: 40px; 
+            width: auto; 
+        }
         .content-container { background-color: white; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); border-radius: 8px; padding: 2rem; margin-bottom: 2rem; }
         .welcome-section { text-align: center; padding: 1.5rem; background: linear-gradient(135deg, #495057, #343a40); color: white; border-radius: 8px; margin-bottom: 2rem; }
         .welcome-section h1 { font-weight: 700; }
@@ -23,11 +27,21 @@
 </head>
 <body>
     <nav class="navbar navbar-dark bg-black">
-        <div class="container-fluid d-flex justify-content-between align-items-center">
+        <div class="container-fluid">
             <a class="navbar-brand" href="#">
                 <img src="https://raw.githubusercontent.com/engineerRDG/vilhena.engenheiro.org/refs/heads/main/imagem/logo.png" alt="Vilhena Serviços Logo">
             </a>
-<img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwISJrhwauLlEf_Kk7s2-69gk3Gy7gcCewCw&amp;s" alt="Logo Secundário" class="navbar-right-logo">
+            <div class="dropdown">
+                <button class="btn btn-light btn-sm fw-bold" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Menu
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="rs.html">RS</a></li>
+                    <li><a class="dropdown-item" href="medicao.html">Medição</a></li>
+                    <li><a class="dropdown-item" href="status.html">Delfinópolis</a></li>
+                    <li><a class="dropdown-item" href="diario.html">Diário</a></li>
+                </ul>
+            </div>
         </div>
     </nav>
 
@@ -35,7 +49,6 @@
         <div class="welcome-section">
             <h1>Controle de Requisições de Serviço</h1>
         </div>
-
         <div class="row mb-4">
            <div class="col-md-4">
                <div class="card shadow-sm kpi-card border-warning">
@@ -68,7 +81,6 @@
                </div>
            </div>
        </div>
-
         <div class="content-container">
             <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
                  <h4 class="mb-0">Requisições</h4>
@@ -89,17 +101,19 @@
         </div>
     </main>
 
- <footer class="container mt-4 mb-4 text-end">
-        <p class="text-muted" style="font-size: 0.9rem;">
-            <b>Vilhena Serviços LTDA</b><br>
-            Departamento de Engenharia e Manutenção
-            <p class="text-body-tertiary" style="font-size: 0.6rem;"><b>Rodrigo M. Araujo</b>
-            <br>
-            Engenheiro Mecânico
-                        <br>
-            Engenheiro de Segurança do Trabalho
-        </p>
-        </p>
+    <footer class="container mt-4 mb-4 d-flex justify-content-between align-items-center">
+        <img src="https://raw.githubusercontent.com/engineerRDG/vilhena.engenheiro.org/refs/heads/main/imagem/eletrobras.png" alt="Logo Eletrobras" class="footer-logo">
+        <div class="text-end">
+            <p class="text-muted mb-1" style="font-size: 0.9rem;">
+                <b>Vilhena Serviços LTDA</b><br>
+                Departamento de Engenharia e Manutenção
+            </p>
+            <p class="text-body-tertiary mb-0" style="font-size: 0.6rem;">
+                <b>Rodrigo M. Araujo</b><br>
+                Engenheiro Mecânico<br>
+                Engenheiro de Segurança do Trabalho
+            </p>
+        </div>
     </footer>
 
    <script>
@@ -128,7 +142,6 @@
            const vessels = new Set();
            requests.forEach(req => { if (req.embarcação) vessels.add(req.embarcação); });
            const sortedVessels = Array.from(vessels).sort((a, b) => a.localeCompare(b));
-           // Texto do filtro alterado
            vesselFilter.innerHTML = '<option value="all">Embarcações</option>';
            sortedVessels.forEach(vessel => {
                const option = document.createElement('option');
@@ -141,7 +154,6 @@
            const months = new Set();
            requests.forEach(req => { const monthYear = getMonthYear(req.abertura); if (monthYear) months.add(monthYear); });
            const sortedMonths = Array.from(months).sort().reverse();
-           // Texto do filtro alterado
            monthFilter.innerHTML = '<option value="all">Meses</option>';
            sortedMonths.forEach(month => {
                const [year, monthNum] = month.split('-');
@@ -156,7 +168,6 @@
            const statuses = new Set();
            requests.forEach(req => { if (req.status) statuses.add(req.status); });
            const sortedStatuses = Array.from(statuses).sort();
-           // Texto do filtro alterado
            statusFilter.innerHTML = '<option value="all">Status</option>';
            sortedStatuses.forEach(status => {
                 const option = document.createElement('option');
@@ -222,10 +233,10 @@
            Papa.parse(GOOGLE_SHEET_CSV_URL, {
                download: true, header: true, skipEmptyLines: true, transformHeader: h => h.trim().toLowerCase(),
                complete: function(results) {
-                   allRequests = results.data.filter(r => r.rs); // Garante que só linhas com RS sejam processadas
+                   allRequests = results.data.filter(r => r.rs); 
                    populateVesselFilter(allRequests);
                    populateMonthFilter(allRequests);
-                   populateStatusFilter(allRequests); // Popula o filtro de status dinamicamente
+                   populateStatusFilter(allRequests);
                    updateKPIs(allRequests);
                    applyFilters();
                },
