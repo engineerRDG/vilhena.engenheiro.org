@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Principal - Vilhena Serviços</title>
+    <title>Dashboard - Vilhena Serviços</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
@@ -45,10 +45,37 @@
         .status-list-item { margin-bottom: 0.25rem; font-size: 0.95rem; }
         .status-list-item .bi { vertical-align: -2px; }
         .calendar-summary .event-item { font-size: 0.95rem; margin-bottom: 0.25rem; }
+
+        /* Estilos para a tela de login */
+        #login-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            display: flex; justify-content: center; align-items: center; z-index: 2000;
+        }
+        #login-box {
+            background: white; padding: 2rem 3rem; border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3); text-align: center;
+        }
     </style>
 </head>
 <body>
-    <div id="main-content">
+
+    <div id="login-overlay">
+        <div id="login-box">
+            <img src="https://raw.githubusercontent.com/engineerRDG/vilhena.engenheiro.org/refs/heads/main/imagem/logo.png" alt="Vilhena Serviços Logo" style="height: 50px; margin-bottom: 1rem;">
+            <h4 class="mb-3">Acesso Restrito</h4>
+            <form id="login-form">
+                <div class="form-floating mb-3">
+                    <input type="password" class="form-control" id="password-input" placeholder="Senha">
+                    <label for="password-input">Senha</label>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Entrar</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="main-content" style="display: none;">
         <nav class="navbar navbar-dark bg-black">
             <div class="container-fluid">
                 <a class="navbar-brand" href="#">
@@ -109,7 +136,7 @@
         </main>
 
         <footer class="container mt-4 mb-4 d-flex justify-content-between align-items-center">
-            <img src="https://d1my6w9ld2remote.cloudfront.net/medias/4/2022/1/eletrobras-logo.png" alt="Logo Eletrobras" class="footer-logo">
+            <img src="https://raw.githubusercontent.com/engineerRDG/vilhena.engenheiro.org/refs/heads/main/imagem/eletrobras.png" alt="Logo Eletrobras" class="footer-logo">
             <div class="text-end">
                 <p class="text-muted mb-1" style="font-size: 0.9rem;"><b>Vilhena Serviços LTDA</b><br>Departamento de Engenharia e Manutenção</p>
                 <p class="text-body-tertiary mb-0" style="font-size: 0.6rem;"><b>Rodrigo M. Araujo</b><br>Engenheiro Mecânico<br>Engenheiro de Segurança do Trabalho</p>
@@ -119,6 +146,24 @@
 
    <script>
     document.addEventListener('DOMContentLoaded', function() {
+        const loginOverlay = document.getElementById('login-overlay');
+        const loginForm = document.getElementById('login-form');
+        const passwordInput = document.getElementById('password-input');
+        const mainContent = document.getElementById('main-content');
+
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (passwordInput.value === 'vilhena') {
+                loginOverlay.style.display = 'none';
+                mainContent.style.display = 'block';
+                loadAllData(); // Carrega os dados somente após o login
+            } else {
+                alert('Acesso Negado!');
+                passwordInput.value = '';
+            }
+        });
+
+        // URLs das planilhas
         const URL_RS_MEDICAO = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT2PRrHp-jZ7WSS7VT-dqzf1x2k7e1UlQMS1ZHlrqpgiRed9YiBlx9uYO2e-P2eKoTB-PsjH-Cfwy2Y/pub?gid=0&single=true&output=csv';
         const URL_STATUS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRLCYTZTrWAEgxvreN2OxK_baOqRlaPF0OqA1f90-I4CHahqbv6TQRXHc0YSq9XOQjqM5faahUv-drN/pub?gid=426952514&single=true&output=csv';
         const URL_DIARIO = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTu9skDnnYmILUpQ4UvWblPFbq1D4k7Dy4FPK5k-21kgAurdYAJbxyXhbofQGUDHwSefc6w18tDOqPj/pub?gid=502983351&single=true&output=csv';
@@ -139,28 +184,10 @@
             const open = getCount('em aberto');
             const inProgress = getCount('em andamento');
             const completed = getCount('concluído') + getCount('concluída');
-            
-            // ATUALIZADO: Filtra apenas itens "Em Andamento" e pega os 3 mais recentes
             const inProgressItems = data.filter(r => (r.status || '').toLowerCase() === 'em andamento');
             const recentInProgress = inProgressItems.slice(-3).reverse();
-
-            let recentHtml = recentInProgress.map(r => `
-                <div class="recent-list-item d-flex justify-content-between">
-                    <span><strong>RS ${r.rs || ''}:</strong> ${r.serviço || 'Serviço não especificado'}</span>
-                    <span class="badge text-bg-light">${r.embarcação || ''}</span>
-                </div>
-            `).join('');
-
-            rsSummary.innerHTML = `
-                <div class="kpi-group">
-                    <div class="kpi-item"><div class="value text-warning">${open}</div><div class="label">Em Aberto</div></div>
-                    <div class="kpi-item"><div class="value text-info">${inProgress}</div><div class="label">Em Andamento</div></div>
-                    <div class="kpi-item"><div class="value text-success">${completed}</div><div class="label">Concluído</div></div>
-                </div>
-                <hr>
-                <h6 class="mb-2">Requisições em Andamento:</h6>
-                <div>${recentHtml || '<p class="text-muted small">Nenhuma requisição em andamento no momento.</p>'}</div>
-            `;
+            let recentHtml = recentInProgress.map(r => `<div class="recent-list-item d-flex justify-content-between"><span><strong>RS ${r.rs || ''}:</strong> ${r.serviço || ''}</span><span class="badge text-bg-light">${r.embarcação || ''}</span></div>`).join('');
+            rsSummary.innerHTML = `<div class="kpi-group"><div class="kpi-item"><div class="value text-warning">${open}</div><div class="label">Em Aberto</div></div><div class="kpi-item"><div class="value text-info">${inProgress}</div><div class="label">Em Andamento</div></div><div class="kpi-item"><div class="value text-success">${completed}</div><div class="label">Concluído</div></div></div><hr><h6 class="mb-2">Requisições em Andamento:</h6><div>${recentHtml || '<p class="text-muted small">Nenhuma requisição em andamento.</p>'}</div>`;
         }
 
         function renderMedicaoSummary(data) {
@@ -175,47 +202,26 @@
                 const value = parseFloat((item.valor || '0').replace('R$', '').trim().replace(/\./g, '').replace(',', '.'));
                 return sum + (isNaN(value) ? 0 : value);
             }, 0);
-            medicaoSummary.innerHTML = `<div class="kpi-group"><div class="kpi-item"><div class="value text-success">${formatCurrency(totalValueThisMonth)}</div><div class="label">Medido no Mês Atual</div></div><div class="kpi-item"><div class="value text-primary">${currentMonthData.length}</div><div class="label">Itens Medidos no Mês</div></div></div><hr><p class="text-muted text-center small">Resumo de itens com data de conclusão no mês corrente.</p>`;
+            medicaoSummary.innerHTML = `<div class="kpi-group"><div class="kpi-item"><div class="value text-success">${formatCurrency(totalValueThisMonth)}</div><div class="label">Medido no Mês Atual</div></div><div class="kpi-item"><div class="value text-primary">${currentMonthData.length}</div><div class="label">Itens Medidos no Mês</div></div></div><hr><p class="text-muted text-center small">Resumo de itens com conclusão no mês corrente.</p>`;
         }
         
         function renderStatusSummary(data) {
              const operating = data.filter(r => (r.status || '').toLowerCase() === 'operando');
              const available = data.filter(r => (r.status || '').toLowerCase() === 'disponivel');
              const maintenance = data.filter(r => (r.status || '').toLowerCase() === 'manutencao');
-
              const createList = (items, colorClass) => {
                  if (items.length === 0) return '<p class="text-muted small">Nenhuma.</p>';
                  return items.map(item => `<div class="status-list-item"><i class="bi bi-circle-fill ${colorClass} me-2"></i>${item.embarcação}</div>`).join('');
              };
-
-             statusSummary.innerHTML = `
-                <div class="status-list">
-                    <h6 class="text-success">OPERANDO (${operating.length})</h6>
-                    ${createList(operating, 'text-success')}
-                    <h6 class="text-info mt-3">DISPONÍVEL (${available.length})</h6>
-                    ${createList(available, 'text-info')}
-                    <h6 class="text-danger mt-3">MANUTENÇÃO (${maintenance.length})</h6>
-                    ${createList(maintenance, 'text-danger')}
-                </div>
-             `;
+             statusSummary.innerHTML = `<div class="status-list"><h6 class="text-success">OPERANDO (${operating.length})</h6>${createList(operating, 'text-success')}<h6 class="text-info mt-3">DISPONÍVEL (${available.length})</h6>${createList(available, 'text-info')}<h6 class="text-danger mt-3">MANUTENÇÃO (${maintenance.length})</h6>${createList(maintenance, 'text-danger')}</div>`;
         }
         
         function renderDiarioSummary(data) {
             const today = new Date();
             const formatDateKey = (date) => `${date.getFullYear()}-${(date.getMonth() + 1)}-${date.getDate()}`;
-            
-            // Ajuste para o dia atual - 15/08/2025
-            const currentDate = new Date('2025-08-15T12:00:00');
-            
-            const eventsToday = data.filter(e => e.date === formatDateKey(currentDate));
-
+            const eventsToday = data.filter(e => e.date === formatDateKey(today));
             const eventsTodayHtml = eventsToday.map(e => `<div class="event-item"><i class="bi bi-check-circle-fill text-primary me-2"></i>${e.title}</div>`).join('') || '<div class="text-muted small">Nenhuma atividade agendada para hoje.</div>';
-            
-            diarioSummary.innerHTML = `
-                <div class="calendar-summary">
-                    ${eventsTodayHtml}
-                </div>
-            `;
+            diarioSummary.innerHTML = `<div class="calendar-summary">${eventsTodayHtml}</div>`;
         }
         
         async function loadAllData() {
@@ -240,9 +246,6 @@
                 statusSummary.innerHTML = errorHtml; diarioSummary.innerHTML = errorHtml;
             }
         }
-        
-        loadAllData();
-        setInterval(loadAllData, 60000);
     });
    </script>
 </body>
