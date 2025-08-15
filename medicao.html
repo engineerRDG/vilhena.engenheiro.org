@@ -8,10 +8,14 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <style>
         body { background-color: #f0f2f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .navbar-brand img, .navbar-right-logo { height: 40px; width: auto; }
+        .navbar-brand img, .footer-logo { 
+            height: 40px; 
+            width: auto; 
+        }
         .content-container { background-color: white; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); border-radius: 8px; padding: 2rem; margin-bottom: 2rem; }
         .welcome-section { text-align: center; padding: 1.5rem; background: linear-gradient(135deg, #495057, #343a40); color: white; border-radius: 8px; margin-bottom: 2rem; }
         .welcome-section h1 { font-weight: 700; }
@@ -31,11 +35,21 @@
 </head>
 <body>
     <nav class="navbar navbar-dark bg-black">
-        <div class="container-fluid d-flex justify-content-between align-items-center">
+        <div class="container-fluid">
             <a class="navbar-brand" href="#">
                 <img src="https://raw.githubusercontent.com/engineerRDG/vilhena.engenheiro.org/refs/heads/main/imagem/logo.png" alt="Vilhena Serviços Logo">
             </a>
-<img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwISJrhwauLlEf_Kk7s2-69gk3Gy7gcCewCw&amp;s" alt="Logo Secundário" class="navbar-right-logo">
+            <div class="dropdown">
+                <button class="btn btn-light btn-sm fw-bold" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Menu
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="rs.html">RS</a></li>
+                    <li><a class="dropdown-item" href="medicao.html">Medição</a></li>
+                    <li><a class="dropdown-item" href="status.html">Delfinópolis</a></li>
+                    <li><a class="dropdown-item" href="diario.html">Diário</a></li>
+                </ul>
+            </div>
         </div>
     </nav>
 
@@ -105,14 +119,26 @@
         </div>
     </main>
 
-    <footer class="container mt-4 mb-4 text-end">
-        <p class="text-muted" style="font-size: 0.9rem;"><b>Vilhena Serviços LTDA</b><br>Departamento de Engenharia e Manutenção</p>
-        <p class="text-body-tertiary" style="font-size: 0.6rem;"><b>Rodrigo M. Araujo</b><br>Engenheiro Mecânico<br>Engenheiro de Segurança do Trabalho</p>
+    <footer class="container mt-4 mb-4 d-flex justify-content-between align-items-center">
+        <img src="https://raw.githubusercontent.com/engineerRDG/vilhena.engenheiro.org/refs/heads/main/imagem/eletrobras.png" alt="Logo Eletrobras" class="footer-logo">
+        <div class="text-end">
+            <p class="text-muted mb-1" style="font-size: 0.9rem;">
+                <b>Vilhena Serviços LTDA</b><br>
+                Departamento de Engenharia e Manutenção
+            </p>
+            <p class="text-body-tertiary mb-0" style="font-size: 0.6rem;">
+                <b>Rodrigo M. Araujo</b><br>
+                Engenheiro Mecânico<br>
+                Engenheiro de Segurança do Trabalho
+            </p>
+        </div>
     </footer>
 
    <script>
    document.addEventListener('DOMContentLoaded', function() {
+       // ATENÇÃO: Verifique se esta é a URL correta da sua planilha de MEDIÇÃO.
        const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT2PRrHp-jZ7WSS7VT-dqzf1x2k7e1UlQMS1ZHlrqpgiRed9YiBlx9uYO2e-P2eKoTB-PsjH-Cfwy2Y/pub?output=csv';
+       
        const dataDisplay = document.getElementById('data-display');
        const monthFilter = document.getElementById('month-filter');
        let allValidData = [];
@@ -160,7 +186,6 @@
            monthFilter.value = 'all';
        }
 
-       // ATUALIZADO: colunas da tabela foram alteradas
        function renderTable(data) {
             if (data.length === 0) { dataDisplay.innerHTML = `<div class="alert alert-warning mt-3">Nenhum item encontrado para o filtro selecionado.</div>`; return; }
             let tableHTML = `<table class="table table-hover align-middle mb-0"><thead class="table-light"><tr><th>Item</th><th>Item Contrato</th><th>Data Conclusão</th><th class="currency">Valor</th></tr></thead><tbody>`;
