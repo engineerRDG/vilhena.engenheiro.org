@@ -3,176 +3,247 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Início - Vilhena Serviços</title>
+    <title>Dashboard Principal - Vilhena Serviços</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"> 
-    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
     <style>
-        body {
-            background-color: #f0f2f5; /* Um fundo suave para a página toda */
+        body { background-color: #f0f2f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .navbar-brand img, .footer-logo { 
+            height: 40px; 
+            width: auto; 
         }
-
-        /* Estilo para a logo no cabeçalho */
-        .navbar-brand img {
-            height: 40px; /* Altura da logo */
-            width: auto; /* Largura automática para manter a proporção */
-        }
-
-        /* Container para os cards e outras seções, com sombra e bordas arredondadas */
-        .content-container {
+        .welcome-section { text-align: center; padding: 1.5rem; background: linear-gradient(135deg, #495057, #343a40); color: white; border-radius: 8px; margin-bottom: 2rem; }
+        .welcome-section h1 { font-weight: 700; }
+        .summary-card {
             background-color: white;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        /* Estilo para a barra de navegação secundária com os botões */
-        .nav-buttons {
-            background-color: #ffffff;
-            padding: 1rem;
-            border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            margin-bottom: 2rem;
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .welcome-section {
-            text-align: center;
-            padding: 4rem 2rem;
-            background-color: #343a40;
-            color: white;
             border-radius: 8px;
-            margin-bottom: 2rem;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
         }
-
-        .welcome-section h1 {
-            font-weight: 700;
-            font-size: 2.5em;
+        .summary-card-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
         }
-        
-        .card-link {
-            text-decoration: none;
-            color: inherit;
-        }
-
-        .card-link .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .card-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            color: #0d6efd;
-        }
-
-        .card-title {
-            font-weight: 600;
-        }
+        .summary-card-header .bi { font-size: 1.5rem; }
+        .summary-card-header h5 { margin: 0; font-weight: 600; }
+        .summary-card-body { padding: 1.5rem; flex-grow: 1; }
+        .summary-card-footer { padding: 1rem 1.5rem; background-color: #f8f9fa; border-top: 1px solid #dee2e6; text-align: end; }
+        .kpi-group { display: flex; justify-content: space-around; text-align: center; margin-bottom: 1rem; }
+        .kpi-item .value { font-size: 2rem; font-weight: 700; }
+        .kpi-item .label { font-size: 0.8rem; text-transform: uppercase; color: #6c757d; }
+        .recent-list-item { font-size: 0.9rem; padding: 0.3rem 0; border-bottom: 1px solid #f0f0f0; }
+        .recent-list-item:last-child { border-bottom: none; }
+        .status-list h6 { font-size: 0.9rem; font-weight: bold; text-transform: uppercase; margin-top: 1rem; margin-bottom: 0.5rem; color: #343a40; }
+        .status-list-item { margin-bottom: 0.25rem; font-size: 0.95rem; }
+        .status-list-item .bi { vertical-align: -2px; }
+        .calendar-summary .event-item { font-size: 0.95rem; margin-bottom: 0.25rem; }
     </style>
 </head>
 <body>
-    
-    <nav class="navbar navbar-dark bg-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">
-                <img src="https://static.wixstatic.com/media/886e87_d769722dd4f34a86a70fc33591489baf~mv2.png/v1/fill/w_201,h_118,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/VILHENA-SERVI%C3%87OS_LOGO2.png" alt="Vilhena Serviços Logo">
-            </a>
-            <span class="navbar-text">
-                Atualizado em: 30/06/2025, 17:00
-            </span>
-        </div>
-    </nav>
-
-    <main class="container mt-4">
-    
-        <div class="nav-buttons">
-            <a href="index.html" class="btn btn-secondary"><i class="bi bi-house-gear-fill"></i> Início</a>
-            <a href="#" class="btn btn-primary"><i class="bi bi-tools"></i> Controle de RS</a>
-            <a href="status.html" class="btn btn-primary"><i class="bi bi-check-circle"></i> Status - Delfinopolis</a>
-            <a href="#" class="btn btn-primary"><i class="bi bi-calendar-week"></i> Cronograma de atendimento</a>
-            <a href="#" class="btn btn-primary"><i class="bi bi-box-seam"></i> Almoxarifado</a>
-            <a href="#" class="btn btn-primary"><i class="bi bi-person-lines-fill"></i> Fornecedores</a>
-        </div>
-
-        <div class="welcome-section">
-            <h1>Bem-vindo ao Painel de Controle</h1>
-        </div>
-
-        <div class="row">
-            <div class="col-lg-4 col-md-6 mb-4">
-                <a href="#" class="card-link">
-                    <div class="card text-center h-100">
-                        <div class="card-body">
-                            <i class="bi bi-tools card-icon"></i>
-                            <h5 class="card-title">Controle de RS</h5>
-                            <p class="card-text">Acompanhe as Requisições de Serviço.</p>
-                        </div>
-                    </div>
+    <div id="main-content">
+        <nav class="navbar navbar-dark bg-black">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">
+                    <img src="https://raw.githubusercontent.com/engineerRDG/vilhena.engenheiro.org/refs/heads/main/imagem/logo.png" alt="Vilhena Serviços Logo">
                 </a>
+                <div class="dropdown">
+                    <button class="btn btn-light btn-sm fw-bold" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Menu
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="rs.html">RS</a></li>
+                        <li><a class="dropdown-item" href="medicao.html">Medição</a></li>
+                        <li><a class="dropdown-item" href="status.html">Delfinópolis</a></li>
+                        <li><a class="dropdown-item" href="diario.html">Diário</a></li>
+                    </ul>
+                </div>
             </div>
-            <div class="col-lg-4 col-md-6 mb-4">
-                <a href="status.html" class="card-link">
-                    <div class="card text-center h-100">
-                        <div class="card-body">
-                            <i class="bi bi-check-circle card-icon" style="color: #198754;"></i>
-                            <h5 class="card-title">Status - Delfinopolis</h5>
-                            <p class="card-text">Visualize o status operacional das embarcações de Delfinopolis.</p>
-                        </div>
-                    </div>
-                </a>
-            </div>
-            <div class="col-lg-4 col-md-6 mb-4">
-                <a href="#" class="card-link">
-                    <div class="card text-center h-100">
-                        <div class="card-body">
-                            <i class="bi bi-calendar-week card-icon" style="color: #ffc107;"></i>
-                            <h5 class="card-title">Cronograma de Atendimento</h5>
-                            <p class="card-text">Acesse a programação de manutenções e atendimentos.</p>
-                        </div>
-                    </div>
-                </a>
-            </div>
-            <div class="col-lg-4 col-md-6 mb-4">
-                <a href="#" class="card-link">
-                    <div class="card text-center h-100">
-                        <div class="card-body">
-                            <i class="bi bi-box-seam card-icon" style="color: #dc3545;"></i>
-                            <h5 class="card-title">Almoxarifado</h5>
-                            <p class="card-text">Controle de estoque de peças e materiais.</p>
-                        </div>
-                    </div>
-                </a>
-            </div>
-            <div class="col-lg-4 col-md-6 mb-4">
-                <a href="#" class="card-link">
-                    <div class="card text-center h-100">
-                        <div class="card-body">
-                            <i class="bi bi-person-lines-fill card-icon" style="color: #0dcaf0;"></i>
-                            <h5 class="card-title">Fornecedores</h5>
-                            <p class="card-text">Gerencie a lista de fornecedores e contatos.</p>
-                        </div>
-                    </div>
-                </a>
-            </div>
-        </div>
+        </nav>
 
-    </main>
+        <main class="container mt-4">
+            <div class="welcome-section">
+                <h1>Dashboard Geral</h1>
+            </div>
 
-    <footer class="container mt-4 mb-4">
-        <p class="text-end text-muted" style="font-size: 1rem; color: gray;">
-        <b>
-Vilhena Serviços LTDA
-<br>
-</b>
-Departamento de Engenharia e Manutenção
-</p>
-    </footer>
+            <div class="row">
+                <div class="col-lg-6 mb-4">
+                    <div class="summary-card">
+                        <div class="summary-card-header text-primary"><i class="bi bi-card-list"></i><h5>Requisições de Serviço</h5></div>
+                        <div class="summary-card-body" id="rs-summary"><div class="text-center"><div class="spinner-border spinner-border-sm" role="status"></div></div></div>
+                        <div class="summary-card-footer"><a href="rs.html" class="btn btn-primary btn-sm">Ver Relatório Completo</a></div>
+                    </div>
+                </div>
 
+                <div class="col-lg-6 mb-4">
+                    <div class="summary-card">
+                        <div class="summary-card-header text-success"><i class="bi bi-cash-coin"></i><h5>Resumo de Medição</h5></div>
+                        <div class="summary-card-body" id="medicao-summary"><div class="text-center"><div class="spinner-border spinner-border-sm" role="status"></div></div></div>
+                        <div class="summary-card-footer"><a href="medicao.html" class="btn btn-success btn-sm">Ver Relatório Completo</a></div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6 mb-4">
+                    <div class="summary-card">
+                        <div class="summary-card-header text-info"><i class="bi bi-power"></i><h5>Status Operacional - Delfinópolis</h5></div>
+                        <div class="summary-card-body" id="status-summary"><div class="text-center"><div class="spinner-border spinner-border-sm" role="status"></div></div></div>
+                        <div class="summary-card-footer"><a href="status.html" class="btn btn-info btn-sm">Ver Relatório Completo</a></div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6 mb-4">
+                    <div class="summary-card">
+                        <div class="summary-card-header text-secondary"><i class="bi bi-calendar-event"></i><h5>Atividades do Dia</h5></div>
+                        <div class="summary-card-body" id="diario-summary"><div class="text-center"><div class="spinner-border spinner-border-sm" role="status"></div></div></div>
+                        <div class="summary-card-footer"><a href="diario.html" class="btn btn-secondary btn-sm">Ver Calendário Completo</a></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="container mt-4 mb-4 d-flex justify-content-between align-items-center">
+            <img src="https://d1my6w9ld2remote.cloudfront.net/medias/4/2022/1/eletrobras-logo.png" alt="Logo Eletrobras" class="footer-logo">
+            <div class="text-end">
+                <p class="text-muted mb-1" style="font-size: 0.9rem;"><b>Vilhena Serviços LTDA</b><br>Departamento de Engenharia e Manutenção</p>
+                <p class="text-body-tertiary mb-0" style="font-size: 0.6rem;"><b>Rodrigo M. Araujo</b><br>Engenheiro Mecânico<br>Engenheiro de Segurança do Trabalho</p>
+            </div>
+        </footer>
+    </div>
+
+   <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const URL_RS_MEDICAO = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT2PRrHp-jZ7WSS7VT-dqzf1x2k7e1UlQMS1ZHlrqpgiRed9YiBlx9uYO2e-P2eKoTB-PsjH-Cfwy2Y/pub?gid=0&single=true&output=csv';
+        const URL_STATUS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRLCYTZTrWAEgxvreN2OxK_baOqRlaPF0OqA1f90-I4CHahqbv6TQRXHc0YSq9XOQjqM5faahUv-drN/pub?gid=426952514&single=true&output=csv';
+        const URL_DIARIO = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTu9skDnnYmILUpQ4UvWblPFbq1D4k7Dy4FPK5k-21kgAurdYAJbxyXhbofQGUDHwSefc6w18tDOqPj/pub?gid=502983351&single=true&output=csv';
+
+        const rsSummary = document.getElementById('rs-summary');
+        const medicaoSummary = document.getElementById('medicao-summary');
+        const statusSummary = document.getElementById('status-summary');
+        const diarioSummary = document.getElementById('diario-summary');
+
+        const fetchAndParse = (url) => {
+            return new Promise((resolve, reject) => {
+                Papa.parse(url, { download: true, header: true, skipEmptyLines: true, transformHeader: h => h.trim().toLowerCase(), complete: results => resolve(results.data), error: err => reject(err) });
+            });
+        };
+
+        function renderRsSummary(data) {
+            const getCount = (statusStr) => data.filter(r => (r.status || '').toLowerCase() === statusStr).length;
+            const open = getCount('em aberto');
+            const inProgress = getCount('em andamento');
+            const completed = getCount('concluído') + getCount('concluída');
+            
+            // ATUALIZADO: Filtra apenas itens "Em Andamento" e pega os 3 mais recentes
+            const inProgressItems = data.filter(r => (r.status || '').toLowerCase() === 'em andamento');
+            const recentInProgress = inProgressItems.slice(-3).reverse();
+
+            let recentHtml = recentInProgress.map(r => `
+                <div class="recent-list-item d-flex justify-content-between">
+                    <span><strong>RS ${r.rs || ''}:</strong> ${r.serviço || 'Serviço não especificado'}</span>
+                    <span class="badge text-bg-light">${r.embarcação || ''}</span>
+                </div>
+            `).join('');
+
+            rsSummary.innerHTML = `
+                <div class="kpi-group">
+                    <div class="kpi-item"><div class="value text-warning">${open}</div><div class="label">Em Aberto</div></div>
+                    <div class="kpi-item"><div class="value text-info">${inProgress}</div><div class="label">Em Andamento</div></div>
+                    <div class="kpi-item"><div class="value text-success">${completed}</div><div class="label">Concluído</div></div>
+                </div>
+                <hr>
+                <h6 class="mb-2">Requisições em Andamento:</h6>
+                <div>${recentHtml || '<p class="text-muted small">Nenhuma requisição em andamento no momento.</p>'}</div>
+            `;
+        }
+
+        function renderMedicaoSummary(data) {
+            const formatCurrency = (val) => val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            const parseDate = (d) => d ? new Date(d.trim().split('/').reverse().join('-') + 'T00:00:00') : null;
+            const now = new Date();
+            const currentMonthData = data.filter(item => {
+                const conclusionDate = parseDate(item.conclusão);
+                return conclusionDate && conclusionDate.getMonth() === now.getMonth() && conclusionDate.getFullYear() === now.getFullYear();
+            });
+            const totalValueThisMonth = currentMonthData.reduce((sum, item) => {
+                const value = parseFloat((item.valor || '0').replace('R$', '').trim().replace(/\./g, '').replace(',', '.'));
+                return sum + (isNaN(value) ? 0 : value);
+            }, 0);
+            medicaoSummary.innerHTML = `<div class="kpi-group"><div class="kpi-item"><div class="value text-success">${formatCurrency(totalValueThisMonth)}</div><div class="label">Medido no Mês Atual</div></div><div class="kpi-item"><div class="value text-primary">${currentMonthData.length}</div><div class="label">Itens Medidos no Mês</div></div></div><hr><p class="text-muted text-center small">Resumo de itens com data de conclusão no mês corrente.</p>`;
+        }
+        
+        function renderStatusSummary(data) {
+             const operating = data.filter(r => (r.status || '').toLowerCase() === 'operando');
+             const available = data.filter(r => (r.status || '').toLowerCase() === 'disponivel');
+             const maintenance = data.filter(r => (r.status || '').toLowerCase() === 'manutencao');
+
+             const createList = (items, colorClass) => {
+                 if (items.length === 0) return '<p class="text-muted small">Nenhuma.</p>';
+                 return items.map(item => `<div class="status-list-item"><i class="bi bi-circle-fill ${colorClass} me-2"></i>${item.embarcação}</div>`).join('');
+             };
+
+             statusSummary.innerHTML = `
+                <div class="status-list">
+                    <h6 class="text-success">OPERANDO (${operating.length})</h6>
+                    ${createList(operating, 'text-success')}
+                    <h6 class="text-info mt-3">DISPONÍVEL (${available.length})</h6>
+                    ${createList(available, 'text-info')}
+                    <h6 class="text-danger mt-3">MANUTENÇÃO (${maintenance.length})</h6>
+                    ${createList(maintenance, 'text-danger')}
+                </div>
+             `;
+        }
+        
+        function renderDiarioSummary(data) {
+            const today = new Date();
+            const formatDateKey = (date) => `${date.getFullYear()}-${(date.getMonth() + 1)}-${date.getDate()}`;
+            
+            // Ajuste para o dia atual - 15/08/2025
+            const currentDate = new Date('2025-08-15T12:00:00');
+            
+            const eventsToday = data.filter(e => e.date === formatDateKey(currentDate));
+
+            const eventsTodayHtml = eventsToday.map(e => `<div class="event-item"><i class="bi bi-check-circle-fill text-primary me-2"></i>${e.title}</div>`).join('') || '<div class="text-muted small">Nenhuma atividade agendada para hoje.</div>';
+            
+            diarioSummary.innerHTML = `
+                <div class="calendar-summary">
+                    ${eventsTodayHtml}
+                </div>
+            `;
+        }
+        
+        async function loadAllData() {
+            try {
+                const [rsData, statusData, diarioData] = await Promise.all([
+                    fetchAndParse(URL_RS_MEDICAO),
+                    fetchAndParse(URL_STATUS),
+                    fetchAndParse(URL_DIARIO)
+                ]);
+
+                if (rsData) { renderRsSummary(rsData); renderMedicaoSummary(rsData); }
+                if (statusData) renderStatusSummary(statusData);
+                if (diarioData) {
+                    const parsedDiario = diarioData.map(item => ({ date: item.date, title: item.title }));
+                    renderDiarioSummary(parsedDiario);
+                }
+
+            } catch (error) {
+                console.error("Falha ao carregar painéis:", error);
+                const errorHtml = `<div class="alert alert-danger p-2 small">Erro ao carregar dados.</div>`;
+                rsSummary.innerHTML = errorHtml; medicaoSummary.innerHTML = errorHtml;
+                statusSummary.innerHTML = errorHtml; diarioSummary.innerHTML = errorHtml;
+            }
+        }
+        
+        loadAllData();
+        setInterval(loadAllData, 60000);
+    });
+   </script>
 </body>
 </html>
