@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Materiais Utilizados por RS - Vilhena Serviços</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <style>
+        body { background-color: #f0f2f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .navbar-brand img, .footer-logo { 
+            height: 40px; 
+            width: auto; 
+        }
+        .content-container { background-color: white; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); border-radius: 8px; padding: 2rem; margin-bottom: 2rem; }
+        .welcome-section { text-align: center; padding: 1.5rem; background: linear-gradient(135deg, #495057, #343a40); color: white; border-radius: 8px; margin-bottom: 2rem; }
+        .welcome-section h1 { font-weight: 700; }
+        .table-hover tbody tr:hover { background-color: rgba(0, 0, 0, 0.05); }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-dark bg-black">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <img src="https://raw.githubusercontent.com/engineerRDG/vilhena.engenheiro.org/refs/heads/main/imagem/logo.png" alt="Vilhena Serviços Logo">
+            </a>
+            <div class="dropdown">
+                <button class="btn btn-light btn-sm fw-bold" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Menu
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="rs.html">RS</a></li>
+                    <li><a class="dropdown-item" href="uso.html">Uso de Materiais</a></li>
+                    <li><a class="dropdown-item" href="medicao.html">Medição</a></li>
+                    <li><a class="dropdown-item" href="status.html">Delfinópolis</a></li>
+                    <li><a class="dropdown-item" href="diario.html">Diário</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mt-4">
+        <div class="welcome-section">
+            <h1>Materiais utilizados por RS</h1>
+        </div>
+
+        <div class="content-container">
+            <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+                 <h4 class="mb-0">Histórico</h4>
+                <div class="input-group input-group-sm" style="width: auto;">
+                    <span class="input-group-text" id="basic-addon1">RS</span>
+                    <input type="search" id="search-input" class="form-control" placeholder="Digite o nº da RS..." style="max-width: 200px;">
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>RS</th>
+                            <th>Material Utilizado</th>
+                            <th>Quantidade</th>
+                            <th>Data da Saída</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usage-table-body">
+                       <tr><td colspan="4" class="text-center p-5">Digite o número de uma RS para consultar os materiais.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <footer class="container mt-4 mb-4 d-flex justify-content-between align-items-center">
+        <img src="https://raw.githubusercontent.com/engineerRDG/vilhena.engenheiro.org/refs/heads/main/imagem/eletrobras.png" alt="Logo Eletrobras" class="footer-logo">
+        <div class="text-end">
+            <p class="text-muted mb-1" style="font-size: 0.9rem;">
+                <b>Vilhena Serviços LTDA</b><br>
+                Departamento de Engenharia e Manutenção
+            </p>
+            <p class="text-body-tertiary mb-0" style="font-size: 0.6rem;">
+                <b>Rodrigo M. Araujo</b><br>
+                Engenheiro Mecânico<br>
+                Engenheiro de Segurança do Trabalho
+            </p>
+        </div>
+    </footer>
+
+   <script>
+   document.addEventListener('DOMContentLoaded', function() {
+       // !!! SUBSTITUA PELA URL CSV DA SUA PLANILHA "uso" !!!
+       const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-EzfpINGaWJduqHgUQwgjK2hzakenB8-zIFSO7eqPtAoZzSin9DV0eyxg9_wEPaWE79lYxiGMQ_9b/pub?gid=1132804567&single=true&output=csv';
+       
+       const usageTableBody = document.getElementById('usage-table-body');
+       const searchInput = document.getElementById('search-input');
+       let allUsageData = [];
+
+       function renderTable(data) {
+           usageTableBody.innerHTML = '';
+           if (data.length === 0) {
+               usageTableBody.innerHTML = `<tr><td colspan="4" class="text-center">Nenhum material encontrado para esta RS.</td></tr>`;
+               return;
+           }
+           data.forEach(item => {
+               const row = document.createElement('tr');
+               row.innerHTML = `
+                   <td>${item.rs || ''}</td>
+                   <td>${item.material_utilizado || ''}</td>
+                   <td>${item.quantidade || ''}</td>
+                   <td>${item.data_saida || ''}</td>
+               `;
+               usageTableBody.appendChild(row);
+           });
+       }
+
+       function applyFilter() {
+           const searchTerm = searchInput.value.trim();
+
+           if (!searchTerm) {
+               usageTableBody.innerHTML = `<tr><td colspan="4" class="text-center p-5">Digite o número de uma RS para consultar os materiais.</td></tr>`;
+               return;
+           }
+           
+           const filteredData = allUsageData.filter(item => {
+               const rs = (item.rs || '').toString();
+               return rs === searchTerm;
+           });
+           
+           renderTable(filteredData);
+       }
+
+       function fetchData() {
+           usageTableBody.innerHTML = `<tr><td colspan="4" class="text-center p-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Carregando...</span></div></td></tr>`;
+           Papa.parse(GOOGLE_SHEET_CSV_URL, {
+               download: true,
+               header: true,
+               skipEmptyLines: true,
+               transformHeader: h => h.trim().toLowerCase().replace(/ /g, '_'), // Transforma "material utilizado" em "material_utilizado"
+               complete: function(results) {
+                   allUsageData = results.data;
+                   applyFilter(); // Chama o filtro após carregar os dados
+               },
+               error: function(err) {
+                   console.error('Erro:', err);
+                   usageTableBody.innerHTML = `<tr><td colspan="4" class="text-center text-danger"><b>Falha ao carregar dados da planilha. Verifique o link.</b></td></tr>`;
+               }
+           });
+       }
+
+       searchInput.addEventListener('input', applyFilter);
+       
+       // Inicia com a busca dos dados da planilha
+       fetchData();
+   });
+   </script>
+</body>
+</html>
