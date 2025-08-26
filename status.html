@@ -7,150 +7,63 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
     <style>
-        body { background-color: #f8f9fa; color: #343a40; }
-        .navbar-brand img, .footer-logo { height: 40px; width: auto; }
-        .page-title { font-weight: 700; color: #343a40; }
-        .status-card {
-            border: 1px solid #dee2e6; border-left-width: 5px; border-radius: .35rem;
-            box-shadow: 0 .15rem 1.75rem 0 rgba(58,59,69,.15); transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-            height: 100%; display: flex; flex-direction: column; background-color: #ffffff;
-        }
-        .status-card:hover { transform: translateY(-5px); box-shadow: 0 .5rem 1rem rgba(0,0,0,.15); }
-        .status-card .card-body { padding: 1.5rem; display: flex; flex-direction: column; flex-grow: 1; }
-        .status-content { text-align: center; flex-grow: 1; padding-bottom: 1rem; border-bottom: 1px solid rgba(0, 0, 0, 0.1); }
-        .status-title { font-weight: 700; font-size: 1.1rem; text-transform: uppercase; color: #343a40; margin-bottom: 0.5rem; }
-        .status-text { font-size: 1.6rem; font-weight: 700; margin: 0.5rem 0; }
-        .status-condition { font-size: 1.1rem; font-weight: 500; color: #6c757d; margin-bottom: 0.5rem; }
-        .status-detail { font-size: 0.95rem; color: #6c757d; min-height: 24px; }
-        .status-timeline { margin-top: 1rem; padding-top: 1rem; font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center; width: 100%; }
-        .timeline-item { display: flex; align-items: center; gap: 0.5rem; }
-        .status-operando { border-left-color: #28a745; }
-        .status-disponivel { border-left-color: #17a2b8; }
-        .status-manutencao { border-left-color: #dc3545; }
-        .status-paralisada { border-left-color: #6c757d; }
-        .loading-spinner { display: none; text-align: center; padding: 2rem; }
-        .loading-spinner.active { display: block; }
+        body { background-color: #f8f9fa; color: #343a40; } .navbar-brand img, .footer-logo { height: 40px; width: auto; } .page-title { font-weight: 700; color: #343a40; } .status-card { border: 1px solid #dee2e6; border-left-width: 5px; border-radius: .35rem; box-shadow: 0 .15rem 1.75rem 0 rgba(58,59,69,.15); transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; height: 100%; display: flex; flex-direction: column; background-color: #ffffff; } .status-card:hover { transform: translateY(-5px); box-shadow: 0 .5rem 1rem rgba(0,0,0,.15); } .status-card .card-body { padding: 1.5rem; display: flex; flex-direction: column; flex-grow: 1; } .status-content { text-align: center; flex-grow: 1; padding-bottom: 1rem; border-bottom: 1px solid rgba(0, 0, 0, 0.1); } .status-title { font-weight: 700; font-size: 1.1rem; text-transform: uppercase; color: #343a40; margin-bottom: 0.5rem; } .status-text { font-size: 1.6rem; font-weight: 700; margin: 0.5rem 0; } .status-condition { font-size: 1.1rem; font-weight: 500; color: #6c757d; margin-bottom: 0.5rem; } .status-detail { font-size: 0.95rem; color: #6c757d; min-height: 24px; } .status-timeline { margin-top: 1rem; padding-top: 1rem; font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center; width: 100%; } .timeline-item { display: flex; align-items: center; gap: 0.5rem; } .status-operando { border-left-color: #28a745; } .status-disponivel { border-left-color: #17a2b8; } .status-manutencao { border-left-color: #dc3545; } .status-paralisada { border-left-color: #6c757d; } .loading-spinner { display: none; text-align: center; padding: 2rem; } .loading-spinner.active { display: block; }
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-dark bg-black">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">
-                <img src="https://raw.githubusercontent.com/engineerRDG/vilhena.engenheiro.org/refs/heads/main/imagem/logo.png" alt="Vilhena Serviços Logo">
-            </a>
-        </div>
-    </nav>
-
-    <main class="container mt-4">
-        <header class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom">
-            <h1 class="h3 page-title mb-0">OPERAÇÃO CÁSSIA - DELFINÓPOLIS</h1>
-            <div id="sheet-update-info" class="text-muted text-end"></div>
-        </header>
-
-        <div class="loading-spinner" id="loading-spinner">
-            <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Carregando dados...</span></div>
-            <p class="mt-3 text-muted">Buscando informações da planilha...</p>
-        </div>
-
-        <div id="status-container" class="row g-4"></div>
-    </main>
-
-    <footer class="container mt-4 mb-4 d-flex justify-content-between align-items-center">
-        <img src="https://raw.githubusercontent.com/engineerRDG/vilhena.engenheiro.org/refs/heads/main/imagem/eletrobras.png" alt="Logo Eletrobras" class="footer-logo">
-        <div class="text-end">
-            <p class="text-muted mb-1" style="font-size: 0.9rem;">
-                <b>Vilhena Serviços LTDA</b><br>
-                Departamento de Engenharia e Manutenção
-            </p>
-            <p class="text-body-tertiary mb-0" style="font-size: 0.6rem;">
-                <b>Rodrigo M. Araujo</b><br>
-                Engenheiro Mecânico<br>
-                Engenheiro de Segurança do Trabalho
-            </p>
-        </div>
-    </footer>
-    
+    <nav class="navbar navbar-dark bg-black"><div class="container-fluid"><a class="navbar-brand" href="#"><img src="https://raw.githubusercontent.com/engineerRDG/vilhena.engenheiro.org/refs/heads/main/imagem/logo.png" alt="Vilhena Serviços Logo"></a><div class="dropdown"><button class="btn btn-light btn-sm fw-bold" type="button" data-bs-toggle="dropdown" aria-expanded="false">Menu</button><ul class="dropdown-menu dropdown-menu-end"><li><a class="dropdown-item" href="rs.html">RS</a></li><li><a class="dropdown-item" href="medicao.html">Medição</a></li><li><a class="dropdown-item" href="status.html">Delfinópolis</a></li><li><a class="dropdown-item" href="diario.html">Diário</a></li></ul></div></div></nav>
+    <main class="container mt-4"><header class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-2 border-bottom"><h1 class="h3 page-title mb-0">OPERAÇÃO CÁSSIA - DELFINÓPOLIS</h1><div id="sheet-update-info" class="text-muted text-end"></div></header><div class="loading-spinner" id="loading-spinner"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Carregando dados...</span></div><p class="mt-3 text-muted">Buscando informações da planilha...</p></div><div id="status-container" class="row g-4"></div></main>
+    <footer class="container mt-4 mb-4 d-flex justify-content-between align-items-center"><img src="https://raw.githubusercontent.com/engineerRDG/vilhena.engenheiro.org/refs/heads/main/imagem/eletrobras.png" alt="Logo Eletrobras" class="footer-logo"><div class="text-end"><p class="text-muted mb-1" style="font-size: 0.9rem;"><b>Vilhena Serviços LTDA</b><br>Departamento de Engenharia e Manutenção</p><p class="text-body-tertiary mb-0" style="font-size: 0.6rem;"><b>Rodrigo M. Araujo</b><br>Engenheiro Mecânico<br>Engenheiro de Segurança do Trabalho</p></div></footer>
     <script>
-        const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRLCYTZTrWAEgxvreN2OxK_baOqRlaPF0OqA1f90-I4CHahqbv6TQRXHc0YSq9XOQjqM5faahUv-drN/pub?gid=426952514&single=true&output=csv';
-
-        const elements = {
-            statusContainer: document.getElementById('status-container'),
-            sheetUpdateInfo: document.getElementById('sheet-update-info'),
-            loadingSpinner: document.getElementById('loading-spinner')
-        };
-
-        function normalizeKey(str) {
-            if (!str) return '';
-            return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().replace(/\s+/g, '_');
-        }
-
-        function parseCsvLine(line) {
-            const values = []; let current = ''; let inQuotes = false;
-            for (const char of line) {
-                if (char === '"') inQuotes = !inQuotes;
-                else if (char === ',' && !inQuotes) { values.push(current.trim().replace(/"/g, '')); current = ''; }
-                else current += char;
-            }
-            values.push(current.trim().replace(/"/g, '')); return values;
-        }
-
+        const apiUrl = 'https://script.google.com/macros/s/AKfycbxiLSh45xdBYElGcFKesxv14_9bbGD3LnB_N2n8B3L4xPmX87IABWPvWQehaSEnNOM/exec';
+        const elements = { statusContainer: document.getElementById('status-container'), sheetUpdateInfo: document.getElementById('sheet-update-info'), loadingSpinner: document.getElementById('loading-spinner') };
         async function fetchData() {
             elements.loadingSpinner.classList.add('active');
+            elements.statusContainer.innerHTML = '';
             try {
-                const response = await fetch(`${sheetUrl}&t=${new Date().getTime()}`);
-                if (!response.ok) throw new Error('Não foi possível acessar a planilha.');
-                const csvText = await response.text();
-                const lines = csvText.trim().split('\n');
-                const headers = lines.shift().split(',').map(h => normalizeKey(h.trim()));
-                const data = lines.map(line => {
-                    const values = parseCsvLine(line);
-                    const row = {};
-                    headers.forEach((header, index) => { row[header] = values[index] || ''; });
-                    return row;
-                });
+                const response = await fetch(`${apiUrl}?t=${new Date().getTime()}`);
+                if (!response.ok) { throw new Error('Falha na rede ou na API. Código: ' + response.status); }
+                const data = await response.json();
+                if (data.error) { throw new Error(data.error); }
+                if (data[0] && data[0]['ULTIMA_ATUALIZACAO']) { 
+                    elements.sheetUpdateInfo.innerHTML = `<small class="d-block">Última atualização da planilha:</small><strong>${data[0]['ULTIMA_ATUALIZACAO']}</strong>`; 
+                }
                 updateStatusCards(data);
             } catch (error) {
-                console.error("Erro:", error);
+                console.error("Erro ao buscar dados:", error);
                 elements.statusContainer.innerHTML = `<div class="col-12"><div class="alert alert-danger" role="alert"><strong>Erro:</strong> ${error.message}</div></div>`;
             } finally {
                 elements.loadingSpinner.classList.remove('active');
             }
         }
-
         function updateStatusCards(data) {
-            if (!data || data.length === 0) { elements.statusContainer.innerHTML = `<div class="col-12"><div class="alert alert-warning" role="alert">Nenhum dado encontrado.</div></div>`; return; }
-            if (data[0]['ULTIMA_ATUALIZACAO']) { elements.sheetUpdateInfo.innerHTML = `<small class="d-block">Última atualização:</small><strong>${data[0]['ULTIMA_ATUALIZACAO']}</strong>`; }
-
-            data.sort((a, b) => {
-                const statusOrder = { 'OPERANDO': 1, 'DISPONIVEL': 2, 'MANUTENCAO': 3 };
-                const priorityA = statusOrder[a.STATUS.toUpperCase()] || 4;
-                const priorityB = statusOrder[b.STATUS.toUpperCase()] || 4;
-                if (priorityA !== priorityB) return priorityA - priorityB;
-                return (a.EMBARCACAO || '').localeCompare(b.EMBARCACAO || '');
+            if (!data || data.length === 0) { 
+                elements.statusContainer.innerHTML = `<div class="col-12"><div class="alert alert-warning" role="alert">Nenhum dado encontrado na planilha.</div></div>`; 
+                return; 
+            }
+            data.sort((a, b) => { 
+                const statusOrder = { 'OPERANDO': 1, 'DISPONIVEL': 2, 'MANUTENCAO': 3 }; 
+                const priorityA = statusOrder[a.STATUS] || 4; 
+                const priorityB = statusOrder[b.STATUS] || 4; 
+                if (priorityA !== priorityB) return priorityA - priorityB; 
+                return (a.EMBARCACAO || '').localeCompare(b.EMBARCACAO || ''); 
             });
-
-            const cardsHtml = data.map(item => {
-                const status = (item.STATUS || '').trim().toUpperCase();
-                let statusClass = 'status-paralisada';
-                if (status === 'OPERANDO') statusClass = 'status-operando';
-                else if (status === 'DISPONIVEL') statusClass = 'status-disponivel';
-                else if (status === 'MANUTENCAO') statusClass = 'status-manutencao';
-
+            const cardsHtml = data.map(item => { 
+                const status = item.STATUS || 'PARALISADA'; 
+                let statusClass = `status-${status.toLowerCase()}`; 
                 return `
                     <div class="col-xl-6 col-md-12 mb-4">
                         <div class="card status-card ${statusClass}">
                             <div class="card-body">
                                 <div class="status-content">
-                                    <div class="status-title">${item.EMBARCACAO || ''}</div>
+                                    <div class="status-title">${item.EMBARCACAO || 'Sem Nome'}</div>
                                     <div class="status-text">${item.STATUS || 'N/A'}</div>
                                     <div class="status-condition">${item.CONDICAO || ''}</div>
                                     <div class="status-detail">${item.MOTIVO || ''}</div>
                                 </div>
                                 <div class="status-timeline">
-                                    <div class="timeline-item"><i class="bi bi-clock"></i><span><strong>Início:</strong> ${item.INICIO || 'N/A'}</span></div>
-                                    <div class="timeline-item"><i class="bi bi-calendar-check"></i><span><strong>Previsão:</strong> ${item.PREVISAO || 'N/A'}</span></div>
+                                    ${item.PREVISAO ? `<div class="timeline-item"><i class="bi bi-calendar-check"></i><span><strong>Previsão:</strong> ${item.PREVISAO}</span></div>` : ''}
                                 </div>
                             </div>
                         </div>
@@ -158,7 +71,10 @@
             }).join('');
             elements.statusContainer.innerHTML = cardsHtml;
         }
-        document.addEventListener('DOMContentLoaded', () => { fetchData(); setInterval(fetchData, 60000); });
+        document.addEventListener('DOMContentLoaded', () => { 
+            fetchData(); 
+            setInterval(fetchData, 60000); 
+        });
     </script>
 </body>
 </html>
