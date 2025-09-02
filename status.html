@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <style>
-        body { background-color: #f8f9fa; color: #343a40; } .navbar-brand img, .footer-logo { height: 40px; width: auto; } .page-title { font-weight: 700; color: #343a40; } .status-card { border: 1px solid #dee2e6; border-left-width: 5px; border-radius: .35rem; box-shadow: 0 .15rem 1.75rem 0 rgba(58,59,69,.15); transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; height: 100%; display: flex; flex-direction: column; background-color: #ffffff; } .status-card:hover { transform: translateY(-5px); box-shadow: 0 .5rem 1rem rgba(0,0,0,.15); } .status-card .card-body { padding: 1.5rem; display: flex; flex-direction: column; flex-grow: 1; } .status-content { text-align: center; flex-grow: 1; padding-bottom: 1rem; border-bottom: 1px solid rgba(0, 0, 0, 0.1); } .status-title { font-weight: 700; font-size: 1.1rem; text-transform: uppercase; color: #343a40; margin-bottom: 0.5rem; } .status-text { font-size: 1.6rem; font-weight: 700; margin: 0.5rem 0; } .status-condition { font-size: 1.1rem; font-weight: 500; color: #6c757d; margin-bottom: 0.5rem; } .status-detail { font-size: 0.95rem; color: #6c757d; min-height: 24px; } .status-timeline { margin-top: 1rem; padding-top: 1rem; font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center; width: 100%; } .timeline-item { display: flex; align-items: center; gap: 0.5rem; } .status-operando { border-left-color: #28a745; } .status-disponivel { border-left-color: #17a2b8; } .status-manutencao { border-left-color: #dc3545; } .status-paralisada { border-left-color: #6c757d; } .loading-spinner { display: none; text-align: center; padding: 2rem; } .loading-spinner.active { display: block; }
+        body { background-color: #f8f9fa; color: #343a40; } .navbar-brand img, .footer-logo { height: 40px; width: auto; } .page-title { font-weight: 700; color: #343a40; } .status-card { border: 1px solid #dee2e6; border-left-width: 5px; border-radius: .35rem; box-shadow: 0 .15rem 1.75rem 0 rgba(58,59,69,.15); transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; display: flex; flex-direction: column; background-color: #ffffff; } .status-card:hover { transform: translateY(-5px); box-shadow: 0 .5rem 1rem rgba(0,0,0,.15); } .status-card .card-body { padding: 1.5rem; display: flex; flex-direction: column; flex-grow: 1; justify-content: center; } .status-content { text-align: center; } .status-title { font-weight: 700; font-size: 1.1rem; text-transform: uppercase; color: #343a40; margin-bottom: 0.5rem; } .status-text { font-size: 1.6rem; font-weight: 700; margin: 0.5rem 0; } .status-condition { font-size: 1.1rem; font-weight: 500; color: #6c757d; margin-bottom: 0.5rem; } .status-timeline { border-top: 1px solid rgba(0,0,0,0.1); margin-top: 1rem; padding-top: 1rem; font-size: 0.9rem; display: flex; justify-content: center; align-items: center; width: 100%; } .timeline-item { display: flex; align-items: center; gap: 0.5rem; } .status-operando { border-left-color: #28a745; } .status-disponivel { border-left-color: #17a2b8; } .status-manutencao { border-left-color: #dc3545; } .status-paralisada { border-left-color: #6c757d; } .loading-spinner { display: none; text-align: center; padding: 2rem; } .loading-spinner.active { display: block; }
     </style>
 </head>
 <body>
@@ -42,29 +42,54 @@
                 elements.statusContainer.innerHTML = `<div class="col-12"><div class="alert alert-warning" role="alert">Nenhum dado encontrado na planilha.</div></div>`; 
                 return; 
             }
+            
+            data.forEach(item => {
+                if (item.STATUS === 'MANUTENCAO') {
+                    item.STATUS = 'MANUTENÇÃO';
+                }
+                if (item.STATUS === 'DISPONIVEL') {
+                    item.STATUS = 'DISPONÍVEL';
+                }
+            });
+
             data.sort((a, b) => { 
-                const statusOrder = { 'OPERANDO': 1, 'DISPONIVEL': 2, 'MANUTENCAO': 3 }; 
+                const statusOrder = { 'OPERANDO': 1, 'DISPONÍVEL': 2, 'MANUTENÇÃO': 3 }; 
                 const priorityA = statusOrder[a.STATUS] || 4; 
                 const priorityB = statusOrder[b.STATUS] || 4; 
                 if (priorityA !== priorityB) return priorityA - priorityB; 
                 return (a.EMBARCACAO || '').localeCompare(b.EMBARCACAO || ''); 
             });
+
             const cardsHtml = data.map(item => { 
-                const status = item.STATUS || 'PARALISADA'; 
-                let statusClass = `status-${status.toLowerCase()}`; 
+                const statusForDisplay = item.STATUS || 'PARALISADA';
+                const statusForClass = statusForDisplay.replace('ÇÃO', 'CAO').replace('Í', 'I');
+                let statusClass = `status-${statusForClass.toLowerCase()}`; 
+                
+                let previsaoHtml = '';
+                if (statusForDisplay === 'MANUTENÇÃO') {
+                    const previsaoContent = item.PREVISAO || '05/09/2025';
+                    previsaoHtml = `
+                        <div class="status-timeline">
+                            <div class="timeline-item">
+                                <i class="bi bi-calendar-check"></i>
+                                <span><strong>Previsão:</strong> ${previsaoContent}</span>
+                            </div>
+                        </div>`;
+                }
+                
+                // Cria a div de condição apenas se houver texto para ela.
+                const conditionHtml = item.CONDICAO ? `<div class="status-condition">${item.CONDICAO}</div>` : '';
+
                 return `
                     <div class="col-xl-6 col-md-12 mb-4">
                         <div class="card status-card ${statusClass}">
                             <div class="card-body">
                                 <div class="status-content">
                                     <div class="status-title">${item.EMBARCACAO || 'Sem Nome'}</div>
-                                    <div class="status-text">${item.STATUS || 'N/A'}</div>
-                                    <div class="status-condition">${item.CONDICAO || ''}</div>
-                                    <div class="status-detail">${item.MOTIVO || ''}</div>
+                                    <div class="status-text">${statusForDisplay}</div>
+                                    ${conditionHtml}
                                 </div>
-                                <div class="status-timeline">
-                                    ${item.PREVISAO ? `<div class="timeline-item"><i class="bi bi-calendar-check"></i><span><strong>Previsão:</strong> ${item.PREVISAO}</span></div>` : ''}
-                                </div>
+                                ${previsaoHtml}
                             </div>
                         </div>
                     </div>`;
