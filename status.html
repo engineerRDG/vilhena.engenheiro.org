@@ -27,7 +27,7 @@
                 const data = await response.json();
                 if (data.error) { throw new Error(data.error); }
                 if (data[0] && data[0]['ULTIMA_ATUALIZACAO']) { 
-                    elements.sheetUpdateInfo.innerHTML = `<small class="d-block">Última atualização da planilha:</small><strong>${data[0]['ULTIMA_ATUALIZACAO']}</strong>`; 
+                    elements.sheetUpdateInfo.innerHTML = `<small class="d-block">Última atualização</small><strong>${data[0]['ULTIMA_ATUALIZACAO']}</strong>`; 
                 }
                 updateStatusCards(data);
             } catch (error) {
