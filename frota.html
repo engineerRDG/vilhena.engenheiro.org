@@ -6,10 +6,8 @@
     <title>Frota - Vilhena Serviços</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
     <style>
         body { background-color: #f8f9fa; color: #343a40; }
@@ -26,10 +24,7 @@
         .reservoir-title-mascarenhas { border-bottom-color: #0d6efd; color: #0d6efd; }
         .vessel-card-mascarenhas { border-left-color: #0d6efd; }
         .vessel-card-mascarenhas:hover { box-shadow: 0 .5rem 1rem rgba(13, 110, 253, .25); }
-        /* NOVO: Mapa com altura reduzida (60% de 400px = 160px) */
-        #mapModalContainer { height: 160px; width: 100%; border-radius: .25rem; background: #e0e0e0; } 
-        /* NOVO: Estilo para a imagem no modal */
-        .modal-vessel-image { max-width: 100%; height: auto; border-radius: .25rem; margin-top: 1rem; margin-bottom: 1.5rem; object-fit: cover; }
+        .modal-vessel-image { max-width: 100%; height: auto; max-height: 220px; border-radius: .25rem; object-fit: cover; margin-bottom: 1.5rem; }
     </style>
 </head>
 <body>
@@ -38,7 +33,7 @@
     </nav>
 
     <main class="container mt-4">
-        <header class="d-flex flex-wrap justify-content-between align-items_center mb-4 pb-2 border-bottom">
+        <header class="text-center mb-4 pb-2 border-bottom">
             <h1 class="h3 page-title mb-0">FROTA</h1>
         </header>
 
@@ -69,12 +64,13 @@
                     <h5 class="modal-title" id="vesselDetailsModalLabel">Detalhes da Embarcação</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
-                    <h4 id="modalVesselName" class="text-center mb-1 text-primary"></h4>
-                    <p id="modalVesselCity" class="text-center text-muted"></p>
-                    <img id="modalVesselImage" src="" alt="Imagem da Embarcação" class="modal-vessel-image d-block mx-auto">
-
-                    <div class="details-section">
+                <div class="modal-body text-center">
+                    <h4 id="modalVesselName" class="mb-1 text-primary"></h4>
+                    <p id="modalVesselCity" class="text-muted"></p>
+                    
+                    <img id="modalVesselImage" src="" alt="Imagem da Embarcação" class="modal-vessel-image">
+                    
+                    <div class="details-section text-start">
                         <h6>Componentes</h6>
                         <ul>
                             <li><span><i class="bi bi-gear-fill"></i> Motor Bombordo</span> <strong id="modalMotorBE">N/A</strong></li>
@@ -83,71 +79,54 @@
                             <li><span><i class="bi bi-arrow-repeat"></i> Reversor Boreste</span> <strong id="modalReversorBB">N/A</strong></li>
                         </ul>
                     </div>
-                    <div class="details-section">
-                        <h6>Localização</h6>
-                        <div id="mapModalContainer" style="height: 400px; width: 100%;"></div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
                 </div>
             </div>
         </div>
     </div>
     
     <script>
-        // NOVO: Adicionado campo 'imagemUrl' para cada embarcação
         const dadosDaFrota = [
-            { "embarcação": "Águas Verdes", "cidade": "Carmo do Rio Claro", "motor bb": "OK", "reversor bb": "OK", "motor be": "OK", "reversor be": "OK", "imagemUrl": "https://i.imgur.com/example-aguas-verdes.jpg" }, 
-            { "embarcação": "Araúna", "cidade": "Fama", "motor bb": "Revisar", "reversor bb": "OK", "motor be": "OK", "reversor be": "OK", "imagemUrl": "https://i.imgur.com/example-arauna.jpg" },
-            { "embarcação": "Canastra", "cidade": "Delfinópolis", "motor bb": "OK", "reversor bb": "OK", "motor be": "OK", "reversor be": "OK", "imagemUrl": "https://i.imgur.com/example-canastra.jpg" },
-            { "embarcação": "Delfinópolis", "cidade": "São José da Barra", "motor bb": "OK", "reversor bb": "OK", "motor be": "OK", "reversor be": "OK", "imagemUrl": "https://i.imgur.com/example-delfinopolis.jpg" },
-            { "embarcação": "Delfinópolis I", "cidade": "Delfinópolis", "motor bb": "OK", "reversor bb": "OK", "motor be": "OK", "reversor be": "OK", "imagemUrl": "https://i.imgur.com/example-delfinopolis1.jpg" },
-            { "embarcação": "Fama", "cidade": "Alfenas", "motor bb": "OK", "reversor bb": "Falha", "motor be": "OK", "reversor be": "OK", "imagemUrl": "https://i.imgur.com/example-fama.jpg" },
-            { "embarcação": "Fernandes", "cidade": "Cristais", "motor bb": "OK", "reversor bb": "OK", "motor be": "OK", "reversor be": "OK", "imagemUrl": "https://i.imgur.com/example-fernandes.jpg" },
-            { "embarcação": "Guapé", "cidade": "Guapé", "motor bb": "OK", "reversor bb": "OK", "motor be": "OK", "reversor be": "OK", "imagemUrl": "https://i.imgur.com/example-guape.jpg" },
-            { "embarcação": "Harmonia", "cidade": "Guapé", "motor bb": "OK", "reversor bb": "OK", "motor be": "OK", "reversor be": "OK", "imagemUrl": "https://i.imgur.com/example-harmonia.jpg" },
-            { "embarcação": "Itapiché", "cidade": "Itapiché", "motor bb": "OK", "reversor bb": "OK", "motor be": "OK", "reversor be": "OK", "imagemUrl": "https://i.imgur.com/example-itapiche.jpg" },
-            { "embarcação": "Nossa Senhora dos Navegantes VII", "cidade": "Delfinópolis", "motor bb": "OK", "reversor bb": "OK", "motor be": "OK", "reversor be": "OK", "imagemUrl": "https://i.imgur.com/example-nsn7.jpg" },
-            { "embarcação": "Nossa Senhora dos Navegantes X", "cidade": "Delfinópolis", "motor bb": "OK", "reversor bb": "OK", "motor be": "OK", "reversor be": "OK", "imagemUrl": "https://i.imgur.com/example-nsn10.jpg" },
-            { "embarcação": "Pontalete", "cidade": "Três Pontas", "motor bb": "OK", "reversor bb": "OK", "motor be": "OK", "reversor be": "OK", "imagemUrl": "https://i.imgur.com/example-pontalete.jpg" },
-            { "embarcação": "Rio Grande 2005", "cidade": "Delfinópolis", "motor bb": "Revisar", "reversor bb": "Revisar", "motor be": "OK", "reversor be": "OK", "imagemUrl": "https://i.imgur.com/example-riogrande2005.jpg" },
-            { "embarcação": "Rio Grande IV", "cidade": "Delfinópolis", "motor bb": "OK", "reversor bb": "OK", "motor be": "OK", "reversor be": "OK", "imagemUrl": "https://i.imgur.com/example-riogrande4.jpg" },
-            { "embarcação": "Saliba", "cidade": "Campo Belo", "motor bb": "OK", "reversor bb": "OK", "motor be": "OK", "reversor be": "OK", "imagemUrl": "https://i.imgur.com/example-saliba.jpg" },
-            { "embarcação": "São Francisco I", "cidade": "Guapé", "motor bb": "OK", "reversor bb": "OK", "motor be": "OK", "reversor be": "OK", "imagemUrl": "https://i.imgur.com/example-saofrancisco1.jpg" }
+            { "embarcação": "Águas Verdes", "cidade": "Carmo do Rio Claro", "motor bb": "OK", "reversor bb": "OK", "motor be": "OK", "reversor be": "OK", "imagemUrl": "https://raw.githubusercontent.com/google-gemini/cookbook/main/examples/data/ferry1.jpg" },
+            { "embarcação": "Araúna", "cidade": "Fama", "motor bb": "Revisar", "reversor bb": "OK", "motor be": "OK", "reversor be": "OK", "imagemUrl": "https://raw.githubusercontent.com/google-gemini/cookbook/main/examples/data/ferry2.jpg" },
+            { "embarcação": "Canastra", "cidade": "Delfinópolis", "motor bb": "OK", "reversor bb": "OK", "motor be": "OK", "reversor be": "OK", "imagemUrl": "https://raw.githubusercontent.com/google-gemini/cookbook/main/examples/data/ferry3.jpg" },
+            { "embarcação": "Delfinópolis", "cidade": "São José da Barra", "motor bb": "OK", "reversor bb": "OK", "motor be": "OK", "reversor be": "OK", "imagemUrl": "https://raw.githubusercontent.com/google-gemini/cookbook/main/examples/data/ferry1.jpg" },
+            { "embarcação": "Delfinópolis I", "cidade": "Delfinópolis", "motor bb": "OK", "reversor bb": "OK", "motor be": "OK", "reversor be": "OK", "imagemUrl": "https://raw.githubusercontent.com/google-gemini/cookbook/main/examples/data/ferry2.jpg" },
+            { "embarcação": "Fama", "cidade": "Alfenas", "motor bb": "OK", "reversor bb": "Falha", "motor be": "OK", "reversor be": "OK", "imagemUrl": "https://raw.githubusercontent.com/google-gemini/cookbook/main/examples/data/ferry3.jpg" },
+            { "embarcação": "Fernandes", "cidade": "Cristais", "motor bb": "OK", "reversor bb": "OK", "motor be": "OK", "reversor be": "OK", "imagemUrl": "https://raw.githubusercontent.com/google-gemini/cookbook/main/examples/data/ferry1.jpg" },
+            { "embarcação": "Guapé", "cidade": "Guapé", "motor bb": "OK", "reversor bb": "OK", "motor be": "OK", "reversor be": "OK", "imagemUrl": "https://raw.githubusercontent.com/google-gemini/cookbook/main/examples/data/ferry2.jpg" },
+            { "embarcação": "Harmonia", "cidade": "Guapé", "motor bb": "OK", "reversor bb": "OK", "motor be": "OK", "reversor be": "OK", "imagemUrl": "https://raw.githubusercontent.com/google-gemini/cookbook/main/examples/data/ferry3.jpg" },
+            { "embarcação": "Itapiché", "cidade": "Itapiché", "motor bb": "OK", "reversor bb": "OK", "motor be": "OK", "reversor be": "OK", "imagemUrl": "https://raw.githubusercontent.com/google-gemini/cookbook/main/examples/data/ferry1.jpg" },
+            { "embarcação": "Nossa Senhora dos Navegantes VII", "cidade": "Delfinópolis", "motor bb": "OK", "reversor bb": "OK", "motor be": "OK", "reversor be": "OK", "imagemUrl": "https://raw.githubusercontent.com/google-gemini/cookbook/main/examples/data/ferry2.jpg" },
+            { "embarcação": "Nossa Senhora dos Navegantes X", "cidade": "Delfinópolis", "motor bb": "OK", "reversor bb": "OK", "motor be": "OK", "reversor be": "OK", "imagemUrl": "https://raw.githubusercontent.com/google-gemini/cookbook/main/examples/data/ferry3.jpg" },
+            { "embarcação": "Pontalete", "cidade": "Três Pontas", "motor bb": "OK", "reversor bb": "OK", "motor be": "OK", "reversor be": "OK", "imagemUrl": "https://raw.githubusercontent.com/google-gemini/cookbook/main/examples/data/ferry1.jpg" },
+            { "embarcação": "Rio Grande 2005", "cidade": "Delfinópolis", "motor bb": "Revisar", "reversor bb": "Revisar", "motor be": "OK", "reversor be": "OK", "imagemUrl": "https://raw.githubusercontent.com/google-gemini/cookbook/main/examples/data/ferry2.jpg" },
+            { "embarcação": "Rio Grande IV", "cidade": "Delfinópolis", "motor bb": "OK", "reversor bb": "OK", "motor be": "OK", "reversor be": "OK", "imagemUrl": "https://raw.githubusercontent.com/google-gemini/cookbook/main/examples/data/ferry3.jpg" },
+            { "embarcação": "Saliba", "cidade": "Campo Belo", "motor bb": "OK", "reversor bb": "OK", "motor be": "OK", "reversor be": "OK", "imagemUrl": "https://raw.githubusercontent.com/google-gemini/cookbook/main/examples/data/ferry1.jpg" },
+            { "embarcação": "São Francisco I", "cidade": "Guapé", "motor bb": "OK", "reversor bb": "OK", "motor be": "OK", "reversor be": "OK", "imagemUrl": "https://raw.githubusercontent.com/google-gemini/cookbook/main/examples/data/ferry2.jpg" }
         ];
 
-        let currentMap = null;
         let allVesselsData = [];
 
         const elements = {
             furnasContainer: document.getElementById('furnas-container'),
             mascarenhasContainer: document.getElementById('mascarenhas-container'),
             vesselDetailsModal: new bootstrap.Modal(document.getElementById('vesselDetailsModal')),
-            modalVesselImage: document.getElementById('modalVesselImage'), // NOVO: Referência para o elemento da imagem
+            modalVesselImage: document.getElementById('modalVesselImage'),
             modalVesselName: document.getElementById('modalVesselName'),
             modalVesselCity: document.getElementById('modalVesselCity'),
             modalMotorBE: document.getElementById('modalMotorBE'),
             modalReversorBE: document.getElementById('modalReversorBE'),
             modalMotorBB: document.getElementById('modalMotorBB'),
             modalReversorBB: document.getElementById('modalReversorBB'),
-            mapModalContainer: document.getElementById('mapModalContainer'),
         };
         
-        const cityCoordinates = {
-            'Guapé': [-20.773, -45.914],
-            'Carmo do Rio Claro': [-20.973, -46.120],
-            'Campo do Meio': [-21.121, -45.865],
-            'Cristais': [-20.893, -45.521],
-            'Alfenas': [-21.426, -45.947],
-            'Fama': [-21.402, -45.834],
-            'Três Pontas': [-21.365, -45.512],
-            'Campo Belo': [-20.897, -45.275],
-            'São José da Barra': [-20.725, -46.312],
-            'Delfinópolis': [-20.352, -46.852],
-            'Itapiché': [-20.973, -46.120]
-        };
-        
+        function getOptimizedImageUrl(originalUrl, quality = 80) {
+            if (!originalUrl || originalUrl.includes('images.weserv.nl')) { return originalUrl; }
+            const proxyUrl = 'https://images.weserv.nl/?url=';
+            const optimizedUrl = `${proxyUrl}${encodeURIComponent(originalUrl)}&q=${quality}&output=jpg`;
+            return optimizedUrl;
+        }
+
         function getPropIgnoreCase(obj, key) {
             const lowerKey = key.toLowerCase();
             const objKey = Object.keys(obj).find(k => k.toLowerCase() === lowerKey);
@@ -161,7 +140,6 @@
                 if (!vesselName || !cityName) return null;
                 const city = cityName.trim();
                 item.reservoir = (city === 'Delfinópolis') ? 'Mascarenhas' : 'Furnas';
-                item.coords = cityCoordinates[city] || null;
                 item.id = `vessel-${index}`;
                 return item;
             }).filter(Boolean);
@@ -202,13 +180,14 @@
             const vessel = allVesselsData.find(v => v.id === vesselId);
             if (!vessel) return;
 
-            // NOVO: Preenche os dados da imagem e mostra/esconde
-            if (vessel.imagemUrl) {
-                elements.modalVesselImage.src = vessel.imagemUrl;
-                elements.modalVesselImage.style.display = 'block'; // Garante que a imagem é visível
+            const originalImageUrl = getPropIgnoreCase(vessel, 'imagemUrl');
+            const optimizedImageUrl = getOptimizedImageUrl(originalImageUrl);
+
+            if (optimizedImageUrl) {
+                elements.modalVesselImage.src = optimizedImageUrl;
+                elements.modalVesselImage.style.display = 'block';
             } else {
-                elements.modalVesselImage.src = ''; // Limpa a src
-                elements.modalVesselImage.style.display = 'none'; // Esconde se não houver imagem
+                elements.modalVesselImage.style.display = 'none';
             }
 
             elements.modalVesselName.textContent = getPropIgnoreCase(vessel, 'embarcação');
@@ -219,31 +198,7 @@
             elements.modalReversorBB.textContent = getPropIgnoreCase(vessel, 'reversor bb') || 'N/A';
             
             elements.vesselDetailsModal.show();
-            
-            if (currentMap) {
-                currentMap.remove();
-                currentMap = null;
-            }
-            
-            if (vessel.coords) {
-                setTimeout(() => {
-                    // NOVO: 'mapModalContainer' já tem a altura reduzida via CSS
-                    currentMap = L.map('mapModalContainer').setView(vessel.coords, 14);
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                    }).addTo(currentMap);
-                    L.marker(vessel.coords).addTo(currentMap).bindPopup(`<b>${getPropIgnoreCase(vessel, 'embarcação')}</b>`).openPopup();
-                    currentMap.invalidateSize();
-                }, 200);
-            }
         }
-        
-        document.getElementById('vesselDetailsModal').addEventListener('hidden.bs.modal', function () {
-            if (currentMap) {
-                currentMap.remove();
-                currentMap = null;
-            }
-        });
 
         document.addEventListener('DOMContentLoaded', () => {
             processAndRenderData(dadosDaFrota);
