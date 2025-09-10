@@ -11,6 +11,11 @@
         .container { max-width: 900px; }
         .table-container { background-color: white; padding: 1.5rem; border-radius: .35rem; box-shadow: 0 .15rem 1.75rem 0 rgba(58,59,69,.15); margin-top: 1.5rem; }
         .navbar-brand img, .footer-logo { height: 40px; width: auto; }
+        /* Nova classe CSS para o destaque */
+        .highlighted-row {
+            border: 2px solid #dc3545 !important; /* Vermelho Bootstrap */
+            box-shadow: 0 0 8px rgba(220, 53, 69, 0.6) !important;
+        }
     </style>
 </head>
 <body>
@@ -149,9 +154,25 @@
                     `;
                     tableBody.appendChild(row);
                 });
+                addHighlightingToRows(); // Adiciona o evento de clique após popular a tabela
             }
             
-            // ALTERAÇÃO APLICADA AQUI
+            function addHighlightingToRows() {
+                const rows = tableBody.querySelectorAll('tr');
+                rows.forEach(row => {
+                    row.addEventListener('click', function() {
+                        // Remove a classe de destaque de qualquer linha que a tenha
+                        const currentHighlighted = document.querySelector('.highlighted-row');
+                        if (currentHighlighted) {
+                            currentHighlighted.classList.remove('highlighted-row');
+                        }
+                        // Adiciona a classe de destaque à linha clicada
+                        this.classList.add('highlighted-row');
+                    });
+                });
+            }
+
+            // Pesquisa com múltiplas palavras (mantido do último ajuste)
             searchInput.addEventListener('keyup', function() {
                 const searchTerms = this.value.toUpperCase().split(' ').filter(term => term);
                 const filteredItems = allItems.filter(item => {
