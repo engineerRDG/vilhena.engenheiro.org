@@ -135,7 +135,6 @@
                     tableBody.innerHTML = `<tr><td colspan="4" class="text-center">Nenhum item encontrado.</td></tr>`;
                     return;
                 }
-                // ALTERAÇÃO: Ordenando pela propriedade 'code' (código)
                 items.sort((a, b) => a.code.localeCompare(b.code));
                 items.forEach(item => {
                     const row = document.createElement('tr');
@@ -152,11 +151,13 @@
                 });
             }
             
+            // ALTERAÇÃO APLICADA AQUI
             searchInput.addEventListener('keyup', function() {
-                const searchTerm = this.value.toUpperCase();
-                const filteredItems = allItems.filter(item => 
-                    item.description.toUpperCase().includes(searchTerm)
-                );
+                const searchTerms = this.value.toUpperCase().split(' ').filter(term => term);
+                const filteredItems = allItems.filter(item => {
+                    const itemDescription = item.description.toUpperCase();
+                    return searchTerms.every(term => itemDescription.includes(term));
+                });
                 displayData(filteredItems);
             });
 
