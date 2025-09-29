@@ -33,7 +33,7 @@
         <p class="text-center text-muted">Contrato 8000014022</p>
         
         <div class="d-flex justify-content-center gap-2 mt-4">
-            <input type="text" id="searchInput" class="form-control" placeholder="Pesquisar item..." style="max-width: 400px;">
+            <input type="text" id="searchInput" class="form-control" placeholder="Pesquisar por código ou item..." style="max-width: 400px;">
         </div>
 
         <div class="table-container">
@@ -172,12 +172,16 @@
                 });
             }
 
-            // Pesquisa com múltiplas palavras (mantido do último ajuste)
+            // Pesquisa com múltiplas palavras em CÓDIGO e DESCRITIVO
             searchInput.addEventListener('keyup', function() {
                 const searchTerms = this.value.toUpperCase().split(' ').filter(term => term);
                 const filteredItems = allItems.filter(item => {
                     const itemDescription = item.description.toUpperCase();
-                    return searchTerms.every(term => itemDescription.includes(term));
+                    const itemCode = item.code.toUpperCase();
+                    // Verifica se TODOS os termos da pesquisa estão presentes no código OU na descrição
+                    return searchTerms.every(term => 
+                        itemDescription.includes(term) || itemCode.includes(term)
+                    );
                 });
                 displayData(filteredItems);
             });
