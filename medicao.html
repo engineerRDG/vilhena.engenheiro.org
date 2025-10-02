@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF--8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Controle de Medição - Vilhena Serviços</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -26,11 +26,22 @@
         .kpi-card .bi { font-size: 2.5rem; }
 
         .text-gray-300 { color: #dee2e6 !important; }
-        .table-hover tbody tr:hover { background-color: rgba(0, 0, 0, 0.05); }
         .currency { text-align: right; }
         .filter-container .form-select-sm { max-width: 200px; }
         
         .chart-container { height: 225px; position: relative; }
+
+        /* Estilos para ordenação da tabela */
+        .sortable { cursor: pointer; user-select: none; }
+        .sortable:hover { color: #0d6efd; }
+        .sort-icon { color: #adb5bd; font-size: 0.8em; vertical-align: middle; margin-left: 4px; }
+        .sortable.asc .sort-icon.asc, .sortable.desc .sort-icon.desc { color: #0d6efd; }
+
+        /* Estilo para linha clicável da tabela */
+        .clickable-row { cursor: pointer; }
+        .table-hover tbody tr.clickable-row:hover {
+            background-color: rgba(0, 123, 255, 0.075);
+        }
     </style>
 </head>
 <body>
@@ -39,17 +50,6 @@
             <a class="navbar-brand" href="#">
                 <img src="https://raw.githubusercontent.com/engineerRDG/vilhena.engenheiro.org/refs/heads/main/imagem/logo.png" alt="Vilhena Serviços Logo">
             </a>
-            <div class="dropdown">
-                <button class="btn btn-light btn-sm fw-bold" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    Menu
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end">
-                    <li><a class="dropdown-item" href="rs.html">RS</a></li>
-                    <li><a class="dropdown-item" href="medicao.html">Medição</a></li>
-                    <li><a class="dropdown-item" href="status.html">Delfinópolis</a></li>
-                    <li><a class="dropdown-item" href="diario.html">Diário</a></li>
-                </ul>
-            </div>
         </div>
     </nav>
 
@@ -60,7 +60,7 @@
            <div class="col-md-4 col-lg-4">
                <div class="card shadow-sm kpi-card border-info h-100">
                    <div class="card-body text-info"><div class="row align-items-center"><div class="col">
-                       <div class="text-xs font-weight-bold mb-1">Itens no Período</div>
+                       <div class="text-xs font-weight-bold mb-1">Itens Medidos no Período</div>
                        <div id="kpi-total-items" class="kpi-value">0</div>
                    </div><div class="col-auto"><i class="bi bi-list-ol text-gray-300"></i></div></div></div>
                </div>
@@ -76,7 +76,7 @@
            <div class="col-md-4 col-lg-4">
                <div class="card shadow-sm kpi-card border-success h-100">
                    <div class="card-body text-success"><div class="row align-items-center"><div class="col">
-                       <div class="text-xs font-weight-bold mb-1">Mês de referência</div>
+                       <div class="text-xs font-weight-bold mb-1">Mês de Referência</div>
                        <div id="kpi-month" class="kpi-value" style="font-size: 1.5rem;">-</div>
                    </div><div class="col-auto"><i class="bi bi-calendar-check text-gray-300"></i></div></div></div>
                </div>
@@ -90,26 +90,41 @@
                     <div class="chart-container"><canvas id="vesselPerformanceChart"></canvas></div>
                 </div>
                 <div class="col-lg-6 mb-4">
-                    <h5 class="mb-3">Análise de Pareto</h5>
+                    <h5 class="mb-3">Análise de Pareto (Itens)</h5>
                     <div class="chart-container"><canvas id="paretoChart"></canvas></div>
                 </div>
                 <div class="col-lg-6 mb-4 mb-lg-0">
-                    <h5 class="mb-3">RS Concluídas por Mês</h5>
+                    <h5 class="mb-3">Itens Medidos por Mês</h5>
                     <div class="chart-container"><canvas id="uniqueItemsChart"></canvas></div>
                 </div>
                 <div class="col-lg-6">
-                    <h5 class="mb-3">Itens Mais Solicitados</h5>
+                    <h5 class="mb-3">Itens Mais Medidos</h5>
                     <div class="chart-container"><canvas id="topContractsChart"></canvas></div>
                 </div>
             </div>
             
             <hr class="my-4">
 
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h4 class="mb-0">Lista de itens medidos</h4>
-                <div class="d-flex align-items-center filter-container">
-                    <label for="month-filter" class="form-label me-2 mb-0">Filtrar por Mês:</label>
-                    <select id="month-filter" class="form-select form-select-sm"></select>
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
+                <h4 class="mb-0">Lista de Itens Medidos</h4>
+                <div class="d-flex align-items-center flex-wrap gap-3 filter-container">
+                    <div class="d-flex align-items-center">
+                        <label for="month-filter" class="form-label me-2 mb-0 text-nowrap">Mês:</label>
+                        <select id="month-filter" class="form-select form-select-sm"></select>
+                    </div>
+                     <div class="d-flex align-items-center">
+                        <label for="vessel-filter" class="form-label me-2 mb-0 text-nowrap">Embarcação:</label>
+                        <select id="vessel-filter" class="form-select form-select-sm"></select>
+                    </div>
+                </div>
+            </div>
+
+             <div class="d-flex justify-content-end mb-3">
+                <div class="btn-group" role="group" aria-label="Modo de visualização">
+                  <input type="radio" class="btn-check" name="view-mode" id="view-mode-unitario" autocomplete="off" value="unitario" checked>
+                  <label class="btn btn-outline-primary btn-sm" for="view-mode-unitario">Unitário</label>
+                  <input type="radio" class="btn-check" name="view-mode" id="view-mode-geral" autocomplete="off" value="geral">
+                  <label class="btn btn-outline-primary btn-sm" for="view-mode-geral">Geral</label>
                 </div>
             </div>
 
@@ -134,67 +149,176 @@
         </div>
     </footer>
 
+    <div class="modal fade" id="itemDetailModal" tabindex="-1" aria-labelledby="itemDetailModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalItemTitle">Detalhes do Item</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div id="modalDetailsContainer"></div>
+            <hr>
+            <p><strong>Quantidade Total:</strong> <span id="modalQuantidade"></span></p>
+            <p><strong>Valor Total:</strong> <span id="modalValor"></span></p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
    <script>
    document.addEventListener('DOMContentLoaded', function() {
-       // ATENÇÃO: Verifique se esta é a URL correta da sua planilha de MEDIÇÃO.
-       const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT2PRrHp-jZ7WSS7VT-dqzf1x2k7e1UlQMS1ZHlrqpgiRed9YiBlx9uYO2e-P2eKoTB-PsjH-Cfwy2Y/pub?output=csv';
+       const SERVICES_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-EzfpINGaWJduqHgUQwgjK2hzakenB8-zIFSO7eqPtAoZzSin9DV0eyxg9_wEPaWE79lYxiGMQ_9b/pub?output=csv';
+       const PRICES_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS8an6Vae5OUkZVObcjTNcqUaXZKD-AtlJCg1WRK-6Aw2DDOoLZHGTB59oDSBK1iGc3BEGWI4u_6Qh3/pub?gid=439074154&single=true&output=csv';
        
        const dataDisplay = document.getElementById('data-display');
        const monthFilter = document.getElementById('month-filter');
-       let allValidData = [];
+       const vesselFilter = document.getElementById('vessel-filter');
+       const viewModeRadios = document.querySelectorAll('input[name="view-mode"]');
+
+       let allProcessedData = [];
        let chartInstances = {};
+       let currentSort = { column: 'valorCalculado', direction: 'desc' };
 
        const formatCurrency = (value) => !isNaN(value) ? value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'R$ 0,00';
        const parseCurrency = (value) => typeof value !== 'string' || value.trim() === '' ? NaN : parseFloat(value.replace('R$', '').trim().replace(/\./g, '').replace(',', '.'));
-       const parseDate = (dateStr) => !dateStr || typeof dateStr !== 'string' ? null : new Date(dateStr.trim().split('/').reverse().join('-') + 'T00:00:00');
+       
+       const monthMap = { 'janeiro': 0, 'fevereiro': 1, 'março': 2, 'abril': 3, 'maio': 4, 'junho': 5, 'julho': 6, 'agosto': 7, 'setembro': 8, 'outubro': 9, 'novembro': 10, 'dezembro': 11 };
+       const parseDate = (dateStr) => {
+           if (typeof dateStr !== 'string' || !dateStr.includes('/')) return null;
+           const [monthName, year] = dateStr.trim().toLowerCase().split('/');
+           const monthIndex = monthMap[monthName];
+           if (monthIndex !== undefined && year && year.length === 4) {
+               return new Date(year, monthIndex, 1);
+           }
+           return null;
+       };
+       
+       const parseQuantity = (qtyStr) => {
+           if (typeof qtyStr !== 'string' || qtyStr.trim() === '') return 0;
+           return parseFloat(qtyStr.trim().replace(',', '.')) || 0;
+       };
 
        function destroyChart(chartId) {
            if (chartInstances[chartId]) chartInstances[chartId].destroy();
        }
 
        function updateKPIs(data, selectedMonthValue) {
-           document.getElementById('kpi-total-items').textContent = data.length;
-           const totalValue = data.reduce((sum, item) => sum + item.valorNumerico, 0);
+           document.getElementById('kpi-total-items').textContent = data.length.toLocaleString('pt-BR');
+           const totalValue = data.reduce((sum, item) => sum + item.valorCalculado, 0);
            document.getElementById('kpi-total-value').textContent = formatCurrency(totalValue);
-
            const kpiMonthElement = document.getElementById('kpi-month');
-           const kpiValueLabel = document.getElementById('kpi-value-label');
-
            if (selectedMonthValue === 'all') {
                kpiMonthElement.textContent = 'TODOS OS MESES';
-               kpiValueLabel.textContent = 'Total Medido';
            } else {
-               kpiMonthElement.textContent = monthFilter.options[monthFilter.selectedIndex].text;
-               kpiValueLabel.textContent = 'Valor medido no mês';
+               kpiMonthElement.textContent = monthFilter.options[monthFilter.selectedIndex].text.toUpperCase();
            }
        }
        
-       function populateMonthFilter(data) {
+        function populateMonthFilter(data) {
             const months = new Set(data.map(item => `${item.dataConclusao.getFullYear()}-${(item.dataConclusao.getMonth() + 1).toString().padStart(2, '0')}`));
             const sortedMonths = Array.from(months).sort().reverse();
-            monthFilter.innerHTML = '';
+            monthFilter.innerHTML = '<option value="all">Todos os Meses</option>';
             sortedMonths.forEach(monthKey => {
                const [year, monthNum] = monthKey.split('-');
                const monthName = new Date(year, monthNum - 1).toLocaleString('pt-BR', { month: 'long', year: 'numeric' });
-               const option = document.createElement('option');
-               option.value = monthKey; option.textContent = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+               const option = new Option(monthName.charAt(0).toUpperCase() + monthName.slice(1), monthKey);
                monthFilter.appendChild(option);
-           });
-           const allMonthsOption = document.createElement('option');
-           allMonthsOption.value = 'all'; allMonthsOption.textContent = 'Todos os Meses';
-           monthFilter.appendChild(allMonthsOption);
-           monthFilter.value = 'all';
-       }
+            });
+        }
+
+        function populateVesselFilter(data) {
+            const vessels = new Set(data.map(item => item.embarcação || 'Não especificada'));
+            const sortedVessels = Array.from(vessels).sort();
+            vesselFilter.innerHTML = '<option value="all">Todas as Embarcações</option>';
+            sortedVessels.forEach(vesselName => {
+               const option = new Option(vesselName, vesselName);
+               vesselFilter.appendChild(option);
+            });
+        }
+
+       function aggregateData(data) {
+            const aggregated = new Map();
+            data.forEach(item => {
+                const key = `${item.item}|${item.descrição}`;
+                if (!aggregated.has(key)) {
+                    aggregated.set(key, {
+                        item: item.item,
+                        descrição: item.descrição,
+                        unidade: item.unidade,
+                        quantidadeNumerica: 0,
+                        valorCalculado: 0,
+                        details: {}
+                    });
+                }
+                const entry = aggregated.get(key);
+                entry.quantidadeNumerica += item.quantidadeNumerica;
+                entry.valorCalculado += item.valorCalculado;
+
+                const vessel = item.embarcação || 'Não especificada';
+                if (!entry.details[vessel]) {
+                    entry.details[vessel] = { qty: 0, val: 0 };
+                }
+                entry.details[vessel].qty += item.quantidadeNumerica;
+                entry.details[vessel].val += item.valorCalculado;
+            });
+            return Array.from(aggregated.values());
+        }
 
        function renderTable(data) {
-            if (data.length === 0) { dataDisplay.innerHTML = `<div class="alert alert-warning mt-3">Nenhum item encontrado para o filtro selecionado.</div>`; return; }
-            let tableHTML = `<table class="table table-hover align-middle mb-0"><thead class="table-light"><tr><th>Item</th><th>Item Contrato</th><th>Data Conclusão</th><th class="currency">Valor</th></tr></thead><tbody>`;
-            data.forEach(item => {
-                tableHTML += `<tr>
+            const viewMode = document.querySelector('input[name="view-mode"]:checked').value;
+            const tableData = viewMode === 'geral' ? aggregateData(data) : data;
+
+            const sortedData = [...tableData].sort((a, b) => {
+                const valA = a[currentSort.column];
+                const valB = b[currentSort.column];
+                if (valA < valB) return currentSort.direction === 'asc' ? -1 : 1;
+                if (valA > valB) return currentSort.direction === 'asc' ? 1 : -1;
+                return 0;
+            });
+           
+            if (sortedData.length === 0) { 
+                dataDisplay.innerHTML = `<div class="alert alert-warning mt-3">Nenhum item encontrado para os filtros selecionados.</div>`; 
+                return; 
+            }
+
+            const renderHeader = (col, label) => {
+                const isSorted = currentSort.column === col;
+                const direction = isSorted ? currentSort.direction : '';
+                return `<th class="sortable ${direction}" data-sort-by="${col}">
+                            ${label}
+                            <span class="sort-icon asc">▲</span>
+                            <span class="sort-icon desc">▼</span>
+                        </th>`;
+            };
+
+            let tableHTML = `<table class="table table-hover align-middle mb-0">
+                <thead class="table-light"><tr>
+                    <th>Item</th>
+                    <th>Descrição</th>
+                    ${renderHeader('quantidadeNumerica', 'Qtd.')}
+                    ${renderHeader('valorCalculado', 'Valor Total')}
+                </tr></thead><tbody>`;
+
+            sortedData.forEach(item => {
+                const detailsAttr = item.details ? `data-details='${JSON.stringify(item.details)}'` : '';
+                tableHTML += `<tr class="clickable-row" 
+                                  data-bs-toggle="modal" 
+                                  data-bs-target="#itemDetailModal"
+                                  data-descricao="${item.descrição || ''}"
+                                  data-embarcacao="${item.embarcação || 'Não especificada'}"
+                                  data-quantidade="${(item.quantidadeNumerica || 0).toLocaleString('pt-BR')}"
+                                  data-valor="${formatCurrency(item.valorCalculado)}"
+                                  data-unidade="${item.unidade || ''}"
+                                  ${detailsAttr}>
                     <td>${item.item || ''}</td>
-                    <td>${item['item contrato'] || ''}</td>
-                    <td>${item.conclusão || ''}</td>
-                    <td class="currency">${formatCurrency(item.valorNumerico)}</td>
+                    <td>${item.descrição || ''}</td>
+                    <td class="text-center">${(item.quantidadeNumerica || 0).toLocaleString('pt-BR')}</td>
+                    <td class="currency">${formatCurrency(item.valorCalculado)}</td>
                 </tr>`;
             });
             tableHTML += `</tbody></table>`;
@@ -202,120 +326,145 @@
        }
 
        function getContractItemCounts(data) {
-           const counts = data.reduce((acc, item) => {
-               const key = item['item contrato'] || 'Não especificado';
-               acc[key] = (acc[key] || 0) + 1; return acc;
+           const itemData = data.reduce((acc, item) => {
+               const key = item['item'] || 'Não especificado';
+               if (!acc[key]) {
+                   acc[key] = { count: 0, description: item['descrição'] || 'Sem descrição' };
+               }
+               acc[key].count += item.quantidadeNumerica; 
+               return acc;
            }, {});
-           return Object.entries(counts).map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count);
+           return Object.entries(itemData)
+                .map(([name, { count, description }]) => ({ name, count, description }))
+                .sort((a, b) => b.count - a.count);
        }
        
        function renderVesselPerformanceChart(data) {
-            const ctx = document.getElementById('vesselPerformanceChart').getContext('2d');
             destroyChart('vesselPerformanceChart');
+            const ctx = document.getElementById('vesselPerformanceChart').getContext('2d');
             if (!data.length || !data[0].hasOwnProperty('embarcação')) {
-                ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-                ctx.font = "16px 'Segoe UI'"; ctx.fillStyle = "#6c757d"; ctx.textAlign = "center";
-                ctx.fillText("Coluna 'embarcação' não encontrada.", ctx.canvas.width / 2, ctx.canvas.height / 2);
                 return;
             }
-
             const vesselData = data.reduce((acc, item) => {
                 const vessel = item.embarcação || 'Não especificada';
-                if (!acc[vessel]) acc[vessel] = { rs: new Set(), valor: 0 };
-                acc[vessel].rs.add(item.rs || item.item);
-                acc[vessel].valor += item.valorNumerico;
+                if (!acc[vessel]) acc[vessel] = { count: 0, valor: 0 };
+                acc[vessel].count += 1;
+                acc[vessel].valor += item.valorCalculado;
                 return acc;
             }, {});
-
-            const processedData = Object.entries(vesselData).map(([name, d]) => ({ name, rsCount: d.rs.size, totalValue: d.valor })).sort((a,b) => b.totalValue - a.totalValue);
-
+            const processedData = Object.entries(vesselData).map(([name, d]) => ({ name, itemsCount: d.count, totalValue: d.valor })).sort((a,b) => b.totalValue - a.totalValue);
             const labels = processedData.map(d => d.name);
-            const rsData = processedData.map(d => d.rsCount);
+            const itemsData = processedData.map(d => d.itemsCount);
             const valorData = processedData.map(d => d.totalValue);
-
             chartInstances['vesselPerformanceChart'] = new Chart(ctx, {
                 type: 'bar', data: { labels, datasets: [
                     { label: 'Valor (R$)', data: valorData, backgroundColor: 'rgba(54, 162, 235, 0.7)', yAxisID: 'y' },
-                    { label: 'Nº de RS', data: rsData, backgroundColor: 'rgba(255, 159, 64, 0.7)', yAxisID: 'y1' }
+                    { label: 'Nº de Itens', data: itemsData, backgroundColor: 'rgba(255, 159, 64, 0.7)', yAxisID: 'y1' }
                 ]},
-                options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y',
-                    plugins: { legend: { position: 'bottom' }, tooltip: { mode: 'index', intersect: false } },
-                    scales: {
-                        y: { stacked: true },
-                        y1: { stacked: true, display: false },
-                    }
-                }
+                options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { position: 'bottom' }, tooltip: { mode: 'index', intersect: false } }, scales: { y: { stacked: true }, y1: { stacked: true, display: false } } }
             });
        }
 
        function renderUniqueItemsChart(data) {
-           const ctx = document.getElementById('uniqueItemsChart').getContext('2d');
            destroyChart('uniqueItemsChart');
+           const ctx = document.getElementById('uniqueItemsChart').getContext('2d');
            if (data.length === 0) return;
            const groupedByMonth = data.reduce((acc, item) => {
                const monthKey = `${item.dataConclusao.getFullYear()}-${(item.dataConclusao.getMonth() + 1).toString().padStart(2, '0')}`;
-               if (!acc[monthKey]) acc[monthKey] = { date: item.dataConclusao, items: new Set() };
-               acc[monthKey].items.add(item.rs || item.item); return acc;
+               if (!acc[monthKey]) acc[monthKey] = { date: item.dataConclusao, count: 0 };
+               acc[monthKey].count += 1; return acc;
            }, {});
-           const sortedKeys = Object.keys(groupedByMonth).sort((a,b) => groupedByMonth[a].date - groupedByMonth[b].date);
+           const sortedKeys = Object.keys(groupedByMonth).sort((a,b) => new Date(a) - new Date(b));
            const labels = sortedKeys.map(key => new Date(key + '-02').toLocaleString('pt-BR', { month: 'short', year: 'numeric' }));
-           const chartData = sortedKeys.map(key => groupedByMonth[key].items.size);
+           const chartData = sortedKeys.map(key => groupedByMonth[key].count);
            chartInstances['uniqueItemsChart'] = new Chart(ctx, {
-               type: 'bar', data: { labels, datasets: [{ label: 'Nº de RS Únicas', data: chartData, backgroundColor: 'rgba(75, 192, 192, 0.7)' }] },
-               options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+               type: 'bar', data: { labels, datasets: [{ label: 'Nº de Itens Medidos', data: chartData, backgroundColor: 'rgba(75, 192, 192, 0.7)' }] },
+               options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
            });
        }
 
        function renderTopContractsChart(data) {
-           const ctx = document.getElementById('topContractsChart').getContext('2d');
            destroyChart('topContractsChart');
+           const ctx = document.getElementById('topContractsChart').getContext('2d');
            if (data.length === 0) return;
            const contractCounts = getContractItemCounts(data);
            let topData = contractCounts.slice(0, 8);
            if (contractCounts.length > 8) {
                const otherCount = contractCounts.slice(8).reduce((sum, item) => sum + item.count, 0);
-               topData.push({ name: 'Outros', count: otherCount });
+               topData.push({ name: 'Outros', count: otherCount, description: `${contractCounts.length - 8} outros itens` });
            }
-           const labels = topData.map(d => d.name);
-           const chartData = topData.map(d => d.count);
            chartInstances['topContractsChart'] = new Chart(ctx, {
-               type: 'bar', data: { labels, datasets: [{ label: 'Nº de Itens', data: chartData, backgroundColor: 'rgba(255, 159, 64, 0.7)' }] },
-               options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+               type: 'bar',
+               data: { 
+                   labels: topData.map(d => d.name), 
+                   datasets: [{ 
+                       label: 'Quantidade Total', 
+                       data: topData.map(d => d.count),
+                       backgroundColor: 'rgba(255, 159, 64, 0.7)',
+                       customData: topData.map(d => d.description)
+                   }] 
+               },
+               options: { 
+                   indexAxis: 'y', responsive: true, maintainAspectRatio: false, 
+                   plugins: { 
+                       legend: { display: false },
+                       tooltip: { callbacks: {
+                           label: (c) => `${c.dataset.label || ''}: ${c.parsed.x.toLocaleString('pt-BR')}`,
+                           afterLabel: (c) => c.dataset.customData[c.dataIndex]
+                       }}
+                   }
+               }
            });
        }
 
        function renderParetoChart(data) {
-            const ctx = document.getElementById('paretoChart').getContext('2d');
             destroyChart('paretoChart');
+            const ctx = document.getElementById('paretoChart').getContext('2d');
             if (data.length === 0) return;
             const contractCounts = getContractItemCounts(data);
             const totalCount = contractCounts.reduce((sum, item) => sum + item.count, 0);
             let cumulativeCount = 0;
-            const paretoData = contractCounts.map(item => { cumulativeCount += item.count; return { ...item, cumulativePct: (cumulativeCount / totalCount) * 100 }; });
-            const labels = paretoData.map(d => d.name);
-            const barData = paretoData.map(d => d.count);
-            const lineData = paretoData.map(d => d.cumulativePct.toFixed(1));
+            const paretoData = contractCounts.map(item => ({ ...item, cumulativePct: (cumulativeCount += item.count) / totalCount * 100 }));
             chartInstances['paretoChart'] = new Chart(ctx, {
-                type: 'bar', data: { labels, datasets: [
-                    { label: 'Nº de Itens', data: barData, backgroundColor: 'rgba(54, 162, 235, 0.7)', yAxisID: 'y' },
-                    { label: 'Cumulativo %', data: lineData, type: 'line', borderColor: 'rgba(255, 99, 132, 1)', backgroundColor: 'rgba(255, 99, 132, 0.2)', yAxisID: 'y1', tension: 0.1 }
-                ]},
+                type: 'bar',
+                data: { 
+                    labels: paretoData.map(d => d.name),
+                    datasets: [
+                        { label: 'Quantidade', data: paretoData.map(d => d.count), backgroundColor: 'rgba(54, 162, 235, 0.7)', yAxisID: 'y', customData: paretoData.map(d => d.description) },
+                        { label: 'Cumulativo %', data: paretoData.map(d => d.cumulativePct.toFixed(1)), type: 'line', borderColor: 'rgba(255, 99, 132, 1)', yAxisID: 'y1', tension: 0.1 }
+                    ]
+                },
                 options: { responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
-                    scales: { x: { ticks: { display: false } }, 
-                        y: { type: 'linear', display: true, position: 'left', title: { display: true, text: 'Quantidade' } },
-                        y1: { type: 'linear', display: true, position: 'right', min: 0, max: 100, title: { display: true, text: '%' }, grid: { drawOnChartArea: false } }
+                    plugins: { 
+                        legend: { display: false }, 
+                        tooltip: { 
+                            mode: 'index', intersect: false,
+                            callbacks: { afterLabel: (c) => c.datasetIndex === 0 ? c.dataset.customData[c.dataIndex] : '' }
+                        } 
+                    },
+                    scales: { 
+                        x: { ticks: { display: false } }, 
+                        y: { position: 'left', title: { display: true, text: 'Quantidade' } },
+                        y1: { type: 'linear', position: 'right', min: 0, max: 100, title: { display: true, text: '%' }, grid: { drawOnChartArea: false } }
                     }
                 }
             });
        }
 
        function applyFilters() {
-            const selectedMonthValue = monthFilter.value;
-            const filteredData = (selectedMonthValue === 'all') ? allValidData : allValidData.filter(item => `${item.dataConclusao.getFullYear()}-${(item.dataConclusao.getMonth() + 1).toString().padStart(2, '0')}` === selectedMonthValue);
+            const selectedMonth = monthFilter.value;
+            const selectedVessel = vesselFilter.value;
+
+            const filteredData = allProcessedData.filter(item => {
+                const monthMatch = selectedMonth === 'all' || `${item.dataConclusao.getFullYear()}-${(item.dataConclusao.getMonth() + 1).toString().padStart(2, '0')}` === selectedMonth;
+                const vesselMatch = selectedVessel === 'all' || item.embarcação === selectedVessel;
+                return monthMatch && vesselMatch;
+            });
             
-            updateKPIs(filteredData, selectedMonthValue);
+            updateKPIs(filteredData, selectedMonth);
             renderTable(filteredData);
+
+            // Charts should always reflect the raw filtered data, not aggregated data.
             renderUniqueItemsChart(filteredData);
             renderTopContractsChart(filteredData);
             renderParetoChart(filteredData);
@@ -323,22 +472,91 @@
        }
 
        function fetchData() {
-           Papa.parse(GOOGLE_SHEET_CSV_URL, {
-               download: true, header: true, skipEmptyLines: true, transformHeader: h => h.trim().toLowerCase(),
-               complete: function(results) {
-                   allValidData = results.data.map(item => ({ ...item, dataConclusao: parseDate(item.conclusão), valorNumerico: parseCurrency(item.valor) })).filter(item => item.dataConclusao && !isNaN(item.valorNumerico));
-                   if (!allValidData || allValidData.length === 0) {
-                        dataDisplay.innerHTML = `<div class="alert alert-danger">Dados carregados, mas nenhuma linha com 'conclusão' e 'valor' válidos foi encontrada. Verifique as colunas na planilha.</div>`;
-                        return;
-                   }
-                   populateMonthFilter(allValidData);
-                   applyFilters();
-               },
-               error: err => { console.error('Erro:', err); dataDisplay.innerHTML = `<div class="alert alert-danger"><b>Falha ao carregar dados da planilha.</b> Verifique a URL e se a planilha foi "Publicada na web" como CSV.</div>`; }
+           const parseOptions = { download: true, header: true, skipEmptyLines: true, transformHeader: h => h.trim().toLowerCase() };
+           Promise.all([
+               new Promise(resolve => Papa.parse(SERVICES_CSV_URL, { ...parseOptions, complete: resolve })),
+               new Promise(resolve => Papa.parse(PRICES_CSV_URL, { ...parseOptions, complete: resolve }))
+           ])
+           .then(([servicesResults, pricesResults]) => {
+                const priceMap = new Map();
+                pricesResults.data.forEach(priceItem => {
+                    if (priceItem['código']) priceMap.set(priceItem['código'].trim(), parseCurrency(priceItem['valor']));
+                });
+
+                allProcessedData = servicesResults.data.map(serviceItem => {
+                    const itemCode = serviceItem['item'] ? serviceItem['item'].trim() : null;
+                    const quantidadeNumerica = parseQuantity(serviceItem.quantidade);
+                    const precoUnitario = priceMap.get(itemCode) || 0;
+                    return { ...serviceItem, dataConclusao: parseDate(serviceItem.mês), quantidadeNumerica, valorCalculado: precoUnitario * quantidadeNumerica };
+                }).filter(item => item.dataConclusao && item.valorCalculado > 0);
+
+                if (allProcessedData.length === 0) {
+                    dataDisplay.innerHTML = `<div class="alert alert-danger"><b>Dados não encontrados.</b> Verifique a fonte de dados.</div>`;
+                    return;
+                }
+                populateMonthFilter(allProcessedData);
+                populateVesselFilter(allProcessedData);
+                applyFilters();
+           })
+           .catch(err => {
+               console.error('Erro ao buscar ou processar dados:', err);
+               dataDisplay.innerHTML = `<div class="alert alert-danger"><b>Falha ao carregar dados.</b> Verifique o console para mais detalhes.</div>`;
            });
        }
 
        monthFilter.addEventListener('change', applyFilters);
+       vesselFilter.addEventListener('change', applyFilters);
+       viewModeRadios.forEach(radio => radio.addEventListener('change', () => renderTable(allProcessedData.filter(item => {
+            const selectedMonth = monthFilter.value;
+            const selectedVessel = vesselFilter.value;
+            const monthMatch = selectedMonth === 'all' || `${item.dataConclusao.getFullYear()}-${(item.dataConclusao.getMonth() + 1).toString().padStart(2, '0')}` === selectedMonth;
+            const vesselMatch = selectedVessel === 'all' || item.embarcação === selectedVessel;
+            return monthMatch && vesselMatch;
+       }))));
+       
+       dataDisplay.addEventListener('click', (e) => {
+            const header = e.target.closest('[data-sort-by]');
+            if (!header) return;
+            const sortBy = header.dataset.sortBy;
+            if (currentSort.column === sortBy) {
+                currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSort.column = sortBy;
+                currentSort.direction = 'desc';
+            }
+            applyFilters();
+        });
+
+        const itemDetailModal = document.getElementById('itemDetailModal');
+        itemDetailModal.addEventListener('show.bs.modal', function (event) {
+          const row = event.relatedTarget;
+          const unit = row.getAttribute('data-unidade') || 'un';
+          
+          itemDetailModal.querySelector('#modalItemTitle').textContent = row.getAttribute('data-descricao');
+          itemDetailModal.querySelector('#modalValor').textContent = row.getAttribute('data-valor');
+          itemDetailModal.querySelector('#modalQuantidade').textContent = `${row.getAttribute('data-quantidade')} ${unit}`;
+
+
+          const detailsContainer = itemDetailModal.querySelector('#modalDetailsContainer');
+          const detailsJSON = row.getAttribute('data-details');
+
+          if (detailsJSON) { // Modo "Geral"
+                const details = JSON.parse(detailsJSON);
+                let detailsHTML = '<ul class="list-group list-group-flush">';
+                Object.entries(details).forEach(([vessel, data]) => {
+                    detailsHTML += `<li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span class="fw-bold text-primary">${vessel}</span>
+                        <span>${data.qty.toLocaleString('pt-BR')} ${unit} (${formatCurrency(data.val)})</span>
+                    </li>`;
+                });
+                detailsHTML += '</ul>';
+                detailsContainer.innerHTML = detailsHTML;
+          } else { // Modo "Unitário"
+                const embarcacao = row.getAttribute('data-embarcacao');
+                detailsContainer.innerHTML = `<p><strong>Embarcação:</strong> <span class="text-primary fw-bold">${embarcacao}</span></p>`;
+          }
+        });
+
        fetchData();
    });
    </script>
