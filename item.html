@@ -11,10 +11,26 @@
         .container { max-width: 900px; }
         .table-container { background-color: white; padding: 1.5rem; border-radius: .35rem; box-shadow: 0 .15rem 1.75rem 0 rgba(58,59,69,.15); margin-top: 1.5rem; }
         .navbar-brand img, .footer-logo { height: 40px; width: auto; }
-        /* Nova classe CSS para o destaque */
+        
+        /* Classe para o destaque da linha */
         .highlighted-row {
             border: 2px solid #dc3545 !important; /* Vermelho Bootstrap */
             box-shadow: 0 0 8px rgba(220, 53, 69, 0.6) !important;
+        }
+
+        /* Novo: Estilo para o aviso de "Copiado!" */
+        .copy-feedback {
+            position: absolute;
+            background-color: #28a745;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-size: 0.8em;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+            pointer-events: none;
+            transform: translate(-50%, -120%);
+            z-index: 1000;
         }
     </style>
 </head>
@@ -33,7 +49,7 @@
         <p class="text-center text-muted">Contrato 8000014022</p>
         
         <div class="d-flex justify-content-center gap-2 mt-4">
-            <input type="text" id="searchInput" class="form-control" placeholder="Pesquisar por código ou item..." style="max-width: 400px;">
+            <input type="text" id="searchInput" class="form-control" placeholder="Pesquisar item..." style="max-width: 400px;">
         </div>
 
         <div class="table-container">
@@ -154,34 +170,61 @@
                     `;
                     tableBody.appendChild(row);
                 });
-                addHighlightingToRows(); // Adiciona o evento de clique após popular a tabela
             }
             
-            function addHighlightingToRows() {
-                const rows = tableBody.querySelectorAll('tr');
-                rows.forEach(row => {
-                    row.addEventListener('click', function() {
-                        // Remove a classe de destaque de qualquer linha que a tenha
-                        const currentHighlighted = document.querySelector('.highlighted-row');
-                        if (currentHighlighted) {
-                            currentHighlighted.classList.remove('highlighted-row');
-                        }
-                        // Adiciona a classe de destaque à linha clicada
-                        this.classList.add('highlighted-row');
-                    });
-                });
+            // Novo: Função para mostrar o aviso "Copiado!"
+            function showCopyFeedback(element) {
+                const feedback = document.createElement('div');
+                feedback.textContent = 'Copiado!';
+                feedback.className = 'copy-feedback';
+                document.body.appendChild(feedback);
+
+                const rect = element.getBoundingClientRect();
+                feedback.style.left = `${rect.left + rect.width / 2}px`;
+                feedback.style.top = `${rect.top + window.scrollY}px`; // Ajusta com o scroll da página
+
+                setTimeout(() => {
+                    feedback.style.opacity = '1';
+                }, 10);
+
+                setTimeout(() => {
+                    feedback.style.opacity = '0';
+                    setTimeout(() => {
+                        document.body.removeChild(feedback);
+                    }, 300);
+                }, 1000);
             }
 
-            // Pesquisa com múltiplas palavras em CÓDIGO e DESCRITIVO
+            // Modificado: Evento de clique na tabela para copiar e destacar
+            tableBody.addEventListener('click', function(event) {
+                const cell = event.target.closest('td');
+                if (!cell) return; // Se o clique não foi em uma célula (td), ignora
+
+                // Parte 1: Copiar o conteúdo da célula
+                const textToCopy = cell.textContent.trim();
+                if (textToCopy && !cell.classList.contains('text-center')) { // Não copia a unidade
+                    navigator.clipboard.writeText(textToCopy).then(() => {
+                        showCopyFeedback(cell); // Mostra o aviso de sucesso
+                    }).catch(err => {
+                        console.error('Falha ao copiar texto: ', err);
+                    });
+                }
+                
+                // Parte 2: Destacar a linha
+                const row = cell.parentElement;
+                const currentHighlighted = document.querySelector('.highlighted-row');
+                if (currentHighlighted) {
+                    currentHighlighted.classList.remove('highlighted-row');
+                }
+                row.classList.add('highlighted-row');
+            });
+
+            // Pesquisa com múltiplas palavras
             searchInput.addEventListener('keyup', function() {
                 const searchTerms = this.value.toUpperCase().split(' ').filter(term => term);
                 const filteredItems = allItems.filter(item => {
                     const itemDescription = item.description.toUpperCase();
-                    const itemCode = item.code.toUpperCase();
-                    // Verifica se TODOS os termos da pesquisa estão presentes no código OU na descrição
-                    return searchTerms.every(term => 
-                        itemDescription.includes(term) || itemCode.includes(term)
-                    );
+                    return searchTerms.every(term => itemDescription.includes(term));
                 });
                 displayData(filteredItems);
             });
