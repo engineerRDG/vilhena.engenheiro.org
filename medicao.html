@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF--8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Controle de Medição - Vilhena Serviços</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -20,32 +20,114 @@
         .welcome-section { text-align: center; padding: 1.5rem; background: linear-gradient(135deg, #495057, #343a40); color: white; border-radius: 8px; margin-bottom: 2rem; }
         .welcome-section h1 { font-weight: 700; }
         
-        .kpi-card .card-body { padding: 1rem; }
-        .kpi-card .kpi-value { font-size: 2rem; font-weight: 700; }
+        .kpi-card .card-body { padding: 1rem 1.25rem; }
+        .kpi-card .kpi-value { font-size: 1.8rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .kpi-card .text-xs { font-size: 0.75rem; letter-spacing: 0.5px; text-transform: uppercase; }
-        .kpi-card .bi { font-size: 2.5rem; }
-
-        .text-gray-300 { color: #dee2e6 !important; }
+        
         .currency { text-align: right; }
         .filter-container .form-select-sm { max-width: 200px; }
         
         .chart-container { height: 225px; position: relative; }
 
-        /* Estilos para ordenação da tabela */
         .sortable { cursor: pointer; user-select: none; }
         .sortable:hover { color: #0d6efd; }
         .sort-icon { color: #adb5bd; font-size: 0.8em; vertical-align: middle; margin-left: 4px; }
         .sortable.asc .sort-icon.asc, .sortable.desc .sort-icon.desc { color: #0d6efd; }
 
-        /* Estilo para linha clicável da tabela */
         .clickable-row { cursor: pointer; }
         .table-hover tbody tr.clickable-row:hover {
             background-color: rgba(0, 123, 255, 0.075);
         }
+
+        #vesselPerformanceList {
+            height: 100%;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        #vesselPerformanceList .list-group-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0.75rem;
+            border: none;
+            border-bottom: 1px solid #eee;
+        }
+
+        #reportModalBody table th,
+        #reportModalBody table td {
+            text-align: left;
+            vertical-align: middle;
+        }
+        #reportModal .modal-body h4 {
+            background-color: #e9ecef;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            margin-top: 1.5rem;
+        }
+        
+        .report-print-header, .report-print-footer {
+            display: none;
+        }
+
+        @media print {
+            body { background-color: #ffffff; }
+            .d-print-none { display: none !important; }
+            body > *:not(#reportModal) { display: none !important; }
+
+            #reportModal { display: block !important; position: static !important; inset: auto !important; margin: 0 !important; padding: 0 !important; }
+            #reportModal .modal-dialog { width: 100%; max-width: 100%; margin: 0; }
+            #reportModal .modal-content { border: none; box-shadow: none; }
+            #reportModal .modal-body { padding: 0; height: auto !important; max-height: none !important; overflow: visible !important; }
+
+            .report-print-header, .report-print-footer {
+                display: flex !important;
+                width: 100%;
+                align-items: center;
+                justify-content: space-between;
+                position: fixed;
+                left: 0;
+                padding: 0.5cm 1.5cm;
+                background-color: #ffffff;
+                z-index: 1000;
+            }
+            .report-print-header { top: 0; border-bottom: 1px solid #dee2e6; }
+            .report-print-footer { bottom: 0; border-top: 1px solid #dee2e6; }
+            
+            .report-print-header img, .report-print-footer img { max-height: 28px; width: auto; }
+            .report-print-footer .sign-text { text-align: right; font-size: 7.5pt; line-height: 1.3; }
+
+            #reportContentWrapper {
+                margin: 3.8cm 1.5cm; /* Margens para o conteúdo não sobrepor header/footer */
+                font-size: 8.5pt;
+                color: #212529;
+            }
+
+            #reportContentWrapper h2 { font-size: 14pt; margin-bottom: 0.9rem !important; }
+            #reportContentWrapper h4 { font-size: 10.5pt; margin-top: 0.8rem !important; margin-bottom: 0.4rem !important; page-break-after: avoid; }
+            
+            #reportContentWrapper table {
+                width: 100%;
+                border-collapse: collapse;
+                page-break-inside: avoid;
+                font-size: 8pt;
+            }
+            #reportContentWrapper table th, #reportContentWrapper table td {
+                padding: 3px 5px;
+                border: 1px solid #dde1e5;
+            }
+
+            .report-section { page-break-before: always; }
+            .report-section:first-child { page-break-before: auto; }
+
+            @page {
+                size: A4 portrait;
+                margin: 0;
+            }
+        }
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-dark bg-black">
+    <nav class="navbar navbar-dark bg-black d-print-none">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">
                 <img src="https://raw.githubusercontent.com/engineerRDG/vilhena.engenheiro.org/refs/heads/main/imagem/logo.png" alt="Vilhena Serviços Logo">
@@ -53,172 +135,143 @@
         </div>
     </nav>
 
-    <main class="container mt-4">
+    <main class="container mt-4 d-print-none">
         <div class="welcome-section"><h1>Controle de Medição</h1></div>
 
         <div class="row mb-4">
-           <div class="col-md-4 col-lg-4">
-               <div class="card shadow-sm kpi-card border-info h-100">
-                   <div class="card-body text-info"><div class="row align-items-center"><div class="col">
-                       <div class="text-xs font-weight-bold mb-1">Itens Medidos no Período</div>
-                       <div id="kpi-total-items" class="kpi-value">0</div>
-                   </div><div class="col-auto"><i class="bi bi-list-ol text-gray-300"></i></div></div></div>
-               </div>
-           </div>
-           <div class="col-md-4 col-lg-4">
-               <div class="card shadow-sm kpi-card border-primary h-100">
-                   <div class="card-body text-primary"><div class="row align-items-center"><div class="col">
-                       <div id="kpi-value-label" class="text-xs font-weight-bold mb-1">Valor Medido</div>
-                       <div id="kpi-total-value" class="kpi-value">R$ 0,00</div>
-                   </div><div class="col-auto"><i class="bi bi-cash-coin text-gray-300"></i></div></div></div>
-               </div>
-           </div>
-           <div class="col-md-4 col-lg-4">
-               <div class="card shadow-sm kpi-card border-success h-100">
-                   <div class="card-body text-success"><div class="row align-items-center"><div class="col">
-                       <div class="text-xs font-weight-bold mb-1">Mês de Referência</div>
-                       <div id="kpi-month" class="kpi-value" style="font-size: 1.5rem;">-</div>
-                   </div><div class="col-auto"><i class="bi bi-calendar-check text-gray-300"></i></div></div></div>
-               </div>
-           </div>
+           <div class="col-md-6 col-lg-3 mb-3 mb-lg-0"><div class="card shadow-sm kpi-card border-info h-100"><div class="card-body text-info"><div class="text-xs font-weight-bold mb-1">Itens Medidos</div><div id="kpi-total-items" class="kpi-value">0</div></div></div></div>
+           <div class="col-md-6 col-lg-3 mb-3 mb-lg-0"><div class="card shadow-sm kpi-card border-primary h-100"><div class="card-body text-primary"><div id="kpi-value-label" class="text-xs font-weight-bold mb-1">Valor Medido</div><div id="kpi-total-value" class="kpi-value">R$ 0,00</div></div></div></div>
+           <div class="col-md-6 col-lg-3 mb-3 mb-md-0"><div class="card shadow-sm kpi-card border-success h-100"><div class="card-body text-success"><div class="text-xs font-weight-bold mb-1">Mês de Referência</div><div id="kpi-month" class="kpi-value">-</div></div></div></div>
+           <div class="col-md-6 col-lg-3"><div class="card shadow-sm kpi-card border-warning h-100"><div class="card-body text-warning"><div class="text-xs font-weight-bold mb-1">Município</div><div id="kpi-city" class="kpi-value">-</div></div></div></div>
        </div>
 
         <div class="content-container">
             <div class="row text-center">
-                <div class="col-lg-6 mb-4">
-                    <h5 class="mb-3">Arrecadado por Embarcação</h5>
-                    <div class="chart-container"><canvas id="vesselPerformanceChart"></canvas></div>
-                </div>
-                <div class="col-lg-6 mb-4">
-                    <h5 class="mb-3">Análise de Pareto (Itens)</h5>
-                    <div class="chart-container"><canvas id="paretoChart"></canvas></div>
-                </div>
-                <div class="col-lg-6 mb-4 mb-lg-0">
-                    <h5 class="mb-3">Itens Medidos por Mês</h5>
-                    <div class="chart-container"><canvas id="uniqueItemsChart"></canvas></div>
-                </div>
-                <div class="col-lg-6">
-                    <h5 class="mb-3">Itens Mais Medidos</h5>
-                    <div class="chart-container"><canvas id="topContractsChart"></canvas></div>
-                </div>
+                <div class="col-lg-6 mb-4"><h5 class="mb-3">Arrecadado por Embarcação</h5><div class="chart-container" id="vesselPerformanceContainer"></div></div>
+                <div class="col-lg-6 mb-4"><h5 class="mb-3">Análise de Pareto (Top 8 Itens)</h5><div class="chart-container"><canvas id="paretoChart"></canvas></div></div>
+                <div class="col-lg-6 mb-4 mb-lg-0"><h5 class="mb-3">Itens Medidos por Mês</h5><div class="chart-container"><canvas id="uniqueItemsChart"></canvas></div></div>
+                <div class="col-lg-6"><h5 class="mb-3">Itens Mais Medidos</h5><div class="chart-container"><canvas id="topContractsChart"></canvas></div></div>
             </div>
-            
             <hr class="my-4">
-
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
-                <h4 class="mb-0">Lista de Itens Medidos</h4>
+                <div class="d-flex align-items-center gap-3">
+                    <h4 class="mb-0">Lista de Itens Medidos</h4>
+                    <button id="report-button" class="btn btn-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#reportModal"><i class="bi bi-file-earmark-text"></i> Relatório Trimestral</button>
+                </div>
                 <div class="d-flex align-items-center flex-wrap gap-3 filter-container">
-                    <div class="d-flex align-items-center">
-                        <label for="month-filter" class="form-label me-2 mb-0 text-nowrap">Mês:</label>
-                        <select id="month-filter" class="form-select form-select-sm"></select>
-                    </div>
-                     <div class="d-flex align-items-center">
-                        <label for="vessel-filter" class="form-label me-2 mb-0 text-nowrap">Embarcação:</label>
-                        <select id="vessel-filter" class="form-select form-select-sm"></select>
-                    </div>
+                    <div class="d-flex align-items-center"><label for="reservatorio-filter" class="form-label me-2 mb-0 text-nowrap">Reservatório:</label><select id="reservatorio-filter" class="form-select form-select-sm"></select></div>
+                    <div class="d-flex align-items-center"><label for="month-filter" class="form-label me-2 mb-0 text-nowrap">Mês:</label><select id="month-filter" class="form-select form-select-sm"></select></div>
+                    <div class="d-flex align-items-center"><label for="city-filter" class="form-label me-2 mb-0 text-nowrap">Cidade:</label><select id="city-filter" class="form-select form-select-sm"></select></div>
+                    <div class="d-flex align-items-center"><label for="vessel-filter" class="form-label me-2 mb-0 text-nowrap">Embarcação:</label><select id="vessel-filter" class="form-select form-select-sm"></select></div>
                 </div>
             </div>
-
              <div class="d-flex justify-content-end mb-3">
-                <div class="btn-group" role="group" aria-label="Modo de visualização">
-                  <input type="radio" class="btn-check" name="view-mode" id="view-mode-unitario" autocomplete="off" value="unitario" checked>
-                  <label class="btn btn-outline-primary btn-sm" for="view-mode-unitario">Unitário</label>
-                  <input type="radio" class="btn-check" name="view-mode" id="view-mode-geral" autocomplete="off" value="geral">
-                  <label class="btn btn-outline-primary btn-sm" for="view-mode-geral">Geral</label>
-                </div>
-            </div>
-
-            <div id="data-display" class="table-responsive">
-                <div class="text-center p-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Carregando...</span></div><p class="mt-2">Carregando dados...</p></div>
-            </div>
+                 <div class="btn-group" role="group">
+                   <input type="radio" class="btn-check" name="view-mode" id="view-mode-unitario" autocomplete="off" value="unitario" checked><label class="btn btn-outline-primary btn-sm" for="view-mode-unitario">Unitário</label>
+                   <input type="radio" class="btn-check" name="view-mode" id="view-mode-geral" autocomplete="off" value="geral"><label class="btn btn-outline-primary btn-sm" for="view-mode-geral">Geral</label>
+                 </div>
+             </div>
+            <div id="data-display" class="table-responsive"><div class="text-center p-5"><div class="spinner-border text-primary"></div><p class="mt-2">Carregando dados...</p></div></div>
         </div>
     </main>
 
-    <footer class="container mt-4 mb-4 d-flex justify-content-between align-items-center">
+    <footer class="container mt-4 mb-4 d-flex justify-content-between align-items-center d-print-none">
         <img src="https://raw.githubusercontent.com/engineerRDG/vilhena.engenheiro.org/refs/heads/main/imagem/eletrobras.png" alt="Logo Eletrobras" class="footer-logo">
         <div class="text-end">
-            <p class="text-muted mb-1" style="font-size: 0.9rem;">
-                <b>Vilhena Serviços LTDA</b><br>
-                Departamento de Engenharia e Manutenção
-            </p>
-            <p class="text-body-tertiary mb-0" style="font-size: 0.6rem;">
-                <b>Rodrigo M. Araujo</b><br>
-                Engenheiro Mecânico<br>
-                Engenheiro de Segurança do Trabalho
-            </p>
+            <p class="text-muted mb-1" style="font-size: 0.9rem;"><b>Vilhena Serviços LTDA</b><br>Departamento de Engenharia e Manutenção</p>
+            <p class="text-body-tertiary mb-0" style="font-size: 0.6rem;"><b>Rodrigo M. Araujo</b><br>Engenheiro Mecânico<br>Engenheiro de Segurança do Trabalho</p>
         </div>
     </footer>
 
-    <div class="modal fade" id="itemDetailModal" tabindex="-1" aria-labelledby="itemDetailModalLabel" aria-hidden="true">
+    <div class="modal fade" id="itemDetailModal" tabindex="-1" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="modalItemTitle">Detalhes do Item</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
+          <div class="modal-header"><h5 class="modal-title" id="modalItemTitle">Detalhes do Item</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
           <div class="modal-body">
-            <div id="modalDetailsContainer"></div>
-            <hr>
+            <div id="modalDetailsContainer"></div><hr>
             <p><strong>Quantidade Total:</strong> <span id="modalQuantidade"></span></p>
             <p><strong>Valor Total:</strong> <span id="modalValor"></span></p>
           </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-          </div>
+          <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button></div>
         </div>
       </div>
     </div>
 
+    <div class="modal fade" id="reportModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header d-print-none">
+                    <h5 class="modal-title">Relatório Trimestral por Reservatório</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="reportModalBody">
+                    <div class="report-print-header">
+                        <img src="https://raw.githubusercontent.com/engineerRDG/vilhena.engenheiro.org/refs/heads/main/imagem/logo.png" alt="Vilhena Serviços Logo">
+                    </div>
+                    <div id="reportContentWrapper"></div>
+                    <div class="report-print-footer">
+                        <img src="https://raw.githubusercontent.com/engineerRDG/vilhena.engenheiro.org/refs/heads/main/imagem/eletrobras.png" alt="Logo Eletrobras">
+                        <div class="sign-text">
+                            <p class="text-muted mb-1"><b>Vilhena Serviços LTDA</b><br>Departamento de Engenharia e Manutenção</p>
+                            <p class="text-body-tertiary mb-0"><b>Rodrigo M. Araujo</b><br>Engenheiro Mecânico<br>Engenheiro de Segurança do Trabalho</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer d-print-none">
+                    <button type="button" class="btn btn-primary" id="printReportButton">Imprimir</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
    <script>
-   document.addEventListener('DOMContentLoaded', function() {
-       const SERVICES_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-EzfpINGaWJduqHgUQwgjK2hzakenB8-zIFSO7eqPtAoZzSin9DV0eyxg9_wEPaWE79lYxiGMQ_9b/pub?output=csv';
-       const PRICES_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS8an6Vae5OUkZVObcjTNcqUaXZKD-AtlJCg1WRK-6Aw2DDOoLZHGTB59oDSBK1iGc3BEGWI4u_6Qh3/pub?gid=439074154&single=true&output=csv';
-       
-       const dataDisplay = document.getElementById('data-display');
-       const monthFilter = document.getElementById('month-filter');
-       const vesselFilter = document.getElementById('vessel-filter');
-       const viewModeRadios = document.querySelectorAll('input[name="view-mode"]');
+    document.addEventListener('DOMContentLoaded', function() {
+        const SERVICES_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-EzfpINGaWJduqHgUQwgjK2hzakenB8-zIFSO7eqPtAoZzSin9DV0eyxg9_wEPaWE79lYxiGMQ_9b/pub?output=csv';
+        const PRICES_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS8an6Vae5OUkZVObcjTNcqUaXZKD-AtlJCg1WRK-6Aw2DDOoLZHGTB59oDSBK1iGc3BEGWI4u_6Qh3/pub?gid=439074154&single=true&output=csv';
+        const LOCATIONS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS5QP1Y7FXm3gRkgb3Xl9iATvUE25q5wq22-X3k7QZG6TusZ3uURbaVPS1os3Gl4G0FxyK25TOtGCj0/pub?gid=0&single=true&output=csv';
+        
+        const dataDisplay = document.getElementById('data-display');
+        const reservatorioFilter = document.getElementById('reservatorio-filter');
+        const monthFilter = document.getElementById('month-filter');
+        const cityFilter = document.getElementById('city-filter');
+        const vesselFilter = document.getElementById('vessel-filter');
+        const reportContentWrapper = document.getElementById('reportContentWrapper');
+        const printReportButton = document.getElementById('printReportButton');
 
-       let allProcessedData = [];
-       let chartInstances = {};
-       let currentSort = { column: 'valorCalculado', direction: 'desc' };
+        let allProcessedData = [];
+        let chartInstances = {};
+        let currentSort = { column: 'valorCalculado', direction: 'desc' };
 
-       const formatCurrency = (value) => !isNaN(value) ? value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'R$ 0,00';
-       const parseCurrency = (value) => typeof value !== 'string' || value.trim() === '' ? NaN : parseFloat(value.replace('R$', '').trim().replace(/\./g, '').replace(',', '.'));
-       
-       const monthMap = { 'janeiro': 0, 'fevereiro': 1, 'março': 2, 'abril': 3, 'maio': 4, 'junho': 5, 'julho': 6, 'agosto': 7, 'setembro': 8, 'outubro': 9, 'novembro': 10, 'dezembro': 11 };
-       const parseDate = (dateStr) => {
-           if (typeof dateStr !== 'string' || !dateStr.includes('/')) return null;
-           const [monthName, year] = dateStr.trim().toLowerCase().split('/');
-           const monthIndex = monthMap[monthName];
-           if (monthIndex !== undefined && year && year.length === 4) {
-               return new Date(year, monthIndex, 1);
-           }
-           return null;
-       };
-       
-       const parseQuantity = (qtyStr) => {
-           if (typeof qtyStr !== 'string' || qtyStr.trim() === '') return 0;
-           return parseFloat(qtyStr.trim().replace(',', '.')) || 0;
-       };
+        const formatCurrency = (value) => !isNaN(value) ? value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'R$ 0,00';
+        
+        const monthMap = { 'janeiro': 0, 'fevereiro': 1, 'março': 2, 'abril': 3, 'maio': 4, 'junho': 5, 'julho': 6, 'agosto': 7, 'setembro': 8, 'outubro': 9, 'novembro': 10, 'dezembro': 11 };
+        const parseDate = dateStr => {
+            if (typeof dateStr !== 'string' || !dateStr.includes('/')) return null;
+            const [monthName, year] = dateStr.trim().toLowerCase().split('/');
+            const monthIndex = monthMap[monthName];
+            if (monthIndex !== undefined && year?.length === 4) return new Date(year, monthIndex, 1);
+            return null;
+        };
+        
+        const parseQuantity = qtyStr => {
+            if (typeof qtyStr !== 'string' || qtyStr.trim() === '') return 0;
+            return parseFloat(qtyStr.trim().replace(',', '.')) || 0;
+        };
 
-       function destroyChart(chartId) {
-           if (chartInstances[chartId]) chartInstances[chartId].destroy();
-       }
+        function destroyChart(chartId) { if (chartInstances[chartId]) chartInstances[chartId].destroy(); }
 
-       function updateKPIs(data, selectedMonthValue) {
-           document.getElementById('kpi-total-items').textContent = data.length.toLocaleString('pt-BR');
-           const totalValue = data.reduce((sum, item) => sum + item.valorCalculado, 0);
-           document.getElementById('kpi-total-value').textContent = formatCurrency(totalValue);
-           const kpiMonthElement = document.getElementById('kpi-month');
-           if (selectedMonthValue === 'all') {
-               kpiMonthElement.textContent = 'TODOS OS MESES';
-           } else {
-               kpiMonthElement.textContent = monthFilter.options[monthFilter.selectedIndex].text.toUpperCase();
-           }
-       }
-       
+        function updateKPIs(data, selectedMonthValue, selectedCityValue) {
+            document.getElementById('kpi-total-items').textContent = data.length.toLocaleString('pt-BR');
+            document.getElementById('kpi-total-value').textContent = formatCurrency(data.reduce((sum, item) => sum + item.valorCalculado, 0));
+            const kpiMonthElement = document.getElementById('kpi-month');
+            kpiMonthElement.textContent = selectedMonthValue === 'all' ? 'Todos' : monthFilter.options[monthFilter.selectedIndex].text;
+            const kpiCityElement = document.getElementById('kpi-city');
+            kpiCityElement.textContent = (selectedCityValue === 'all' || !selectedCityValue) ? 'Todos' : selectedCityValue;
+        }
+        
+        function populateReservatorioFilter() { reservatorioFilter.innerHTML = `<option value="all">Todos</option><option value="furnas">Furnas</option><option value="mascarenhas">Mascarenhas de Moraes</option>`; }
+
         function populateMonthFilter(data) {
             const months = new Set(data.map(item => `${item.dataConclusao.getFullYear()}-${(item.dataConclusao.getMonth() + 1).toString().padStart(2, '0')}`));
             const sortedMonths = Array.from(months).sort().reverse();
@@ -226,339 +279,231 @@
             sortedMonths.forEach(monthKey => {
                const [year, monthNum] = monthKey.split('-');
                const monthName = new Date(year, monthNum - 1).toLocaleString('pt-BR', { month: 'long', year: 'numeric' });
-               const option = new Option(monthName.charAt(0).toUpperCase() + monthName.slice(1), monthKey);
-               monthFilter.appendChild(option);
+               monthFilter.appendChild(new Option(monthName.charAt(0).toUpperCase() + monthName.slice(1), monthKey));
             });
         }
 
+       function populateCityFilter(data) {
+           const cities = new Set(data.map(item => item.cidade || 'Não especificada'));
+           cityFilter.innerHTML = '<option value="all">Todas as Cidades</option>';
+           Array.from(cities).sort().forEach(cityName => cityFilter.appendChild(new Option(cityName, cityName)));
+       }
+
         function populateVesselFilter(data) {
             const vessels = new Set(data.map(item => item.embarcação || 'Não especificada'));
-            const sortedVessels = Array.from(vessels).sort();
             vesselFilter.innerHTML = '<option value="all">Todas as Embarcações</option>';
-            sortedVessels.forEach(vesselName => {
-               const option = new Option(vesselName, vesselName);
-               vesselFilter.appendChild(option);
-            });
+            Array.from(vessels).sort().forEach(vesselName => vesselFilter.appendChild(new Option(vesselName, vesselName)));
         }
 
        function aggregateData(data) {
             const aggregated = new Map();
             data.forEach(item => {
                 const key = `${item.item}|${item.descrição}`;
-                if (!aggregated.has(key)) {
-                    aggregated.set(key, {
-                        item: item.item,
-                        descrição: item.descrição,
-                        unidade: item.unidade,
-                        quantidadeNumerica: 0,
-                        valorCalculado: 0,
-                        details: {}
-                    });
-                }
+                if (!aggregated.has(key)) aggregated.set(key, { item: item.item, descrição: item.descrição, unidade: item.unidade, quantidadeNumerica: 0, valorCalculado: 0, details: {} });
                 const entry = aggregated.get(key);
                 entry.quantidadeNumerica += item.quantidadeNumerica;
                 entry.valorCalculado += item.valorCalculado;
-
                 const vessel = item.embarcação || 'Não especificada';
-                if (!entry.details[vessel]) {
-                    entry.details[vessel] = { qty: 0, val: 0 };
-                }
+                if (!entry.details[vessel]) entry.details[vessel] = { qty: 0, val: 0 };
                 entry.details[vessel].qty += item.quantidadeNumerica;
                 entry.details[vessel].val += item.valorCalculado;
             });
             return Array.from(aggregated.values());
-        }
+       }
 
        function renderTable(data) {
             const viewMode = document.querySelector('input[name="view-mode"]:checked').value;
             const tableData = viewMode === 'geral' ? aggregateData(data) : data;
-
             const sortedData = [...tableData].sort((a, b) => {
-                const valA = a[currentSort.column];
-                const valB = b[currentSort.column];
+                const valA = a[currentSort.column], valB = b[currentSort.column];
                 if (valA < valB) return currentSort.direction === 'asc' ? -1 : 1;
                 if (valA > valB) return currentSort.direction === 'asc' ? 1 : -1;
                 return 0;
             });
-           
-            if (sortedData.length === 0) { 
-                dataDisplay.innerHTML = `<div class="alert alert-warning mt-3">Nenhum item encontrado para os filtros selecionados.</div>`; 
-                return; 
-            }
-
-            const renderHeader = (col, label) => {
-                const isSorted = currentSort.column === col;
-                const direction = isSorted ? currentSort.direction : '';
-                return `<th class="sortable ${direction}" data-sort-by="${col}">
-                            ${label}
-                            <span class="sort-icon asc">▲</span>
-                            <span class="sort-icon desc">▼</span>
-                        </th>`;
-            };
-
-            let tableHTML = `<table class="table table-hover align-middle mb-0">
-                <thead class="table-light"><tr>
-                    <th>Item</th>
-                    <th>Descrição</th>
-                    ${renderHeader('quantidadeNumerica', 'Qtd.')}
-                    ${renderHeader('valorCalculado', 'Valor Total')}
-                </tr></thead><tbody>`;
-
+            if (sortedData.length === 0) { dataDisplay.innerHTML = `<div class="alert alert-warning mt-3">Nenhum item encontrado.</div>`; return; }
+            const renderHeader = (col, label) => `<th class="sortable ${currentSort.column === col ? currentSort.direction : ''}" data-sort-by="${col}">${label}<span class="sort-icon asc">▲</span><span class="sort-icon desc">▼</span></th>`;
+            let tableHTML = `<table class="table table-hover align-middle mb-0"><thead class="table-light"><tr><th>Item</th><th>Descrição</th>${renderHeader('quantidadeNumerica', 'Qtd.')}${renderHeader('valorCalculado', 'Valor Total')}</tr></thead><tbody>`;
             sortedData.forEach(item => {
                 const detailsAttr = item.details ? `data-details='${JSON.stringify(item.details)}'` : '';
-                tableHTML += `<tr class="clickable-row" 
-                                  data-bs-toggle="modal" 
-                                  data-bs-target="#itemDetailModal"
-                                  data-descricao="${item.descrição || ''}"
-                                  data-embarcacao="${item.embarcação || 'Não especificada'}"
-                                  data-quantidade="${(item.quantidadeNumerica || 0).toLocaleString('pt-BR')}"
-                                  data-valor="${formatCurrency(item.valorCalculado)}"
-                                  data-unidade="${item.unidade || ''}"
-                                  ${detailsAttr}>
-                    <td>${item.item || ''}</td>
-                    <td>${item.descrição || ''}</td>
-                    <td class="text-center">${(item.quantidadeNumerica || 0).toLocaleString('pt-BR')}</td>
-                    <td class="currency">${formatCurrency(item.valorCalculado)}</td>
-                </tr>`;
+                tableHTML += `<tr class="clickable-row" data-bs-toggle="modal" data-bs-target="#itemDetailModal" data-descricao="${item.descrição || ''}" data-embarcacao="${item.embarcação || 'Não especificada'}" data-quantidade="${(item.quantidadeNumerica || 0).toLocaleString('pt-BR')}" data-valor="${formatCurrency(item.valorCalculado)}" data-unidade="${item.unidade || ''}" ${detailsAttr}>
+                    <td>${item.item || ''}</td><td>${item.descrição || ''}</td><td class="text-center">${(item.quantidadeNumerica || 0).toLocaleString('pt-BR')}</td><td class="currency">${formatCurrency(item.valorCalculado)}</td></tr>`;
             });
-            tableHTML += `</tbody></table>`;
-            dataDisplay.innerHTML = tableHTML;
+            dataDisplay.innerHTML = tableHTML + `</tbody></table>`;
        }
 
        function getContractItemCounts(data) {
-           const itemData = data.reduce((acc, item) => {
-               const key = item['item'] || 'Não especificado';
-               if (!acc[key]) {
-                   acc[key] = { count: 0, description: item['descrição'] || 'Sem descrição' };
-               }
-               acc[key].count += item.quantidadeNumerica; 
-               return acc;
-           }, {});
-           return Object.entries(itemData)
-                .map(([name, { count, description }]) => ({ name, count, description }))
-                .sort((a, b) => b.count - a.count);
+            const itemData = data.reduce((acc, item) => {
+                const key = item['item'] || 'Não especificado';
+                if (!acc[key]) acc[key] = { count: 0, description: item['descrição'] || 'Sem descrição' };
+                acc[key].count += item.quantidadeNumerica; 
+                return acc;
+            }, {});
+            return Object.entries(itemData).map(([name, { count, description }]) => ({ name, count, description })).sort((a, b) => b.count - a.count);
        }
        
-       function renderVesselPerformanceChart(data) {
-            destroyChart('vesselPerformanceChart');
-            const ctx = document.getElementById('vesselPerformanceChart').getContext('2d');
-            if (!data.length || !data[0].hasOwnProperty('embarcação')) {
-                return;
-            }
+       function renderVesselPerformanceList(data) {
+            const container = document.getElementById('vesselPerformanceContainer');
+            if (data.length === 0) { container.innerHTML = '<div class="text-center text-muted p-3">Nenhum dado para exibir.</div>'; return; }
             const vesselData = data.reduce((acc, item) => {
                 const vessel = item.embarcação || 'Não especificada';
-                if (!acc[vessel]) acc[vessel] = { count: 0, valor: 0 };
-                acc[vessel].count += 1;
+                if (!acc[vessel]) acc[vessel] = { valor: 0 };
                 acc[vessel].valor += item.valorCalculado;
                 return acc;
             }, {});
-            const processedData = Object.entries(vesselData).map(([name, d]) => ({ name, itemsCount: d.count, totalValue: d.valor })).sort((a,b) => b.totalValue - a.totalValue);
-            const labels = processedData.map(d => d.name);
-            const itemsData = processedData.map(d => d.itemsCount);
-            const valorData = processedData.map(d => d.totalValue);
-            chartInstances['vesselPerformanceChart'] = new Chart(ctx, {
-                type: 'bar', data: { labels, datasets: [
-                    { label: 'Valor (R$)', data: valorData, backgroundColor: 'rgba(54, 162, 235, 0.7)', yAxisID: 'y' },
-                    { label: 'Nº de Itens', data: itemsData, backgroundColor: 'rgba(255, 159, 64, 0.7)', yAxisID: 'y1' }
-                ]},
-                options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { position: 'bottom' }, tooltip: { mode: 'index', intersect: false } }, scales: { y: { stacked: true }, y1: { stacked: true, display: false } } }
-            });
-       }
+            const processedData = Object.entries(vesselData).map(([name, d]) => ({ name, totalValue: d.valor })).sort((a,b) => b.totalValue - a.totalValue);
+            let listHTML = '<ul class="list-group list-group-flush" id="vesselPerformanceList">';
+            processedData.forEach(item => { listHTML += `<li class="list-group-item"><span>${item.name}</span><span class="fw-bold text-primary">${formatCurrency(item.totalValue)}</span></li>`; });
+            container.innerHTML = listHTML + '</ul>';
+        }
 
        function renderUniqueItemsChart(data) {
            destroyChart('uniqueItemsChart');
-           const ctx = document.getElementById('uniqueItemsChart').getContext('2d');
            if (data.length === 0) return;
+           const ctx = document.getElementById('uniqueItemsChart').getContext('2d');
            const groupedByMonth = data.reduce((acc, item) => {
-               const monthKey = `${item.dataConclusao.getFullYear()}-${(item.dataConclusao.getMonth() + 1).toString().padStart(2, '0')}`;
-               if (!acc[monthKey]) acc[monthKey] = { date: item.dataConclusao, count: 0 };
-               acc[monthKey].count += 1; return acc;
+               const key = `${item.dataConclusao.getFullYear()}-${(item.dataConclusao.getMonth() + 1).toString().padStart(2, '0')}`;
+               if (!acc[key]) acc[key] = 0;
+               acc[key] += 1; return acc;
            }, {});
            const sortedKeys = Object.keys(groupedByMonth).sort((a,b) => new Date(a) - new Date(b));
-           const labels = sortedKeys.map(key => new Date(key + '-02').toLocaleString('pt-BR', { month: 'short', year: 'numeric' }));
-           const chartData = sortedKeys.map(key => groupedByMonth[key].count);
-           chartInstances['uniqueItemsChart'] = new Chart(ctx, {
-               type: 'bar', data: { labels, datasets: [{ label: 'Nº de Itens Medidos', data: chartData, backgroundColor: 'rgba(75, 192, 192, 0.7)' }] },
-               options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
-           });
+           chartInstances['uniqueItemsChart'] = new Chart(ctx, { type: 'bar', data: { labels: sortedKeys.map(key => new Date(key + '-02').toLocaleString('pt-BR', { month: 'short', year: 'numeric' })), datasets: [{ label: 'Nº de Itens Medidos', data: sortedKeys.map(key => groupedByMonth[key]), backgroundColor: 'rgba(75, 192, 192, 0.7)' }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } } });
        }
 
        function renderTopContractsChart(data) {
            destroyChart('topContractsChart');
-           const ctx = document.getElementById('topContractsChart').getContext('2d');
            if (data.length === 0) return;
+           const ctx = document.getElementById('topContractsChart').getContext('2d');
            const contractCounts = getContractItemCounts(data);
            let topData = contractCounts.slice(0, 8);
-           if (contractCounts.length > 8) {
-               const otherCount = contractCounts.slice(8).reduce((sum, item) => sum + item.count, 0);
-               topData.push({ name: 'Outros', count: otherCount, description: `${contractCounts.length - 8} outros itens` });
-           }
-           chartInstances['topContractsChart'] = new Chart(ctx, {
-               type: 'bar',
-               data: { 
-                   labels: topData.map(d => d.name), 
-                   datasets: [{ 
-                       label: 'Quantidade Total', 
-                       data: topData.map(d => d.count),
-                       backgroundColor: 'rgba(255, 159, 64, 0.7)',
-                       customData: topData.map(d => d.description)
-                   }] 
-               },
-               options: { 
-                   indexAxis: 'y', responsive: true, maintainAspectRatio: false, 
-                   plugins: { 
-                       legend: { display: false },
-                       tooltip: { callbacks: {
-                           label: (c) => `${c.dataset.label || ''}: ${c.parsed.x.toLocaleString('pt-BR')}`,
-                           afterLabel: (c) => c.dataset.customData[c.dataIndex]
-                       }}
-                   }
-               }
-           });
+           if (contractCounts.length > 8) topData.push({ name: 'Outros', count: contractCounts.slice(8).reduce((sum, item) => sum + item.count, 0), description: `${contractCounts.length - 8} outros itens` });
+           chartInstances['topContractsChart'] = new Chart(ctx, { type: 'bar', data: { labels: topData.map(d => d.name), datasets: [{ label: 'Quantidade Total', data: topData.map(d => d.count), backgroundColor: 'rgba(255, 159, 64, 0.7)', customData: topData.map(d => d.description) }] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => `${c.dataset.label || ''}: ${c.parsed.x.toLocaleString('pt-BR')}`, afterLabel: c => c.dataset.customData[c.dataIndex] }}} }});
        }
 
        function renderParetoChart(data) {
             destroyChart('paretoChart');
-            const ctx = document.getElementById('paretoChart').getContext('2d');
             if (data.length === 0) return;
-            const contractCounts = getContractItemCounts(data);
-            const totalCount = contractCounts.reduce((sum, item) => sum + item.count, 0);
+            const ctx = document.getElementById('paretoChart').getContext('2d');
+            const top8ContractCounts = getContractItemCounts(data).slice(0, 8);
+            const totalCount = top8ContractCounts.reduce((sum, item) => sum + item.count, 0);
             let cumulativeCount = 0;
-            const paretoData = contractCounts.map(item => ({ ...item, cumulativePct: (cumulativeCount += item.count) / totalCount * 100 }));
-            chartInstances['paretoChart'] = new Chart(ctx, {
-                type: 'bar',
-                data: { 
-                    labels: paretoData.map(d => d.name),
-                    datasets: [
-                        { label: 'Quantidade', data: paretoData.map(d => d.count), backgroundColor: 'rgba(54, 162, 235, 0.7)', yAxisID: 'y', customData: paretoData.map(d => d.description) },
-                        { label: 'Cumulativo %', data: paretoData.map(d => d.cumulativePct.toFixed(1)), type: 'line', borderColor: 'rgba(255, 99, 132, 1)', yAxisID: 'y1', tension: 0.1 }
-                    ]
-                },
-                options: { responsive: true, maintainAspectRatio: false,
-                    plugins: { 
-                        legend: { display: false }, 
-                        tooltip: { 
-                            mode: 'index', intersect: false,
-                            callbacks: { afterLabel: (c) => c.datasetIndex === 0 ? c.dataset.customData[c.dataIndex] : '' }
-                        } 
-                    },
-                    scales: { 
-                        x: { ticks: { display: false } }, 
-                        y: { position: 'left', title: { display: true, text: 'Quantidade' } },
-                        y1: { type: 'linear', position: 'right', min: 0, max: 100, title: { display: true, text: '%' }, grid: { drawOnChartArea: false } }
-                    }
-                }
-            });
+            const paretoData = top8ContractCounts.map(item => ({ ...item, cumulativePct: (cumulativeCount += item.count) / totalCount * 100 }));
+            chartInstances['paretoChart'] = new Chart(ctx, { type: 'bar', data: { labels: paretoData.map(d => d.name), datasets: [ { label: 'Quantidade', data: paretoData.map(d => d.count), backgroundColor: 'rgba(54, 162, 235, 0.7)', yAxisID: 'y', customData: paretoData.map(d => d.description) }, { label: 'Cumulativo %', data: paretoData.map(d => d.cumulativePct.toFixed(1)), type: 'line', borderColor: 'rgba(255, 99, 132, 1)', yAxisID: 'y1', tension: 0.1 } ]}, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false, callbacks: { afterLabel: c => c.datasetIndex === 0 ? c.dataset.customData[c.dataIndex] : '' }}}, scales: { x: { ticks: { display: false } }, y: { position: 'left', title: { display: true, text: 'Quantidade' } }, y1: { type: 'linear', position: 'right', min: 0, max: 100, title: { display: true, text: '%' }, grid: { drawOnChartArea: false } }}}});
        }
 
        function applyFilters() {
-            const selectedMonth = monthFilter.value;
-            const selectedVessel = vesselFilter.value;
-
+            const { value: selectedReservatorio } = reservatorioFilter, { value: selectedMonth } = monthFilter, { value: selectedCity } = cityFilter, { value: selectedVessel } = vesselFilter;
             const filteredData = allProcessedData.filter(item => {
+                const reservatorioMatch = selectedReservatorio === 'all' || (selectedReservatorio === 'furnas' && item.cidade !== 'Delfinópolis') || (selectedReservatorio === 'mascarenhas' && item.cidade === 'Delfinópolis');
                 const monthMatch = selectedMonth === 'all' || `${item.dataConclusao.getFullYear()}-${(item.dataConclusao.getMonth() + 1).toString().padStart(2, '0')}` === selectedMonth;
+                const cityMatch = selectedCity === 'all' || item.cidade === selectedCity;
                 const vesselMatch = selectedVessel === 'all' || item.embarcação === selectedVessel;
-                return monthMatch && vesselMatch;
+                return reservatorioMatch && monthMatch && cityMatch && vesselMatch;
             });
-            
-            updateKPIs(filteredData, selectedMonth);
+            updateKPIs(filteredData, selectedMonth, selectedCity);
             renderTable(filteredData);
-
-            // Charts should always reflect the raw filtered data, not aggregated data.
             renderUniqueItemsChart(filteredData);
             renderTopContractsChart(filteredData);
             renderParetoChart(filteredData);
-            renderVesselPerformanceChart(filteredData);
+            renderVesselPerformanceList(filteredData);
        }
+
+        function generateReport() {
+            reportContentWrapper.innerHTML = '<div class="text-center p-4"><div class="spinner-border text-primary"></div></div>';
+            const getQuarterData = date => {
+                const q = Math.floor(date.getMonth() / 3) + 1, year = date.getFullYear();
+                return { key: `${year}-Q${q}`, name: `${q}º Trimestre de ${year}`, months: [["Janeiro", "Fevereiro", "Março"],["Abril", "Maio", "Junho"],["Julho", "Agosto", "Setembro"],["Outubro", "Novembro", "Dezembro"]][q - 1] };
+            };
+            const getMonthName = date => date.toLocaleString('pt-BR', { month: 'long' }).replace(/^\w/, c => c.toUpperCase());
+            const reportData = {};
+            allProcessedData.forEach(item => {
+                const reservatorio = item.cidade === 'Delfinópolis' ? 'Mascarenhas de Moraes' : 'Furnas';
+                const { key: qKey, name: qName, months: qMonths } = getQuarterData(item.dataConclusao);
+                const monthName = getMonthName(item.dataConclusao), vesselName = item.embarcação || 'Não especificada';
+                if (!reportData[reservatorio]) reportData[reservatorio] = {};
+                if (!reportData[reservatorio][qKey]) reportData[reservatorio][qKey] = { name: qName, months: qMonths, vessels: {} };
+                if (!reportData[reservatorio][qKey].vessels[vesselName]) reportData[reservatorio][qKey].vessels[vesselName] = { city: item.cidade, monthlyTotals: {}, quarterTotal: 0 };
+                const vesselEntry = reportData[reservatorio][qKey].vessels[vesselName];
+                if (!vesselEntry.monthlyTotals[monthName]) vesselEntry.monthlyTotals[monthName] = 0;
+                vesselEntry.monthlyTotals[monthName] += item.valorCalculado;
+                vesselEntry.quarterTotal += item.valorCalculado;
+            });
+            let reportHTML = '';
+            ['Furnas', 'Mascarenhas de Moraes'].forEach(reservatorio => {
+                if (!reportData[reservatorio]) return;
+                reportHTML += `<div class="report-section"><h2 class="text-primary mb-3">${reservatorio}</h2>`;
+                const sortedQuarterKeys = Object.keys(reportData[reservatorio]).sort().reverse();
+                if (sortedQuarterKeys.length === 0) { reportHTML += '<p class="text-muted">Nenhum dado encontrado.</p>'; }
+                sortedQuarterKeys.forEach(qKey => {
+                    const quarter = reportData[reservatorio][qKey];
+                    reportHTML += `<h4 class="mt-4 mb-3">${quarter.name}</h4><table class="table table-sm table-bordered"><thead class="table-light"><tr><th>Embarcação</th><th>Cidade</th><th>${quarter.months[0]}</th><th>${quarter.months[1]}</th><th>${quarter.months[2]}</th><th>Total Trimestre</th></tr></thead><tbody>`;
+                    let quarterGrandTotal = 0;
+                    const sortedVessels = Object.entries(quarter.vessels).sort(([, a], [, b]) => b.quarterTotal - a.quarterTotal);
+                    sortedVessels.forEach(([vesselName, vessel]) => {
+                        quarterGrandTotal += vessel.quarterTotal;
+                        reportHTML += `<tr><td>${vesselName}</td><td>${vessel.city}</td><td>${formatCurrency(vessel.monthlyTotals[quarter.months[0]] || 0)}</td><td>${formatCurrency(vessel.monthlyTotals[quarter.months[1]] || 0)}</td><td>${formatCurrency(vessel.monthlyTotals[quarter.months[2]] || 0)}</td><td class="fw-bold">${formatCurrency(vessel.quarterTotal)}</td></tr>`;
+                    });
+                    reportHTML += `<tr class="table-light"><td colspan="5" class="fw-bold text-end">Total Geral do Trimestre</td><td class="fw-bold">${formatCurrency(quarterGrandTotal)}</td></tr></tbody></table>`;
+                });
+                reportHTML += '</div>';
+            });
+            reportContentWrapper.innerHTML = reportHTML || '<p class="text-center p-5">Nenhum dado disponível.</p>';
+        }
 
        function fetchData() {
            const parseOptions = { download: true, header: true, skipEmptyLines: true, transformHeader: h => h.trim().toLowerCase() };
            Promise.all([
-               new Promise(resolve => Papa.parse(SERVICES_CSV_URL, { ...parseOptions, complete: resolve })),
-               new Promise(resolve => Papa.parse(PRICES_CSV_URL, { ...parseOptions, complete: resolve }))
-           ])
-           .then(([servicesResults, pricesResults]) => {
-                const priceMap = new Map();
-                pricesResults.data.forEach(priceItem => {
-                    if (priceItem['código']) priceMap.set(priceItem['código'].trim(), parseCurrency(priceItem['valor']));
-                });
-
-                allProcessedData = servicesResults.data.map(serviceItem => {
-                    const itemCode = serviceItem['item'] ? serviceItem['item'].trim() : null;
-                    const quantidadeNumerica = parseQuantity(serviceItem.quantidade);
-                    const precoUnitario = priceMap.get(itemCode) || 0;
-                    return { ...serviceItem, dataConclusao: parseDate(serviceItem.mês), quantidadeNumerica, valorCalculado: precoUnitario * quantidadeNumerica };
+               new Promise(r => Papa.parse(SERVICES_CSV_URL, {...parseOptions, complete: r})),
+               new Promise(r => Papa.parse(PRICES_CSV_URL, {...parseOptions, complete: r})),
+               new Promise(r => Papa.parse(LOCATIONS_CSV_URL, {...parseOptions, complete: r}))
+           ]).then(([services, prices, locations]) => {
+                const priceMap = new Map(prices.data.map(i => [i['código']?.trim(), i['valor'] ? parseFloat(i['valor'].replace(/[^\d,]/g, '').replace(',', '.')) : 0]));
+                const vesselCityMap = new Map(locations.data.map(i => [i['embarcação']?.trim(), i['cidade']?.trim()]));
+                allProcessedData = services.data.map(item => {
+                    const vesselName = item['embarcação']?.trim();
+                    const preco = priceMap.get(item['item']?.trim()) || 0;
+                    const qtd = parseQuantity(item.quantidade);
+                    return { ...item, cidade: vesselCityMap.get(vesselName) || 'Não especificada', dataConclusao: parseDate(item.mês), quantidadeNumerica: qtd, valorCalculado: preco * qtd };
                 }).filter(item => item.dataConclusao && item.valorCalculado > 0);
-
-                if (allProcessedData.length === 0) {
-                    dataDisplay.innerHTML = `<div class="alert alert-danger"><b>Dados não encontrados.</b> Verifique a fonte de dados.</div>`;
-                    return;
-                }
+                if (allProcessedData.length === 0) { dataDisplay.innerHTML = `<div class="alert alert-danger"><b>Dados não encontrados.</b></div>`; return; }
+                populateReservatorioFilter();
                 populateMonthFilter(allProcessedData);
+                populateCityFilter(allProcessedData);
                 populateVesselFilter(allProcessedData);
                 applyFilters();
-           })
-           .catch(err => {
-               console.error('Erro ao buscar ou processar dados:', err);
-               dataDisplay.innerHTML = `<div class="alert alert-danger"><b>Falha ao carregar dados.</b> Verifique o console para mais detalhes.</div>`;
-           });
+           }).catch(err => { console.error('Erro:', err); dataDisplay.innerHTML = `<div class="alert alert-danger"><b>Falha ao carregar dados.</b></div>`; });
        }
 
-       monthFilter.addEventListener('change', applyFilters);
-       vesselFilter.addEventListener('change', applyFilters);
-       viewModeRadios.forEach(radio => radio.addEventListener('change', () => renderTable(allProcessedData.filter(item => {
-            const selectedMonth = monthFilter.value;
-            const selectedVessel = vesselFilter.value;
-            const monthMatch = selectedMonth === 'all' || `${item.dataConclusao.getFullYear()}-${(item.dataConclusao.getMonth() + 1).toString().padStart(2, '0')}` === selectedMonth;
-            const vesselMatch = selectedVessel === 'all' || item.embarcação === selectedVessel;
-            return monthMatch && vesselMatch;
-       }))));
+       document.querySelectorAll('select, input[name="view-mode"]').forEach(el => el.addEventListener('change', applyFilters));
+       document.getElementById('report-button').addEventListener('click', () => generateReport());
+       printReportButton.addEventListener('click', () => window.print());
        
-       dataDisplay.addEventListener('click', (e) => {
+       dataDisplay.addEventListener('click', e => {
             const header = e.target.closest('[data-sort-by]');
             if (!header) return;
             const sortBy = header.dataset.sortBy;
-            if (currentSort.column === sortBy) {
-                currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
-            } else {
-                currentSort.column = sortBy;
-                currentSort.direction = 'desc';
-            }
+            if (currentSort.column === sortBy) currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+            else { currentSort.column = sortBy; currentSort.direction = 'desc'; }
             applyFilters();
         });
 
-        const itemDetailModal = document.getElementById('itemDetailModal');
-        itemDetailModal.addEventListener('show.bs.modal', function (event) {
-          const row = event.relatedTarget;
-          const unit = row.getAttribute('data-unidade') || 'un';
-          
-          itemDetailModal.querySelector('#modalItemTitle').textContent = row.getAttribute('data-descricao');
-          itemDetailModal.querySelector('#modalValor').textContent = row.getAttribute('data-valor');
-          itemDetailModal.querySelector('#modalQuantidade').textContent = `${row.getAttribute('data-quantidade')} ${unit}`;
-
-
-          const detailsContainer = itemDetailModal.querySelector('#modalDetailsContainer');
+        document.getElementById('itemDetailModal').addEventListener('show.bs.modal', e => {
+          const row = e.relatedTarget, unit = row.getAttribute('data-unidade') || 'un';
+          e.target.querySelector('#modalItemTitle').textContent = row.getAttribute('data-descricao');
+          e.target.querySelector('#modalValor').textContent = row.getAttribute('data-valor');
+          e.target.querySelector('#modalQuantidade').textContent = `${row.getAttribute('data-quantidade')} ${unit}`;
+          const detailsContainer = e.target.querySelector('#modalDetailsContainer');
           const detailsJSON = row.getAttribute('data-details');
-
-          if (detailsJSON) { // Modo "Geral"
-                const details = JSON.parse(detailsJSON);
-                let detailsHTML = '<ul class="list-group list-group-flush">';
-                Object.entries(details).forEach(([vessel, data]) => {
-                    detailsHTML += `<li class="list-group-item d-flex justify-content-between align-items-center">
-                        <span class="fw-bold text-primary">${vessel}</span>
-                        <span>${data.qty.toLocaleString('pt-BR')} ${unit} (${formatCurrency(data.val)})</span>
-                    </li>`;
-                });
-                detailsHTML += '</ul>';
-                detailsContainer.innerHTML = detailsHTML;
-          } else { // Modo "Unitário"
-                const embarcacao = row.getAttribute('data-embarcacao');
-                detailsContainer.innerHTML = `<p><strong>Embarcação:</strong> <span class="text-primary fw-bold">${embarcacao}</span></p>`;
+          if (detailsJSON) {
+               let detailsHTML = '<ul class="list-group list-group-flush">';
+               Object.entries(JSON.parse(detailsJSON)).forEach(([v, d]) => { detailsHTML += `<li class="list-group-item d-flex justify-content-between"><span>${v}</span><span>${d.qty.toLocaleString('pt-BR')} ${unit} (${formatCurrency(d.val)})</span></li>`; });
+               detailsContainer.innerHTML = detailsHTML + '</ul>';
+          } else {
+               detailsContainer.innerHTML = `<p><strong>Embarcação:</strong> <span class="text-primary fw-bold">${row.getAttribute('data-embarcacao')}</span></p>`;
           }
         });
 
        fetchData();
-   });
-   </script>
+    });
+    </script>
 </body>
-</html>
+</html>"
