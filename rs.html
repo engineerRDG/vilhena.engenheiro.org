@@ -165,7 +165,16 @@
         let allRequests = [];
         let statusCardFilter = null;
 
-        // Normaliza nome de embarcação (mantendo Delfinópolis completo)
+        // Lista de embarcações que compõem Mascarenhas de Moraes (Nomes normalizados)
+        const mascarenhasVessels = [
+            'Canastra', 
+            'Delfinópolis I', 
+            'NSDN VII', // Normalizado de Nossa Senhora dos Navegantes VII
+            'NSDN X',   // Normalizado de Nossa Senhora dos Navegantes X
+            'RG IV'     // Normalizado de Rio Grande IV
+        ];
+
+        // Normaliza nome de embarcação
         function normalizeVesselName(name) {
             if (!name) return '';
             const n = name.trim();
@@ -207,7 +216,11 @@
             const sortedVessels = Array.from(vessels).sort((a, b) =>
                 normalizeForSort(a).localeCompare(normalizeForSort(b))
             );
+            
+            // Adiciona a opção padrão e a opção Mascarenhas de Moraes fixa
             vesselFilter.innerHTML = '<option value="all">Embarcações</option>';
+            vesselFilter.innerHTML += '<option value="mascarenhas" style="font-weight:bold; color:#0d6efd;">Mascarenhas de Moraes</option>';
+            
             sortedVessels.forEach(vessel => {
                 const option = document.createElement('option');
                 option.value = vessel; option.textContent = vessel;
@@ -293,9 +306,13 @@
                 });
             }
 
-            if (vesselFilter.value !== 'all') {
+            // Lógica do filtro de Embarcação com "Mascarenhas de Moraes"
+            if (vesselFilter.value === 'mascarenhas') {
+                filtered = filtered.filter(req => mascarenhasVessels.includes(req.embarcação));
+            } else if (vesselFilter.value !== 'all') {
                 filtered = filtered.filter(req => req.embarcação === vesselFilter.value);
             }
+
             if (monthFilter.value !== 'all') {
                 filtered = filtered.filter(req => getMonthYear(req.abertura) === monthFilter.value);
             }
@@ -373,9 +390,21 @@
             applyFilters();
         });
 
-        // -------- RELATÓRIO: ordenação por embarcação (sem acento) e depois RS --------
+        // -------- RELATÓRIO --------
         btnRelatorio.addEventListener('click', function() {
-            let abertas = allRequests.filter(req => req.status === 'Em aberto');
+            // Começa com todas as requisições
+            let dataForReport = allRequests;
+
+            // Aplica filtro de embarcação/usina selecionada no momento
+            if (vesselFilter.value === 'mascarenhas') {
+                dataForReport = dataForReport.filter(req => mascarenhasVessels.includes(req.embarcação));
+            } else if (vesselFilter.value !== 'all') {
+                dataForReport = dataForReport.filter(req => req.embarcação === vesselFilter.value);
+            }
+            // Se for 'all', mantém todos
+
+            // Filtra apenas "Em aberto" para o relatório
+            let abertas = dataForReport.filter(req => req.status === 'Em aberto');
 
             // Ordena por embarcação (ignorando acentos) e depois por RS
             abertas.sort((a, b) => {
@@ -469,6 +498,7 @@
                     </style>
                 </head>
                 <body>
+                    <h3 style="font-size: 6px; margin-bottom: 5px;">Relatório de Pendências - ${vesselFilter.options[vesselFilter.selectedIndex].text}</h3>
                     <table>
                         <thead>
                             <tr>
@@ -479,7 +509,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            ${rowsHtml || '<tr><td colspan="4" style="text-align:center;">Nenhuma RS em aberto.</td></tr>'}
+                            ${rowsHtml || '<tr><td colspan="4" style="text-align:center;">Nenhuma RS em aberto para a seleção atual.</td></tr>'}
                         </tbody>
                     </table>
                 </body>
