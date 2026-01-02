@@ -4,153 +4,381 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Controle de RS - Vilhena Serviços</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Biblioteca para leitura de CSV -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <style>
-    body { background-color: #f0f2f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    .navbar-brand img, .footer-logo { 
-        height: 40px; 
-        width: auto; 
-    }
-    .content-container { background-color: white; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); border-radius: 8px; padding: 2rem; margin-bottom: 2rem; }
-    .welcome-section { text-align: center; padding: 1.5rem; background: linear-gradient(135deg, #495057, #343a40); color: white; border-radius: 8px; margin-bottom: 2rem; }
-    .welcome-section h1 { font-weight: 700; }
-    .kpi-card { cursor: pointer; transition: transform 0.1s ease, box-shadow 0.1s ease; }
-    .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 6px 14px rgba(0,0,0,0.15); }
-    .kpi-card.active { box-shadow: 0 0 0 3px rgba(13,110,253,.5); }
-    .kpi-card .kpi-value { font-size: 2.5rem; font-weight: 700; }
-    .kpi-card .text-xs { font-size: 0.8rem; letter-spacing: 0.5px; }
-    .text-gray-300 { color: #dee2e6 !important; }
-    .table-hover tbody tr:hover { background-color: rgba(0, 0, 0, 0.05); }
-    .table-light { background-color: #f8f9fa !important; color: #6c757d; }
+        /* 1. IDENTIDADE VISUAL E CSS PADRÃO (Industrial Monospace) */
+        :root {
+            --bg-page: #f0f0f0;
+            --bg-container: #ffffff;
+            --header-bg: #333333;
+            --header-text: #ffffff;
+            --border-color: #cccccc;
+            --text-primary: #333333;
+            --btn-primary: #28a745;
+            --btn-primary-hover: #218838;
+            --btn-report: #007bff;
+            --btn-report-hover: #0056b3;
+            --btn-danger: #dc3545;
+            --btn-danger-hover: #c82333;
+            --btn-secondary: #ffc107;
+            --btn-secondary-hover: #e0a800;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg-page);
+            font-family: 'Courier New', Courier, monospace; /* OBRIGATÓRIO */
+            color: var(--text-primary);
+            margin: 0;
+            padding: 30px 20px;
+            font-size: 14px;
+        }
+
+        /* 2. ESTRUTURA E VISUAL 3D */
+        .container {
+            background-color: var(--bg-container);
+            max-width: 1200px;
+            margin: 0 auto;
+            border-radius: 8px;
+            /* Efeito de Sombra 3D Elevado */
+            box-shadow: 0 20px 50px rgba(0,0,0,0.15), 0 10px 20px rgba(0,0,0,0.1);
+            padding: 25px;
+            border: 1px solid #d0d0d0;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Cabeçalho */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--header-bg);
+            padding-bottom: 20px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .header-left { display: flex; align-items: center; gap: 15px; }
+        .header-logo { height: 50px; width: auto; }
+        .header-title h1 { margin: 0; font-size: 26px; color: var(--header-bg); text-transform: uppercase; line-height: 1.2; }
+        .header-title div { font-size: 13px; color: #666; letter-spacing: 1px; }
+        .header-menu { display: flex; gap: 10px; }
+
+        /* KPIs */
+        .grid-kpi {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .kpi-card {
+            border: 2px solid var(--header-bg);
+            background: #fff;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        
+        .kpi-card:active { transform: translateY(1px); }
+
+        .kpi-card.active {
+            border-color: var(--btn-secondary);
+            background-color: #fffdf0;
+            box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.3);
+        }
+
+        .kpi-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #666;
+        }
+
+        .kpi-value {
+            font-size: 36px;
+            font-weight: bold;
+            color: #000;
+        }
+
+        /* Inputs e Controles */
+        input, select {
+            font-family: 'Courier New', Courier, monospace;
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background: #fff;
+            color: #333;
+        }
+        input:focus, select:focus { outline: none; border-color: var(--header-bg); background-color: #fafafa; }
+
+        .controls-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            background: #f8f8f8;
+            padding: 15px;
+            border: 1px solid #eee;
+            border-left: 4px solid var(--header-bg);
+            align-items: flex-end;
+            margin-bottom: 20px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            min-width: 150px;
+            flex-grow: 1;
+        }
+
+        .control-group label {
+            font-size: 11px;
+            text-transform: uppercase;
+            font-weight: bold;
+            color: #444;
+        }
+
+        /* Botões */
+        button {
+            font-family: 'Courier New', Courier, monospace;
+            border: none;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 12px;
+            border-radius: 4px;
+            transition: background 0.2s, transform 0.1s;
+        }
+        button:active { transform: translateY(1px); }
+        .btn-primary { background-color: var(--btn-primary); color: white; }
+        .btn-primary:hover { background-color: var(--btn-primary-hover); }
+        .btn-report { background-color: var(--btn-report); color: white; }
+        .btn-report:hover { background-color: var(--btn-report-hover); }
+        .btn-secondary { background-color: var(--btn-secondary); color: #333; border: 1px solid #d39e00; }
+        .btn-secondary:hover { background-color: var(--btn-secondary-hover); }
+
+        /* Tabela */
+        .table-container { overflow-x: auto; border: 1px solid var(--border-color); }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        thead { background-color: var(--header-bg); color: white; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border-color); border-right: 1px solid #eee; }
+        th:last-child, td:last-child { border-right: none; }
+        
+        tbody tr:nth-child(even) { background-color: #f9f9f9; }
+        tbody tr:hover { background-color: #e9ecef; cursor: pointer; }
+        tbody tr.table-light { background-color: #f0f0f0; color: #555; }
+
+        .text-center { text-align: center; }
+
+        /* Status Badges (Texto Puro) */
+        .status-badge {
+            padding: 2px 6px;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 11px;
+            display: inline-block;
+        }
+        .status-open { background-color: #ffc107; color: #000; border: 1px solid #d39e00; }
+        .status-progress { background-color: #17a2b8; color: #fff; border: 1px solid #117a8b; }
+        .status-closed { background-color: #28a745; color: #fff; border: 1px solid #1e7e34; }
+        .status-undefined { background-color: #6c757d; color: #fff; border: 1px solid #545b62; }
+
+        /* Footer */
+        footer {
+            margin-top: 40px; padding-top: 20px;
+            border-top: 2px solid var(--header-bg);
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;
+        }
+        .footer-logo { height: 40px; width: auto; }
+        .footer-info { text-align: right; font-size: 12px; color: #555; line-height: 1.4; }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-content {
+            background: white; width: 90%; max-width: 900px; max-height: 90vh; overflow-y: auto;
+            border: 2px solid var(--header-bg); box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: flex; flex-direction: column;
+        }
+        .modal-header {
+            background: var(--header-bg); color: white; padding: 15px;
+            display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0;
+        }
+        .modal-header h3 { margin: 0; font-size: 16px; text-transform: uppercase; }
+        .modal-close { background: transparent; border: none; color: white; font-size: 20px; cursor: pointer; font-weight: bold; }
+        .modal-body { padding: 0; height: auto !important; max-height: none !important; overflow: visible !important; }
+        .modal-footer { padding: 15px; border-top: 1px solid #eee; display: flex; justify-content: flex-end; gap: 10px; background: #fff; }
+
+        /* Spinner */
+        .spinner-custom {
+            border: 4px solid #f3f3f3; border-top: 4px solid #555; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* 3. IMPRESSÃO */
+        .print-area { display: none; }
+        @media print {
+            body { background-color: white; margin: 0; padding: 0; }
+            .container, .no-print { display: none !important; }
+            .print-area { display: block; width: 100%; margin: 0 auto; }
+            
+            /* Estilo Específico do Relatório RS (Checklist) */
+            body { font-family: Arial, sans-serif; font-size: 4px; line-height: 1.1; margin: 0; padding: 0; }
+            .print-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+            .print-table th, .print-table td {
+                border: 1px solid #000; padding: 0 1px; vertical-align: middle; word-wrap: break-word;
+            }
+            .print-table th { background-color: #f0f0f0; font-weight: bold; }
+            .chk-col { width: 18px; text-align: center; vertical-align: middle; }
+            .chk { display: block; margin: 0 auto; width: 8px; height: 8px; }
+            .col-rs { width: 32px; }
+            .emb-col { width: 95px; white-space: nowrap; overflow: hidden; text-overflow: clip; }
+            .col-servico { width: auto; }
+        }
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-dark bg-black">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">
-                <img src="https://raw.githubusercontent.com/engineerRDG/vilhena.engenheiro.org/refs/heads/main/imagem/logo.png" alt="Vilhena Serviços Logo">
-            </a>
-            <div class="dropdown">
-                <button class="btn btn-light btn-sm fw-bold" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    Menu
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end">
-                    <li><a class="dropdown-item" href="rs.html">RS</a></li>
-                    <li><a class="dropdown-item" href="medicao.html">Medição</a></li>
-                    <li><a class="dropdown-item" href="status.html">Delfinópolis</a></li>
-                    <li><a class="dropdown-item" href="diario.html">Diário</a></li>
-                </ul>
-            </div>
-        </div>
-    </nav>
 
-    <main class="container mt-4">
-        <div class="welcome-section">
-            <h1>Controle de Requisições de Serviço</h1>
-        </div>
-        <div class="row mb-4">
-            <div class="col-md-4">
-                <div id="card-open" class="card shadow-sm kpi-card border-warning">
-                    <div class="card-body text-warning">
-                        <div class="row align-items-center">
-                            <div class="col">
-                                <div class="text-xs font-weight-bold text-uppercase mb-1">Em Aberto</div>
-                                <div id="kpi-open" class="kpi-value">0</div>
-                            </div>
-                            <div class="col-auto"><i class="bi bi-hourglass-split fs-1 text-gray-300"></i></div>
-                        </div>
-                    </div>
+    <!-- Interface Principal -->
+    <div class="container">
+        <header>
+            <div class="header-left">
+                <img src="https://raw.githubusercontent.com/engineerRDG/vilhena.engenheiro.org/refs/heads/main/imagem/logo.png" alt="Vilhena Serviços Logo" class="header-logo">
+                <div class="header-title">
+                    <h1>Vilhena Serviços Ltda.</h1>
+                    <div>CONTROLE DE REQUISIÇÕES DE SERVIÇO</div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div id="card-in-progress" class="card shadow-sm kpi-card border-info">
-                    <div class="card-body text-info">
-                        <div class="row align-items-center">
-                            <div class="col">
-                                <div class="text-xs font-weight-bold text-uppercase mb-1">Em Andamento</div>
-                                <div id="kpi-in-progress" class="kpi-value">0</div>
-                            </div>
-                            <div class="col-auto"><i class="bi bi-gear fs-1 text-gray-300"></i></div>
-                        </div>
-                    </div>
-                </div>
+            <div class="header-menu">
+                <button class="btn-primary" onclick="window.location.href='rs.html'">RS</button>
+                <button class="btn-secondary" onclick="window.location.href='medicao.html'">MEDIÇÃO</button>
             </div>
-            <div class="col-md-4">
-                <div id="card-completed" class="card shadow-sm kpi-card border-success">
-                    <div class="card-body text-success">
-                        <div class="row align-items-center">
-                            <div class="col">
-                                <div class="text-xs font-weight-bold text-uppercase mb-1">Concluído</div>
-                                <div id="kpi-completed" class="kpi-value">0</div>
-                            </div>
-                            <div class="col-auto"><i class="bi bi-check2-circle fs-1 text-gray-300"></i></div>
-                        </div>
-                    </div>
-                </div>
+        </header>
+
+        <!-- KPIs (Filtros Rápidos) -->
+        <div class="grid-kpi">
+            <div id="card-open" class="kpi-card" style="border-left: 5px solid #ffc107;">
+                <div class="kpi-label">Em Aberto</div>
+                <div id="kpi-open" class="kpi-value">0</div>
+            </div>
+            <div id="card-in-progress" class="kpi-card" style="border-left: 5px solid #17a2b8;">
+                <div class="kpi-label">Em Andamento</div>
+                <div id="kpi-in-progress" class="kpi-value">0</div>
+            </div>
+            <div id="card-completed" class="kpi-card" style="border-left: 5px solid #28a745;">
+                <div class="kpi-label">Concluído</div>
+                <div id="kpi-completed" class="kpi-value">0</div>
             </div>
         </div>
 
-        <div class="content-container">
-            <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
-                <h4 class="mb-0">Requisições</h4>
-                <div class="d-flex flex-wrap gap-2 align-items-center">
-                    <button id="btn-relatorio" class="btn btn-sm btn-outline-secondary">
-                        <i class="bi bi-file-earmark-pdf me-1"></i> Relatório
-                    </button>
-                    <div class="input-group input-group-sm" style="width: auto;">
-                        <input type="search" id="search-input" class="form-control" placeholder="Pesquisar RS ou Serviço..." style="max-width: 200px;">
-                        <select id="vessel-filter" class="form-select" style="max-width: 150px;"></select>
-                        <select id="status-filter" class="form-select" style="max-width: 150px;"></select>
-                        <select id="month-filter" class="form-select" style="max-width: 150px;"></select>
+        <!-- Filtros -->
+        <div class="controls-bar">
+            <div class="control-group" style="flex-grow: 2; max-width: 400px;">
+                <label>Pesquisar (RS/Serviço)</label>
+                <input type="search" id="search-input" placeholder="Digite para filtrar...">
+            </div>
+            <div class="control-group">
+                <label>Embarcação</label>
+                <select id="vessel-filter"></select>
+            </div>
+            <div class="control-group">
+                <label>Status</label>
+                <select id="status-filter"></select>
+            </div>
+            <div class="control-group">
+                <label>Mês</label>
+                <select id="month-filter"></select>
+            </div>
+            <div class="control-group" style="margin-left: auto;">
+                <button id="btn-relatorio" class="btn-report">GERAR RELATÓRIO [CHECKLIST]</button>
+            </div>
+        </div>
+
+        <!-- Tabela de Dados -->
+        <div class="table-container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>RS</th>
+                        <th>Embarcação</th>
+                        <th>Serviço</th>
+                        <th class="text-center">Status</th>
+                    </tr>
+                </thead>
+                <tbody id="rs-table-body">
+                    <tr><td colspan="4" class="text-center"><div class="spinner-custom"></div></td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Footer -->
+        <footer>
+            <div class="footer-left">
+                <img src="https://raw.githubusercontent.com/engineerRDG/vilhena.engenheiro.org/refs/heads/main/imagem/eletrobras.png" alt="Logo Eletrobras" class="footer-logo">
+            </div>
+            <div class="footer-info">
+                <p><b>Vilhena Serviços LTDA</b><br>Departamento de Engenharia e Manutenção</p>
+                <p><b>Rodrigo M. Araujo</b><br>Engenheiro Mecânico<br>Engenheiro de Segurança do Trabalho</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Modal Relatório -->
+    <div id="modal-report" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header no-print">
+                <h3>Relatório de Pendências (Checklist)</h3>
+                <button class="modal-close" onclick="closeModal('modal-report')">X</button>
+            </div>
+            <div class="modal-body">
+                <!-- Área de Visualização (Web) -->
+                <div id="report-screen-content" class="no-print" style="background: #f0f0f0; padding: 10px; font-size: 10px;">
+                    <div style="background: white; padding: 20px; border: 1px solid #ccc;">
+                        <p class="text-center">Selecione os filtros e clique em "Gerar Relatório".</p>
                     </div>
                 </div>
+                
+                <!-- Área de Impressão (Hidden unless @media print) -->
+                <div id="print-content" class="print-area">
+                    <!-- Conteúdo gerado via JS -->
+                </div>
             </div>
-            <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>RS</th>
-                            <th>Embarcação</th>
-                            <th>Serviço</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="rs-table-body">
-                        <tr>
-                            <td colspan="4" class="text-center p-5">
-                                <div class="spinner-border text-primary" role="status">
-                                    <span class="visually-hidden">Carregando...</span>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+            <div class="modal-footer no-print">
+                <button class="btn-secondary" onclick="closeModal('modal-report')">FECHAR</button>
+                <button class="btn-report" onclick="window.print()">IMPRIMIR</button>
             </div>
         </div>
-    </main>
-
-    <footer class="container mt-4 mb-4 d-flex justify-content-between align-items-center">
-        <img src="https://raw.githubusercontent.com/engineerRDG/vilhena.engenheiro.org/refs/heads/main/imagem/eletrobras.png" alt="Logo Eletrobras" class="footer-logo">
-        <div class="text-end">
-            <p class="text-muted mb-1" style="font-size: 0.9rem;">
-                <b>Vilhena Serviços LTDA</b><br>
-                Departamento de Engenharia e Manutenção
-            </p>
-            <p class="text-body-tertiary mb-0" style="font-size: 0.6rem;">
-                <b>Rodrigo M. Araujo</b><br>
-                Engenheiro Mecânico<br>
-                Engenheiro de Segurança do Trabalho
-            </p>
-        </div>
-    </footer>
+    </div>
 
     <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // URL DADOS
         const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT2PRrHp-jZ7WSS7VT-dqzf1x2k7e1UlQMS1ZHlrqpgiRed9YiBlx9uYO2e-P2eKoTB-PsjH-Cfwy2Y/pub?gid=0&single=true&output=csv';
+        
+        // DOM ELEMENTS
         const rsTableBody = document.getElementById('rs-table-body');
         const monthFilter = document.getElementById('month-filter');
         const statusFilter = document.getElementById('status-filter');
@@ -165,35 +393,28 @@
         let allRequests = [];
         let statusCardFilter = null;
 
-        // Lista de embarcações que compõem Mascarenhas de Moraes (Nomes normalizados)
+        // Lista de embarcações que compõem Mascarenhas de Moraes
         const mascarenhasVessels = [
             'Canastra', 
             'Delfinópolis I', 
-            'NSDN VII', // Normalizado de Nossa Senhora dos Navegantes VII
-            'NSDN X',   // Normalizado de Nossa Senhora dos Navegantes X
-            'RG IV'     // Normalizado de Rio Grande IV
+            'NSDN VII', 
+            'NSDN X',   
+            'RG IV'     
         ];
 
         // Normaliza nome de embarcação
         function normalizeVesselName(name) {
             if (!name) return '';
             const n = name.trim();
-            if (n === 'Nossa Senhora dos Navegantes VII') return 'NSDN VII';
-            if (n === 'Nossa Senhora dos Navegantes X') return 'NSDN X';
-            if (n === 'Rio Grande IV') return 'RG IV';
-            if (n === 'São Francisco I') return 'SF I';
-            if (n === 'São Francisco III') return 'SF III';
-            if (n === 'São João Batista do Glória') return 'SJBG';
-            return n;
-        }
-
-        // Remove acentuação para ordenação (Á = A)
-        function normalizeForSort(str) {
-            return (str || '')
-                .toString()
-                .normalize('NFD')
-                .replace(/[\u0300-\u036f]/g, '')
-                .toLowerCase();
+            const map = {
+                'Nossa Senhora dos Navegantes VII': 'NSDN VII',
+                'Nossa Senhora dos Navegantes X': 'NSDN X',
+                'Rio Grande IV': 'RG IV',
+                'São Francisco I': 'SF I',
+                'São Francisco III': 'SF III',
+                'São João Batista do Glória': 'SJBG'
+            };
+            return map[n] || n;
         }
 
         function parseDate(dateStr) {
@@ -210,16 +431,11 @@
 
         function populateVesselFilter(requests) {
             const vessels = new Set();
-            requests.forEach(req => { 
-                if (req.embarcação) vessels.add(req.embarcação); 
-            });
-            const sortedVessels = Array.from(vessels).sort((a, b) =>
-                normalizeForSort(a).localeCompare(normalizeForSort(b))
-            );
+            requests.forEach(req => { if (req.embarcação) vessels.add(req.embarcação); });
+            const sortedVessels = Array.from(vessels).sort((a, b) => a.localeCompare(b));
             
-            // Adiciona a opção padrão e a opção Mascarenhas de Moraes fixa
-            vesselFilter.innerHTML = '<option value="all">Embarcações</option>';
-            vesselFilter.innerHTML += '<option value="mascarenhas" style="font-weight:bold; color:#0d6efd;">Mascarenhas de Moraes</option>';
+            vesselFilter.innerHTML = '<option value="all">Todas as Embarcações</option>';
+            vesselFilter.innerHTML += '<option value="mascarenhas" style="font-weight:bold; color:#0056b3;">MASCARENHAS DE MORAES</option>';
             
             sortedVessels.forEach(vessel => {
                 const option = document.createElement('option');
@@ -230,9 +446,9 @@
 
         function populateMonthFilter(requests) {
             const months = new Set();
-            requests.forEach(req => { const monthYear = getMonthYear(req.abertura); if (monthYear) months.add(monthYear); });
+            requests.forEach(req => { const my = getMonthYear(req.abertura); if (my) months.add(my); });
             const sortedMonths = Array.from(months).sort().reverse();
-            monthFilter.innerHTML = '<option value="all">Meses</option>';
+            monthFilter.innerHTML = '<option value="all">Todos os Meses</option>';
             sortedMonths.forEach(month => {
                 const [year, monthNum] = month.split('-');
                 const option = document.createElement('option');
@@ -246,7 +462,7 @@
             const statuses = new Set();
             requests.forEach(req => { if (req.status) statuses.add(req.status); });
             const sortedStatuses = Array.from(statuses).sort();
-            statusFilter.innerHTML = '<option value="all">Status</option>';
+            statusFilter.innerHTML = '<option value="all">Todos os Status</option>';
             sortedStatuses.forEach(status => {
                 const option = document.createElement('option');
                 option.value = status; option.textContent = status;
@@ -254,12 +470,14 @@
             });
         }
 
-        function getStatusBadge(status) {
+        function getStatusBadgeHTML(status) {
             const s = (status || "Indefinido").trim();
-            if (s === 'Concluída' || s === 'Concluído') return `<span class="badge text-bg-success">${s}</span>`;
-            if (s === 'Em Andamento') return `<span class="badge text-bg-info">${s}</span>`;
-            if (s === 'Em aberto') return `<span class="badge text-bg-warning">${s}</span>`;
-            return `<span class="badge text-bg-secondary">${s}</span>`;
+            let cls = 'status-undefined';
+            if (s === 'Concluída' || s === 'Concluído') cls = 'status-closed';
+            else if (s === 'Em Andamento') cls = 'status-progress';
+            else if (s === 'Em aberto') cls = 'status-open';
+            
+            return `<span class="status-badge ${cls}">${s}</span>`;
         }
 
         function renderTable(requests) {
@@ -272,22 +490,19 @@
                 const row = document.createElement('tr');
                 if (req.status === 'Concluída' || req.status === 'Concluído') row.classList.add('table-light');
                 row.innerHTML = `
-                    <td>${req.rs || ''}</td>
+                    <td style="font-family: monospace; font-weight: bold;">${req.rs || ''}</td>
                     <td>${normalizeVesselName(req.embarcação) || ''}</td>
                     <td>${req.serviço || ''}</td>
-                    <td>${getStatusBadge(req.status)}</td>
+                    <td class="text-center">${getStatusBadgeHTML(req.status)}</td>
                 `;
                 rsTableBody.appendChild(row);
             });
         }
 
         function updateKPIs(requests) {
-            document.getElementById('kpi-open').textContent =
-                requests.filter(r => r.status === 'Em aberto').length;
-            document.getElementById('kpi-in-progress').textContent =
-                requests.filter(r => r.status === 'Em Andamento').length;
-            document.getElementById('kpi-completed').textContent =
-                requests.filter(r => r.status === 'Concluída' || r.status === 'Concluído').length;
+            document.getElementById('kpi-open').textContent = requests.filter(r => r.status === 'Em aberto').length;
+            document.getElementById('kpi-in-progress').textContent = requests.filter(r => r.status === 'Em Andamento').length;
+            document.getElementById('kpi-completed').textContent = requests.filter(r => r.status === 'Concluída' || r.status === 'Concluído').length;
         }
 
         function clearCardActive() {
@@ -306,7 +521,6 @@
                 });
             }
 
-            // Lógica do filtro de Embarcação com "Mascarenhas de Moraes"
             if (vesselFilter.value === 'mascarenhas') {
                 filtered = filtered.filter(req => mascarenhasVessels.includes(req.embarcação));
             } else if (vesselFilter.value !== 'all') {
@@ -321,7 +535,11 @@
             }
 
             if (statusCardFilter) {
-                filtered = filtered.filter(req => req.status === statusCardFilter);
+                if(statusCardFilter === 'completed') {
+                     filtered = filtered.filter(req => req.status === 'Concluída' || req.status === 'Concluído');
+                } else {
+                     filtered = filtered.filter(req => req.status === statusCardFilter);
+                }
             }
 
             renderTable(filtered);
@@ -334,12 +552,7 @@
                 skipEmptyLines: true,
                 transformHeader: h => h.trim().toLowerCase(),
                 complete: function(results) {
-                    allRequests = results.data
-                        .filter(r => r.rs)
-                        .map(r => ({
-                            ...r,
-                            embarcação: normalizeVesselName(r.embarcação)
-                        }));
+                    allRequests = results.data.filter(r => r.rs).map(r => ({ ...r, embarcação: normalizeVesselName(r.embarcação) }));
                     populateVesselFilter(allRequests);
                     populateMonthFilter(allRequests);
                     populateStatusFilter(allRequests);
@@ -348,92 +561,81 @@
                 },
                 error: err => {
                     console.error('Erro:', err);
-                    rsTableBody.innerHTML =
-                        `<tr><td colspan="4" class="text-center text-danger"><b>Falha ao carregar dados.</b></td></tr>`;
+                    rsTableBody.innerHTML = `<tr><td colspan="4" class="text-center" style="color: var(--btn-danger); font-weight: bold;">[FALHA AO CARREGAR DADOS]</td></tr>`;
                 }
             });
         }
 
+        // Event Listeners
         searchInput.addEventListener('input', applyFilters);
         monthFilter.addEventListener('change', applyFilters);
         statusFilter.addEventListener('change', applyFilters);
         vesselFilter.addEventListener('change', applyFilters);
 
+        // Interação dos Cards
         cardOpen.addEventListener('click', function() {
-            if (statusCardFilter === 'Em aberto') {
-                statusCardFilter = null;
-                clearCardActive();
-            } else {
-                statusCardFilter = 'Em aberto';
-                clearCardActive();
-                cardOpen.classList.add('active');
-            }
+            statusCardFilter = (statusCardFilter === 'Em aberto') ? null : 'Em aberto';
+            clearCardActive();
+            if(statusCardFilter) cardOpen.classList.add('active');
             applyFilters();
         });
 
         cardInProgress.addEventListener('click', function() {
-            if (statusCardFilter === 'Em Andamento') {
-                statusCardFilter = null;
-                clearCardActive();
-            } else {
-                statusCardFilter = 'Em Andamento';
-                clearCardActive();
-                cardInProgress.classList.add('active');
-            }
+            statusCardFilter = (statusCardFilter === 'Em Andamento') ? null : 'Em Andamento';
+            clearCardActive();
+            if(statusCardFilter) cardInProgress.classList.add('active');
             applyFilters();
         });
 
         cardCompleted.addEventListener('click', function() {
-            statusCardFilter = null;
+            statusCardFilter = (statusCardFilter === 'completed') ? null : 'completed';
             clearCardActive();
-            cardCompleted.classList.add('active');
+            if(statusCardFilter) cardCompleted.classList.add('active');
             applyFilters();
         });
 
-        // -------- RELATÓRIO --------
+        // RELATÓRIO (Gerar HTML para Impressão)
         btnRelatorio.addEventListener('click', function() {
-            // Começa com todas as requisições
+            // Inicia com todas as requisições
             let dataForReport = allRequests;
 
-            // Aplica filtro de embarcação/usina selecionada no momento
+            // Aplica filtro de embarcação selecionada
             if (vesselFilter.value === 'mascarenhas') {
                 dataForReport = dataForReport.filter(req => mascarenhasVessels.includes(req.embarcação));
             } else if (vesselFilter.value !== 'all') {
                 dataForReport = dataForReport.filter(req => req.embarcação === vesselFilter.value);
             }
-            // Se for 'all', mantém todos
 
             // Filtra apenas "Em aberto" para o relatório
             let abertas = dataForReport.filter(req => req.status === 'Em aberto');
 
-            // Ordena por embarcação (ignorando acentos) e depois por RS
+            // Ordena por embarcação e depois por RS
             abertas.sort((a, b) => {
-                const embA = normalizeForSort(a.embarcação || '');
-                const embB = normalizeForSort(b.embarcação || '');
+                const embA = (a.embarcação || '').toString().toLowerCase();
+                const embB = (b.embarcação || '').toString().toLowerCase();
                 if (embA < embB) return -1;
                 if (embA > embB) return 1;
 
-                const rsA = normalizeForSort(a.rs || '');
-                const rsB = normalizeForSort(b.rs || '');
-                if (rsA < rsB) return -1;
-                if (rsA > rsB) return 1;
-                return 0;
+                const rsA = (a.rs || '').toString().toLowerCase();
+                const rsB = (b.rs || '').toString().toLowerCase();
+                return rsA.localeCompare(rsB);
             });
 
             let rowsHtml = '';
-            let currentGroupKey = null;
+            let currentRs = null;
             let useGreen = false;
 
             abertas.forEach(req => {
-                const groupKey = (req.embarcação || '') + '|' + (req.rs || '');
-                if (groupKey !== currentGroupKey) {
-                    currentGroupKey = groupKey;
+                // Zebrado por RS
+                if (req.rs !== currentRs) {
+                    currentRs = req.rs;
                     useGreen = !useGreen;
                 }
                 const background = useGreen ? 'background-color:#e8f6e8;' : 'background-color:#ffffff;';
+                
                 rowsHtml += `
                     <tr style="${background}">
-                        <td class="checkbox-col">
+                        <td class="chk-col">
                             <input type="checkbox" class="chk">
                         </td>
                         <td>${req.rs || ''}</td>
@@ -443,91 +645,40 @@
                 `;
             });
 
+            const vesselLabel = vesselFilter.options[vesselFilter.selectedIndex].text;
+
+            // HTML da Tabela de Impressão (Estilo Compacto RS Original)
             const reportHtml = `
-                <html>
-                <head>
-                    <meta charset="UTF-8">
-                    <title>Relatório de RS em Aberto</title>
-                    <style>
-                        @page {
-                            size: A4 portrait;
-                            margin: 8mm;
-                        }
-                        body {
-                            font-family: Arial, sans-serif;
-                            font-size: 3px;
-                            line-height: 1.1;
-                            margin: 0;
-                            padding: 0;
-                        }
-                        table {
-                            width: 100%;
-                            border-collapse: collapse;
-                            table-layout: fixed;
-                        }
-                        th, td {
-                            border: 1px solid #000;
-                            padding: 0 1px;
-                            vertical-align: middle;
-                            word-wrap: break-word;
-                        }
-                        th {
-                            background-color: #f0f0f0;
-                            font-weight: bold;
-                        }
-                        .checkbox-col {
-                            width: 18px;
-                            text-align: center;
-                            vertical-align: middle;
-                        }
-                        .chk {
-                            display: block;
-                            margin: 0 auto;
-                            width: 8px;
-                            height: 8px;
-                        }
-                        .col-rs { width: 32px; }
-                        .emb-col,
-                        .col-embarcacao {
-                            width: 100px;
-                            white-space: nowrap;
-                            overflow: hidden;
-                            text-overflow: clip;
-                        }
-                        .col-servico { width: auto; }
-                    </style>
-                </head>
-                <body>
-                    <h3 style="font-size: 6px; margin-bottom: 5px;">Relatório de Pendências - ${vesselFilter.options[vesselFilter.selectedIndex].text}</h3>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th class="checkbox-col"></th>
-                                <th class="col-rs">RS</th>
-                                <th class="col-embarcacao">Embarcação</th>
-                                <th class="col-servico">Serviço</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${rowsHtml || '<tr><td colspan="4" style="text-align:center;">Nenhuma RS em aberto para a seleção atual.</td></tr>'}
-                        </tbody>
-                    </table>
-                </body>
-                </html>
+                <h3 style="font-size: 6px; margin-bottom: 5px; text-align: center;">Relatório de Pendências - ${vesselLabel}</h3>
+                <table class="print-table">
+                    <thead>
+                        <tr>
+                            <th class="chk-col"></th>
+                            <th class="col-rs">RS</th>
+                            <th class="emb-col">Embarcação</th>
+                            <th class="col-servico">Serviço</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${rowsHtml || '<tr><td colspan="4" style="text-align:center;">Nenhuma RS em aberto.</td></tr>'}
+                    </tbody>
+                </table>
             `;
 
-            const win = window.open('', '_blank');
-            if (!win) {
-                alert('Não foi possível abrir a janela de relatório. Verifique o bloqueio de pop-ups.');
-                return;
-            }
-            win.document.open();
-            win.document.write(reportHtml);
-            win.document.close();
+            // Preenche áreas (Modal e Print)
+            const reportScreen = document.getElementById('report-screen-content');
+            const printArea = document.getElementById('print-content');
 
-            win.focus();
-            win.print();
+            reportScreen.innerHTML = `<div style="background: white; padding: 10px; border: 1px solid #ccc;">${reportHtml}</div>`;
+            printArea.innerHTML = reportHtml;
+
+            // Abre Modal
+            document.getElementById('modal-report').classList.add('active');
         });
+
+        // Utilitário Modal
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+        window.closeModal = closeModal;
 
         setInterval(fetchData, 60000);
         fetchData();
