@@ -321,7 +321,7 @@
 
         <div class="controls-bar">
             <div class="control-group" style="display: flex; gap: 10px; align-items: flex-end;">
-                <button id="btn-generate-report" class="btn-report">RELATÓRIO MENSAL</button>
+                <!-- BOTÃO RELATÓRIO MENSAL REMOVIDO CONFORME SOLICITAÇÃO -->
                 <button id="btn-generate-boletim" class="btn-secondary" style="background-color: #333; color: white;">BOLETIM</button>
                 <button id="btn-matriz" class="btn-primary" style="background-color: var(--btn-primary);">MATRIZ DE LANÇAMENTO</button>
             </div>
@@ -351,7 +351,8 @@
             </div>
         </div>
 
-        <div class="section-title">LISTA DE MEDIÇÕES</div>
+        <!-- TÍTULO "LISTA DE MEDIÇÕES" REMOVIDO CONFORME SOLICITAÇÃO -->
+        
         <div class="table-container">
             <table id="data-table">
                 <thead>
@@ -451,14 +452,23 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
-        // CONFIGURAÇÃO DE VALOR FIXO
-        const VALOR_FIXO_ADMINISTRACAO = 119142.70; 
+        
+        // --- MAPEAMENTO DE VALORES FIXOS POR MUNICÍPIO ---
+        // Como a imagem com os valores não foi fornecida no prompt, configurei o valor padrão (119142.70) 
+        // para todos os municípios ('default').
+        // EDITE OS VALORES ABAIXO conforme a tabela da imagem para cada município específico.
+        const VALORES_FIXOS_MUNICIPIO = {
+            'default': 119142.70,
+            'Delfinópolis': 119142.70, // Alterar se necessário
+            'Alfenas': 119142.70,      // Alterar se necessário
+            'Guapé': 119142.70,        // Alterar se necessário
+            // Adicione outros municípios aqui com seus respectivos valores fixos
+        };
 
         const SERVICES_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-EzfpINGaWJduqHgUQwgjK2hzakenB8-zIFSO7eqPtAoZzSin9DV0eyxg9_wEPaWE79lYxiGMQ_9b/pub?gid=1132804567&single=true&output=csv';
         const PRICES_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS8an6Vae5OUkZVObcjTNcqUaXZKD-AtlJCg1WRK-6Aw2DDOoLZHGTB59oDSBK1iGc3BEGWI4u_6Qh3/pub?gid=439074154&single=true&output=csv';
         const LOCATIONS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS5QP1Y7FXm3gRkgb3Xl9iATvUE25q5wq22-X3k7QZG6TusZ3uURbaVPS1os3Gl4G0FxyK25TOtGCj0/pub?gid=0&single=true&output=csv';
         
-        // --- MAPEAMENTO SOLICITADO ---
         const VESSEL_MAPPING = {
             "Fama": "Alfenas", "Delfinópolis": "Alfenas", "Saliba": "Campo Belo", "São Francisco III": "Campo do Meio",
             "Águas Verdes": "Carmo do Rio Claro", "Itapiché": "Carmo do Rio Claro", "Fernandes": "Cristais",
@@ -475,24 +485,19 @@
         const formatCurrency = (value) => !isNaN(value) ? value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'R$ 0,00';
         const monthMap = { 'janeiro': 0, 'fevereiro': 1, 'março': 2, 'abril': 3, 'maio': 4, 'junho': 5, 'julho': 6, 'agosto': 7, 'setembro': 8, 'outubro': 9, 'novembro': 10, 'dezembro': 11 };
         
-        // FUNÇÃO DE DATA CORRIGIDA PARA LER 'Mês', 'Data', etc.
         const parseDate = dateStr => {
             if (!dateStr || typeof dateStr !== 'string' || dateStr.trim() === '') return null;
             const parts = dateStr.trim().split('/');
-            // Tenta formatos: Mês/Ano ou Dia/Mês/Ano
-            // Se tiver 2 partes (Mês/Ano)
             if (parts.length === 2) {
                 const [monthName, year] = parts.map(p => p.trim().toLowerCase());
                 const monthIndex = monthMap[monthName];
                 if (monthIndex !== undefined && year?.length === 4) return new Date(year, monthIndex, 1);
             }
-            // Se tiver 3 partes (Dia/Mês/Ano)
             if (parts.length === 3) {
                 const [day, monthName, year] = parts.map(p => p.trim().toLowerCase());
                 const monthIndex = monthMap[monthName];
                 if (monthIndex !== undefined && year?.length === 4 && !isNaN(day)) return new Date(year, monthIndex, parseInt(day));
             }
-            // Tentar formatos de data do Excel numéricos
             const parsedTime = Date.parse(dateStr);
             if (!isNaN(parsedTime)) return new Date(parsedTime);
             
@@ -521,7 +526,6 @@
         }
         function populateMonthFilter(data) {
             const sel = document.getElementById('month-filter');
-            // Verifica se dataConclusao existe antes de usar os métodos
             const months = new Set(data.map(item => item.dataConclusao ? `${item.dataConclusao.getFullYear()}-${(item.dataConclusao.getMonth() + 1).toString().padStart(2, '0')}` : null).filter(m => m !== null));
             const sortedMonths = Array.from(months).sort().reverse();
             sel.innerHTML = '<option value="all">TODAS REFERÊNCIAS</option>';
@@ -710,7 +714,7 @@
             renderVesselPerformanceList(filtered);
         }
 
-        // --- BOLETIM DE MEDIÇÃO PADRÃO (SEM ASSINATURAS, COM CÓPIA) ---
+        // --- BOLETIM DE MEDIÇÃO PADRÃO (ATUALIZADO COM VALORES FIXOS POR MUNICÍPIO) ---
         function generateBoletim() {
             document.getElementById('modal-report-title').textContent = "BOLETIM DE MEDIÇÃO PADRÃO";
 
@@ -744,7 +748,10 @@
                 totalServicos += item.valorCalculado;
             });
 
-            const totalGeral = totalServicos + VALOR_FIXO_ADMINISTRACAO;
+            // BUSCA VALOR FIXO ESPECÍFICO DO MUNICÍPIO OU USA O PADRÃO
+            const valorFixoMunicipio = VALORES_FIXOS_MUNICIPIO[munVal] || VALORES_FIXOS_MUNICIPIO['default'];
+
+            const totalGeral = totalServicos + valorFixoMunicipio;
 
             let html = `
                 <div style="background: white; padding: 20px; border: 1px solid #ccc; font-family: Arial, sans-serif; font-size: 12pt;">
@@ -780,10 +787,10 @@
             html += `
                     <tr>
                         <td style="border: 1px solid black; padding: 8px;">
-                            Equipe Técnica e Administração Local (Mensal)
+                            Equipe Técnica e Administração Local (Mensal) - Valor Fixo
                         </td>
-                        <td style="border: 1px solid black; padding: 8px; text-align: right; cursor: pointer;" onclick="copyText(this, ${VALOR_FIXO_ADMINISTRACAO})" title="Clique para copiar">
-                            ${formatCurrency(VALOR_FIXO_ADMINISTRACAO)}
+                        <td style="border: 1px solid black; padding: 8px; text-align: right; cursor: pointer;" onclick="copyText(this, ${valorFixoMunicipio})" title="Clique para copiar">
+                            ${formatCurrency(valorFixoMunicipio)}
                         </td>
                     </tr>
             `;
@@ -802,101 +809,6 @@
 
             reportScreen.innerHTML = html;
             document.getElementById('print-content').innerHTML = html;
-        }
-
-        // --- RELATÓRIO MENSAL (ORIGINAL - RESTAURADO) ---
-        function generateReport() {
-            document.getElementById('modal-report-title').textContent = "RELATÓRIO MENSAL DETALHADO";
-            const reportScreen = document.getElementById('report-screen-content');
-            const loading = '<div class="text-center p-4">[ PROCESSANDO RELATÓRIO... ]</div>';
-            reportScreen.innerHTML = loading;
-            
-            const mVal = document.getElementById('month-filter').value;
-            const munVal = document.getElementById('municipio-filter').value;
-
-            if (mVal === 'all') {
-                alert("Por favor, selecione um Mês/Referência específico para gerar o relatório.");
-                reportScreen.innerHTML = '';
-                return;
-            }
-
-            openModal('modal-report');
-
-            const filteredData = allProcessedData.filter(item => {
-                if (!item.dataConclusao) return false;
-                const mMatch = `${item.dataConclusao.getFullYear()}-${(item.dataConclusao.getMonth() + 1).toString().padStart(2, '0')}` === mVal;
-                const munMatch = munVal === 'all' || item.municipio === munVal;
-                return mMatch && munMatch;
-            });
-
-            const grouped = {};
-            filteredData.forEach(item => {
-                const city = item.municipio || 'Não Informado';
-                const vessel = item.embarcação || 'Não Informada';
-                if (!grouped[city]) grouped[city] = {};
-                if (!grouped[city][vessel]) grouped[city][vessel] = 0;
-                grouped[city][vessel] += item.valorCalculado;
-            });
-
-            const monthSel = document.getElementById('month-filter');
-            const monthName = monthSel.options[monthSel.selectedIndex].text;
-
-            let html = `
-                <div class="report-header" style="text-align: center; border-bottom: 2px solid #000; margin-bottom: 20px;">
-                    <h1 style="margin: 0; font-size: 20px;">VILHENA SERVIÇOS LTDA.</h1>
-                    <h2 style="margin: 5px 0; font-size: 16px;">BOLETIM DE MEDIÇÃO MENSAL (DETALHADO)</h2>
-                    <p style="margin: 5px 0 15px 0;">Referência: <strong>${monthName}</strong></p>
-                </div>
-            `;
-
-            const cities = Object.keys(grouped).sort();
-            if (cities.length === 0) {
-                html += '<p class="text-center">Nenhum dado encontrado para os filtros selecionados.</p>';
-            } else {
-                cities.forEach(city => {
-                    const vessels = grouped[city];
-                    const vesselNames = Object.keys(vessels).sort((a,b) => vessels[b] - vessels[a]);
-                    
-                    html += `
-                        <div style="margin-bottom: 30px;">
-                            <div style="background: #333; color: white; padding: 5px 10px; font-weight: bold; text-transform: uppercase; font-size: 14px;">
-                                MUNICÍPIO: ${city}
-                            </div>
-                            <table class="matriz-table" style="margin-top: 0;">
-                                <thead>
-                                    <tr>
-                                        <th style="width: 70%;">EMBARCAÇÃO</th>
-                                        <th style="width: 30%; text-align: right;">VALOR TOTAL</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                    `;
-                    
-                    let cityTotal = 0;
-                    vesselNames.forEach(v => {
-                        cityTotal += vessels[v];
-                        html += `
-                            <tr>
-                                <td>${v}</td>
-                                <td class="text-right-p" style="font-weight: bold;">${formatCurrency(vessels[v])}</td>
-                            </tr>
-                        `;
-                    });
-
-                    html += `
-                                    <tr style="background-color: #eee; font-weight: bold;">
-                                        <td class="text-right-p">TOTAL ${city.toUpperCase()}</td>
-                                        <td class="text-right-p">${formatCurrency(cityTotal)}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    `;
-                });
-            }
-
-            reportScreen.innerHTML = `<div style="background: white; padding: 20px; border: 1px solid #ccc;">${html}</div>`;
-            document.getElementById('print-content').innerHTML = `<div class="print-area">${html}</div>`;
         }
 
         // --- EXPORTAÇÃO XLS ---
@@ -997,7 +909,7 @@
             document.body.removeChild(link);
         }
 
-        // --- MATRIZ DE LANÇAMENTO (TELA - RESTAURADA) ---
+        // --- MATRIZ DE LANÇAMENTO (TELA) ---
         document.getElementById('btn-matriz').addEventListener('click', function() {
             const mVal = document.getElementById('month-filter').value;
             const munVal = document.getElementById('municipio-filter').value;
@@ -1123,16 +1035,15 @@
                         municipio: municipioName,
                         embarcação: v,
                         codigo: codigo,
-                        descritivo: i['descritivo'] || i['descrição'] || i['descricao'] || i['descritivo'], // Fallbacks
+                        descritivo: i['descritivo'] || i['descrição'] || i['descricao'] || i['descritivo'], 
                         referenciaStr: dateStr,
                         dataConclusao: dataConclusao, 
                         quantidadeNumerica: q, 
                         valorCalculado: price * q,
-                        servico: i['serviço'] || i['serviço'] || '' // Fallbacks
+                        servico: i['serviço'] || i['serviço'] || '' 
                     };
-                }).filter(i => i.dataConclusao && i.valorCalculado > 0); // Se for nulo ou 0 valor, sai
+                }).filter(i => i.dataConclusao && i.valorCalculado > 0); 
 
-                // Verifica se processou dados
                 console.log("Total processado:", allProcessedData.length);
                 
                 if (allProcessedData.length === 0) {
@@ -1155,10 +1066,8 @@
         document.querySelectorAll('select').forEach(el => el.addEventListener('change', applyFilters));
         document.querySelectorAll('input[name="view-mode"]').forEach(el => el.addEventListener('change', applyFilters));
         
-        // RESTAURADOS OS LISTENERS DOS TRÊS BOTÕES
-        document.getElementById('btn-generate-report').addEventListener('click', generateReport);
+        // LISTENER DO BOLETIM MANTIDO
         document.getElementById('btn-generate-boletim').addEventListener('click', generateBoletim);
-        document.getElementById('btn-matriz').addEventListener('click', generateMatriz);
         
         document.getElementById('btn-download-xls').addEventListener('click', exportMatrixToXLS);
 
