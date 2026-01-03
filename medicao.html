@@ -451,7 +451,6 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
-        // CONFIGURAÇÃO DE VALOR FIXO
         const VALOR_FIXO_ADMINISTRACAO = 119142.70; 
 
         const SERVICES_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-EzfpINGaWJduqHgUQwgjK2hzakenB8-zIFSO7eqPtAoZzSin9DV0eyxg9_wEPaWE79lYxiGMQ_9b/pub?gid=1132804567&single=true&output=csv';
@@ -472,7 +471,11 @@
         let currentSort = { column: 'valorCalculado', direction: 'desc' };
 
         const formatCurrency = (value) => !isNaN(value) ? value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'R$ 0,00';
-        const monthMap = { 'janeiro': 0, 'fevereiro': 1, 'março': 2, 'abril': 3, 'maio': 4, 'junho': 5, 'julho': 6, 'agosto': 7, 'setembro': 8, 'outubro': 9, 'novembro': 10, 'dezembro': 11 };
+        // Mapa de meses atualizado para aceitar abreviações
+        const monthMap = { 
+            'janeiro':0, 'jan':0, 'fevereiro':1, 'fev':1, 'março':2, 'mar':2, 'abril':3, 'abr':3, 'maio':4, 'mai':4, 'junho':5, 'jun':5,
+            'julho':6, 'jul':6, 'agosto':7, 'ago':7, 'setembro':8, 'set':8, 'outubro':9, 'out':9, 'novembro':10, 'nov':10, 'dezembro':11, 'dez':11
+        };
         
         const parseDate = dateStr => {
             if (typeof dateStr !== 'string' || !dateStr.includes('/')) return null;
