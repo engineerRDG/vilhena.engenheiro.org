@@ -25,10 +25,6 @@
             --btn-danger-hover: #c82333;
             --btn-secondary: #ffc107;
             --btn-secondary-hover: #e0a800;
-            --matriz-header-bg: #1f4e78;
-            --matriz-header-text: #fff;
-            --matriz-row-even: #f2f6fa;
-            --matriz-row-hover: #dbeecf;
         }
 
         * { box-sizing: border-box; }
@@ -184,84 +180,135 @@
 
         /* Tabelas Gerais */
         .table-container { overflow-x: auto; border: 1px solid var(--border-color); }
-        #data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        #data-table thead { background-color: var(--header-bg); color: white; }
-        #data-table th, #data-table td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--border-color); border-right: 1px solid #eee; }
-        #data-table th:last-child, #data-table td:last-child { border-right: none; }
-        #data-table th.sortable { cursor: pointer; user-select: none; }
-        #data-table th.sortable:hover { background-color: #444; }
-        #data-table tbody tr:nth-child(even) { background-color: #f9f9f9; }
-        #data-table tbody tr:hover { background-color: #e9ecef; cursor: pointer; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        thead { background-color: var(--header-bg); color: white; }
+        th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--border-color); border-right: 1px solid #eee; }
+        th:last-child, td:last-child { border-right: none; }
+        th.sortable { cursor: pointer; user-select: none; }
+        th.sortable:hover { background-color: #444; }
+        tbody tr:nth-child(even) { background-color: #f9f9f9; }
+        tbody tr:hover { background-color: #e9ecef; cursor: pointer; }
         .text-right { text-align: right; }
         .text-center { text-align: center; }
 
-        /* --- ESTILO DA MATRIZ --- */
-        .matriz-header { text-align: center; border-bottom: 2px solid #000; margin-bottom: 15px; padding-bottom: 10px; }
-        .matriz-header h2 { font-size: 14pt; margin: 0; text-transform: uppercase; }
-        .matriz-header h3 { font-size: 12pt; margin: 5px 0 0 0; font-weight: normal; }
+        /* Área de Gráficos */
+        .chart-wrapper {
+            position: relative; height: 300px; width: 100%;
+            border: 1px solid #ddd; padding: 10px; background: #fff;
+        }
+        .chart-label {
+            text-align: center; font-size: 14px; font-weight: bold;
+            margin-bottom: 10px; color: #333; text-transform: uppercase;
+            border-bottom: 1px dashed #ccc; padding-bottom: 5px;
+        }
 
-        .matriz-table { width: 100%; border-collapse: collapse; font-size: 12px; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
-        .matriz-table th { background-color: var(--matriz-header-bg) !important; color: var(--matriz-header-text) !important; font-weight: bold; text-transform: uppercase; padding: 8px 5px; border: 1px solid #ddd; vertical-align: middle; }
-        .matriz-table td { border: 1px solid #ddd; padding: 6px 5px; vertical-align: middle; color: #333; }
-        .matriz-table tbody tr:nth-child(even) { background-color: var(--matriz-row-even); }
-        .matriz-table tbody tr:hover { background-color: var(--matriz-row-hover); transition: background 0.2s; }
-
-        .col-ref { width: 10%; }
-        .col-emb { width: 14%; }
-        .col-serv { width: 14%; }
-        .col-item { width: 8%; text-align: center; font-family: monospace; font-weight: bold; }
-        .col-desc { width: 22%; }
-        .col-uni { width: 5%; text-align: center; }
-        .col-qtd { width: 8%; text-align: center; }
-        .col-vunit { width: 9%; text-align: right; }
-        .col-total { width: 10%; text-align: right; font-weight: bold; color: #000; }
-
-        /* Rodapé do relatório */
-        .report-footer { margin-top: 40px; display: flex; justify-content: space-between; page-break-inside: avoid; }
-        
-        /* Gráficos */
-        .chart-wrapper { position: relative; height: 300px; width: 100%; border: 1px solid #ddd; padding: 10px; background: #fff; }
-        .chart-label { text-align: center; font-size: 14px; font-weight: bold; margin-bottom: 10px; color: #333; text-transform: uppercase; border-bottom: 1px dashed #ccc; padding-bottom: 5px; }
-
-        /* Lista Embarcação */
-        #vesselPerformanceContainer { height: 300px; overflow-y: auto; border: 1px solid #333; background: #fff; }
-        .vessel-list-header { display: flex; background-color: var(--header-bg); color: white; padding: 8px 10px; font-weight: bold; font-size: 12px; text-transform: uppercase; position: sticky; top: 0; z-index: 10; }
+        /* --- ESTILO DA LISTA DE EMBARCAÇÃO --- */
+        #vesselPerformanceContainer {
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #333;
+            background: #fff;
+        }
+        .vessel-list-header {
+            display: flex;
+            background-color: var(--header-bg);
+            color: white;
+            padding: 8px 10px;
+            font-weight: bold;
+            font-size: 12px;
+            text-transform: uppercase;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
         .vessel-col-name { flex: 2; } 
         .vessel-col-city { flex: 1; }
         .vessel-col-val { flex: 1; text-align: right; }
-        .vessel-list-item { display: flex; align-items: center; padding: 6px 10px; border-bottom: 1px solid #eee; font-size: 12px; }
+        .vessel-list-item {
+            display: flex;
+            align-items: center;
+            padding: 6px 10px;
+            border-bottom: 1px solid #eee;
+            font-size: 12px;
+        }
         .vessel-list-item:hover { background-color: #f0f0f0; }
         .vessel-name-text { font-weight: bold; color: #000; }
         .vessel-city-text { color: #555; }
         .vessel-value-text { font-family: 'Courier New', monospace; font-weight: bold; color: #0056b3; }
 
         /* Footer */
-        footer { margin-top: 40px; padding-top: 20px; border-top: 2px solid var(--header-bg); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; }
+        footer {
+            margin-top: 40px; padding-top: 20px;
+            border-top: 2px solid var(--header-bg);
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;
+        }
         .footer-logo { height: 40px; width: auto; }
         .footer-info { text-align: right; font-size: 12px; color: #555; line-height: 1.4; }
 
         /* Modais */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); z-index: 1000;
+            justify-content: center; align-items: center;
+        }
         .modal-overlay.active { display: flex; }
-        .modal-content { background: white; width: 95%; max-width: 1100px; max-height: 90vh; overflow-y: auto; border: 2px solid var(--header-bg); box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: flex; flex-direction: column; }
-        .modal-header { background: var(--header-bg); color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+        .modal-content {
+            background: white; width: 95%; max-width: 1100px; max-height: 90vh; overflow-y: auto;
+            border: 2px solid var(--header-bg); box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: flex; flex-direction: column;
+        }
+        .modal-header {
+            background: var(--header-bg); color: white; padding: 15px;
+            display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0;
+        }
         .modal-header h3 { margin: 0; font-size: 16px; text-transform: uppercase; }
         .modal-close { background: transparent; border: none; color: white; font-size: 20px; cursor: pointer; font-weight: bold; }
         .modal-body { padding: 20px; }
 
-        /* Impressão */
+        /* 3. IMPRESSÃO */
         .print-area { display: none; }
         @media print {
             @page { size: A4 landscape; margin: 10mm; }
             body { background-color: white; margin: 0; padding: 0; font-family: 'Courier New', monospace; font-size: 10pt; }
             .container, .no-print, .modal-overlay { display: none !important; }
             .print-area { display: block; width: 100%; max-width: 100%; margin: 0 auto; }
-            .matriz-table th { background-color: #eee !important; color: #000 !important; -webkit-print-color-adjust: exact; }
-            .matriz-table tbody tr:nth-child(even) { background-color: transparent !important; }
-            .matriz-table tbody tr:hover { background-color: transparent !important; }
-            .matriz-table th, .matriz-table td { border: 1px solid #000; }
+            
+            /* Cabeçalho da Matriz */
+            .matriz-header {
+                text-align: center; border-bottom: 2px solid #000; margin-bottom: 15px; padding-bottom: 10px;
+            }
+            .matriz-header h2 { font-size: 14pt; margin: 0; text-transform: uppercase; }
+            .matriz-header h3 { font-size: 12pt; margin: 5px 0 0 0; font-weight: normal; }
+
+            /* Tabela da Matriz */
+            .matriz-table { width: 100%; border-collapse: collapse; font-size: 9pt; table-layout: fixed; }
+            .matriz-table th, .matriz-table td {
+                border: 1px solid #000; padding: 4px 6px; text-align: left; vertical-align: middle; word-wrap: break-word;
+            }
+            .matriz-table th { background-color: #eee !important; font-weight: bold; text-transform: uppercase; -webkit-print-color-adjust: exact; }
+            
+            /* Larguras fixas para caber no A4 Landscape */
+            .col-ref { width: 12%; }
+            .col-emb { width: 14%; }
+            .col-serv { width: 14%; }
+            .col-item { width: 8%; }
+            .col-desc { width: 18%; }
+            .col-uni { width: 5%; text-align: center; }
+            .col-qtd { width: 6%; text-align: center; }
+            .col-vunit { width: 9%; text-align: right; }
+            .col-total { width: 9%; text-align: right; }
+
             .text-right-p { text-align: right; }
             .text-center-p { text-align: center; }
+
+            .report-footer { 
+                margin-top: 30px; 
+                display: flex; 
+                justify-content: space-between; 
+                page-break-inside: avoid; 
+            }
+            .signature-block { width: 45%; text-align: center; }
+            .signature-line { border-top: 1px solid #000; margin-top: 40px; padding-top: 5px; font-weight: bold; }
         }
     </style>
 </head>
@@ -321,8 +368,7 @@
 
         <div class="controls-bar">
             <div class="control-group" style="display: flex; gap: 10px; align-items: flex-end;">
-                <button id="btn-generate-report" class="btn-report">RELATÓRIO MENSAL</button>
-                <button id="btn-generate-boletim" class="btn-secondary" style="background-color: #333; color: white;">BOLETIM</button>
+                <button id="btn-generate-report" class="btn-report">RELATÓRIO TRIMESTRAL</button>
                 <button id="btn-matriz" class="btn-primary" style="background-color: var(--btn-primary);">MATRIZ DE LANÇAMENTO</button>
             </div>
             <div class="control-group">
@@ -400,12 +446,12 @@
     <div id="modal-report" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header no-print">
-                <h3 id="modal-report-title">Relatório</h3>
+                <h3>Relatório Trimestral</h3>
                 <button class="modal-close" onclick="closeModal('modal-report')">X</button>
             </div>
             <div class="modal-body" id="report-screen-content" style="background: #f0f0f0; padding: 10px;">
                 <div style="background: white; padding: 20px; border: 1px solid #ccc;">
-                    <p>Selecione os filtros e clique em um dos botões de relatório.</p>
+                    <p>Selecione os filtros e clique em "Gerar Relatório".</p>
                 </div>
             </div>
             <div class="modal-header no-print" style="border-top: 1px solid #ccc; border-bottom: none; background: white;">
@@ -421,12 +467,17 @@
                 <h3>Matriz de Lançamento</h3>
                 <button class="modal-close" onclick="closeModal('modal-matriz')">X</button>
             </div>
-            <div class="modal-body" id="matriz-screen-content" style="padding: 20px;"></div>
+            <div class="modal-body" id="matriz-screen-content" style="padding: 0;">
+                <!-- Conteúdo Gerado -->
+            </div>
+            <!-- Rodapé do Modal com botões Imprimir e XLS -->
             <div class="modal-header no-print" style="border-top: 1px solid #ccc; border-bottom: none; background: white; padding-top: 10px;">
                 <div style="display: flex; gap: 10px;">
-                    <button id="btn-download-xls" class="btn-secondary" style="background-color: #1f7a38; color: white;">XLS (FORMATADO)</button>
+                    <!-- Botão Excel -->
+                    <button id="btn-download-xls" class="btn-secondary" style="background-color: #217346; color: white;">XLS</button>
                 </div>
                 <div style="margin-left: auto;">
+                    <!-- Botão Imprimir -->
                     <button class="btn-primary" onclick="window.print()">IMPRIMIR MATRIZ</button>
                 </div>
             </div>
@@ -434,37 +485,46 @@
     </div>
 
     <div class="print-area" id="print-content">
+        <!-- Conteúdo Trimestral -->
+        <div class="report-header">
+            <h1>Vilhena Serviços Ltda.</h1>
+            <h2>Relatório Trimestral de Medição</h2>
+        </div>
+        <div id="report-body-wrapper"></div>
+        <div class="report-footer">
+            <div class="signature-block"><div class="signature-line">Responsável Técnico</div></div>
+            <div class="signature-block"><div class="signature-line">Aprovação Cliente</div></div>
+        </div>
     </div>
 
     <script>
-    window.openModal = function(id) { document.getElementById(id).classList.add('active'); }
-    window.closeModal = function(id) { document.getElementById(id).classList.remove('active'); }
-    
-    // Função para copiar texto ao clicar
-    window.copyText = function(el, val) {
-        const text = val.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-        navigator.clipboard.writeText(text).then(() => {
-            const originalBg = el.style.backgroundColor;
-            el.style.backgroundColor = '#aaffaa';
-            setTimeout(() => el.style.backgroundColor = originalBg || 'transparent', 300);
-        });
-    }
-
     document.addEventListener('DOMContentLoaded', function() {
-        // CONFIGURAÇÃO DE VALOR FIXO
-        const VALOR_FIXO_ADMINISTRACAO = 119142.70; 
-
+        // LINK DO CSV ATUALIZADO
         const SERVICES_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-EzfpINGaWJduqHgUQwgjK2hzakenB8-zIFSO7eqPtAoZzSin9DV0eyxg9_wEPaWE79lYxiGMQ_9b/pub?gid=1132804567&single=true&output=csv';
         const PRICES_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS8an6Vae5OUkZVObcjTNcqUaXZKD-AtlJCg1WRK-6Aw2DDOoLZHGTB59oDSBK1iGc3BEGWI4u_6Qh3/pub?gid=439074154&single=true&output=csv';
         const LOCATIONS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS5QP1Y7FXm3gRkgb3Xl9iATvUE25q5wq22-X3k7QZG6TusZ3uURbaVPS1os3Gl4G0FxyK25TOtGCj0/pub?gid=0&single=true&output=csv';
         
+        // --- MAPEAMENTO SOLICITADO ---
         const VESSEL_MAPPING = {
-            "Fama": "Alfenas", "Delfinópolis": "Alfenas", "Saliba": "Campo Belo", "São Francisco III": "Campo do Meio",
-            "Águas Verdes": "Carmo do Rio Claro", "Itapiché": "Carmo do Rio Claro", "Fernandes": "Cristais",
-            "Delfinópolis I": "Delfinópolis", "Canastra": "Delfinópolis", "Nossa Senhora dos Navegantes": "Delfinópolis",
-            "Nossa Senhora dos Navegantes VII": "Delfinópolis", "Nossa Senhora dos Navegantes X": "Delfinópolis",
-            "Rio Grande IV": "Delfinópolis", "São João Batista do Glória": "Delfinópolis", "Araúna": "Fama",
-            "Guapé": "Guapé", "Harmonia": "Guapé", "São Francisco I": "Guapé", "Pontalete": "Três Pontas"
+            "Fama": "Alfenas",
+            "Delfinópolis": "Alfenas",
+            "Saliba": "Campo Belo",
+            "São Francisco III": "Campo do Meio",
+            "Águas Verdes": "Carmo do Rio Claro",
+            "Itapiché": "Carmo do Rio Claro",
+            "Fernandes": "Cristais",
+            "Delfinópolis I": "Delfinópolis",
+            "Canastra": "Delfinópolis",
+            "Nossa Senhora dos Navegantes": "Delfinópolis",
+            "Nossa Senhora dos Navegantes VII": "Delfinópolis",
+            "Nossa Senhora dos Navegantes X": "Delfinópolis",
+            "Rio Grande IV": "Delfinópolis",
+            "São João Batista do Glória": "Delfinópolis",
+            "Araúna": "Fama",
+            "Guapé": "Guapé",
+            "Harmonia": "Guapé",
+            "São Francisco I": "Guapé",
+            "Pontalete": "Três Pontas"
         };
 
         let allProcessedData = [];
@@ -486,6 +546,8 @@
         };
 
         function destroyChart(chartId) { if (chartInstances[chartId]) chartInstances[chartId].destroy(); }
+        function openModal(id) { document.getElementById(id).classList.add('active'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
         function updateKPIs(data, selectedMonthValue, selectedMunicipioValue) {
             document.getElementById('kpi-total-items').textContent = data.length.toLocaleString('pt-BR');
@@ -563,7 +625,7 @@
             let html = '';
             sortedData.forEach(item => {
                 const detailsStr = item.details ? `'${JSON.stringify(item.details)}'` : '';
-                const onClick = `openDetail(${detailsStr}, '${(item.descritivo || '').replace(/'/g, "\\'")}', '${item.embarcação || 'N/A'}', ${item.quantidadeNumerica}, ${item.valorCalculado}, '${item.unidade || ''}')`;
+                const onClick = `openDetail(${detailsStr}, '${item.descritivo}', '${item.embarcação || 'N/A'}', ${item.quantidadeNumerica}, ${item.valorCalculado}, '${item.unidade || ''}')`;
                 html += `<tr onclick="${onClick}">
                     <td style="font-family: monospace; font-weight: bold;">${item.codigo || ''}</td>
                     <td>${item.descritivo || ''}</td>
@@ -607,7 +669,7 @@
 
         function renderVesselPerformanceList(data) {
             const container = document.getElementById('vesselPerformanceContainer');
-            if (data.length === 0) { container.innerHTML = '<div class="text-center p-3 text-muted">Sem dados para exibir.</div>'; return; }
+            if (data.length === 0) return;
             const vesselData = data.reduce((acc, item) => {
                 const v = item.embarcação || 'Não especificada';
                 if (!acc[v]) acc[v] = { valor: 0, municipio: item.municipio || 'Não especificada' };
@@ -642,7 +704,6 @@
             const total = top8.reduce((s, i) => s + i.count, 0);
             let cum = 0;
             const paretoData = top8.map(i => ({ ...i, cumPct: (cum += i.count) / total * 100 }));
-            
             chartInstances['paretoChart'] = new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -654,16 +715,7 @@
                 },
                 options: {
                     responsive: true, maintainAspectRatio: false,
-                    plugins: { 
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                afterLabel: function(context) {
-                                    return paretoData[context.dataIndex].description;
-                                }
-                            }
-                        }
-                    },
+                    plugins: { legend: { display: false } },
                     scales: { y: { position: 'left' }, y1: { type: 'linear', position: 'right', min: 0, max: 100, grid: { drawOnChartArea: false } } }
                 }
             });
@@ -690,197 +742,8 @@
             renderVesselPerformanceList(filtered);
         }
 
-        // --- BOLETIM DE MEDIÇÃO PADRÃO (SEM ASSINATURAS, COM CÓPIA) ---
-        function generateBoletim() {
-            document.getElementById('modal-report-title').textContent = "BOLETIM DE MEDIÇÃO PADRÃO";
-
-            const mVal = document.getElementById('month-filter').value;
-            const munVal = document.getElementById('municipio-filter').value;
-
-            if (mVal === 'all') { alert("Selecione uma Referência/Mês para o Boletim."); return; }
-            if (munVal === 'all') { alert("Selecione um Município para o Boletim."); return; }
-
-            openModal('modal-report');
-            const reportScreen = document.getElementById('report-screen-content');
-            reportScreen.innerHTML = '<div class="text-center p-4">[ PROCESSANDO BOLETIM... ]</div>';
-
-            const [year, monthNum] = mVal.split('-');
-            const dateObj = new Date(year, monthNum - 1, 1);
-            const monthName = dateObj.toLocaleString('pt-BR', { month: 'long' });
-            const monthNameCap = monthName.charAt(0).toUpperCase() + monthName.slice(1);
-            const lastDay = new Date(year, monthNum, 0).getDate();
-            
-            const periodo = `01 de ${monthNameCap} de ${year} a ${lastDay} de ${monthNameCap} de ${year}`;
-
-            const data = allProcessedData.filter(item => {
-                return item.municipio === munVal && `${item.dataConclusao.getFullYear()}-${(item.dataConclusao.getMonth()+1).toString().padStart(2,'0')}` === mVal;
-            });
-
-            const vesselTotals = {};
-            let totalServicos = 0;
-            data.forEach(item => {
-                if(!vesselTotals[item.embarcação]) vesselTotals[item.embarcação] = 0;
-                vesselTotals[item.embarcação] += item.valorCalculado;
-                totalServicos += item.valorCalculado;
-            });
-
-            const totalGeral = totalServicos + VALOR_FIXO_ADMINISTRACAO;
-
-            let html = `
-                <div style="background: white; padding: 20px; border: 1px solid #ccc; font-family: Arial, sans-serif; font-size: 12pt;">
-                    <div style="text-align: center; margin-bottom: 30px;">
-                        <h2 style="margin: 0; font-size: 18pt; text-transform: uppercase;">Boletim de Medição</h2>
-                        <h3 style="margin: 5px 0 20px 0; font-size: 14pt;">Prefeitura Municipal de ${munVal.toUpperCase()}</h3>
-                        <p style="margin: 0; font-weight: bold;">Período de Referência: ${periodo}</p>
-                    </div>
-
-                    <table style="width: 100%; border-collapse: collapse; border: 1px solid black; margin-bottom: 20px;">
-                        <thead>
-                            <tr style="background-color: #eee; font-weight: bold; text-transform: uppercase;">
-                                <th style="border: 1px solid black; padding: 10px; text-align: left; width: 75%;">Embarcação</th>
-                                <th style="border: 1px solid black; padding: 10px; text-align: right; width: 25%;">VALOR MEDIDO</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
-
-            Object.entries(vesselTotals).forEach(([vessel, val]) => {
-                html += `
-                    <tr>
-                        <td style="border: 1px solid black; padding: 8px;">
-                            <strong>${vessel}</strong>
-                        </td>
-                        <td style="border: 1px solid black; padding: 8px; text-align: right; cursor: pointer;" onclick="copyText(this, ${val})" title="Clique para copiar">
-                            ${formatCurrency(val)}
-                        </td>
-                    </tr>
-                `;
-            });
-
-            html += `
-                    <tr>
-                        <td style="border: 1px solid black; padding: 8px;">
-                            Equipe Técnica e Administração Local (Mensal)
-                        </td>
-                        <td style="border: 1px solid black; padding: 8px; text-align: right; cursor: pointer;" onclick="copyText(this, ${VALOR_FIXO_ADMINISTRACAO})" title="Clique para copiar">
-                            ${formatCurrency(VALOR_FIXO_ADMINISTRACAO)}
-                        </td>
-                    </tr>
-            `;
-
-            html += `
-                    <tr style="background-color: #ddd; font-weight: bold; font-size: 1.1em;">
-                        <td style="border: 1px solid black; padding: 12px; text-align: right;">Total do Faturamento :</td>
-                        <td style="border: 1px solid black; padding: 12px; text-align: right; cursor: pointer;" onclick="copyText(this, ${totalGeral})" title="Clique para copiar">
-                            ${formatCurrency(totalGeral)}
-                        </td>
-                    </tr>
-                        </tbody>
-                    </table>
-                </div>
-            `;
-
-            reportScreen.innerHTML = html;
-            document.getElementById('print-content').innerHTML = html;
-        }
-
-        // --- RELATÓRIO MENSAL (ORIGINAL - RESTAURADO) ---
-        function generateReport() {
-            document.getElementById('modal-report-title').textContent = "RELATÓRIO MENSAL DETALHADO";
-            const reportScreen = document.getElementById('report-screen-content');
-            const loading = '<div class="text-center p-4">[ PROCESSANDO RELATÓRIO... ]</div>';
-            reportScreen.innerHTML = loading;
-            
-            const mVal = document.getElementById('month-filter').value;
-            const munVal = document.getElementById('municipio-filter').value;
-
-            if(mVal === 'all') {
-                alert("Por favor, selecione um Mês/Referência específico para gerar o relatório.");
-                reportScreen.innerHTML = '';
-                return;
-            }
-
-            openModal('modal-report');
-
-            const filteredData = allProcessedData.filter(item => {
-                if (!item.dataConclusao) return false;
-                const mMatch = `${item.dataConclusao.getFullYear()}-${(item.dataConclusao.getMonth() + 1).toString().padStart(2, '0')}` === mVal;
-                const munMatch = munVal === 'all' || item.municipio === munVal;
-                return mMatch && munMatch;
-            });
-
-            const grouped = {};
-            filteredData.forEach(item => {
-                const city = item.municipio || 'Não Informado';
-                const vessel = item.embarcação || 'Não Informada';
-                if(!grouped[city]) grouped[city] = {};
-                if(!grouped[city][vessel]) grouped[city][vessel] = 0;
-                grouped[city][vessel] += item.valorCalculado;
-            });
-
-            const monthSel = document.getElementById('month-filter');
-            const monthName = monthSel.options[monthSel.selectedIndex].text;
-
-            let html = `
-                <div class="report-header" style="text-align: center; border-bottom: 2px solid #000; margin-bottom: 20px;">
-                    <h1 style="margin:0; font-size:20px;">VILHENA SERVIÇOS LTDA.</h1>
-                    <h2 style="margin:5px 0; font-size:16px;">BOLETIM DE MEDIÇÃO MENSAL (DETALHADO)</h2>
-                    <p style="margin:5px 0 15px 0;">Referência: <strong>${monthName}</strong></p>
-                </div>
-            `;
-
-            const cities = Object.keys(grouped).sort();
-            if(cities.length === 0) {
-                html += '<p class="text-center">Nenhum dado encontrado para os filtros selecionados.</p>';
-            } else {
-                cities.forEach(city => {
-                    const vessels = grouped[city];
-                    const vesselNames = Object.keys(vessels).sort((a,b) => vessels[b] - vessels[a]);
-                    
-                    html += `
-                        <div style="margin-bottom: 30px;">
-                            <div style="background: #333; color: white; padding: 5px 10px; font-weight: bold; text-transform: uppercase; font-size: 14px;">
-                                MUNICÍPIO: ${city}
-                            </div>
-                            <table class="matriz-table" style="margin-top: 0;">
-                                <thead>
-                                    <tr>
-                                        <th style="width: 70%;">EMBARCAÇÃO</th>
-                                        <th style="width: 30%; text-align: right;">VALOR TOTAL</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                    `;
-                    
-                    let cityTotal = 0;
-                    vesselNames.forEach(v => {
-                        cityTotal += vessels[v];
-                        html += `
-                            <tr>
-                                <td>${v}</td>
-                                <td class="text-right-p" style="font-weight: bold;">${formatCurrency(vessels[v])}</td>
-                            </tr>
-                        `;
-                    });
-
-                    html += `
-                                    <tr style="background-color: #eee; font-weight: bold;">
-                                        <td class="text-right-p">TOTAL ${city.toUpperCase()}</td>
-                                        <td class="text-right-p">${formatCurrency(cityTotal)}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    `;
-                });
-            }
-
-            reportScreen.innerHTML = `<div style="background: white; padding: 20px; border: 1px solid #ccc;">${html}</div>`;
-            document.getElementById('print-content').innerHTML = `<div class="print-area">${html}</div>`;
-        }
-
-        // --- EXPORTAÇÃO XLS ---
-        function exportMatrixToXLS() {
+        // --- NOVO: FUNÇÃO DE EXPORTAÇÃO XLS (CSV) ---
+        function exportMatrixToCSV() {
             const mVal = document.getElementById('month-filter').value;
             const munVal = document.getElementById('municipio-filter').value;
 
@@ -888,101 +751,73 @@
                 alert("Para exportar para Excel, selecione uma Referência e um Município específico.");
                 return;
             }
+
+            // Filtrar dados (Mesma lógica da Matriz)
             const dataForMatrix = allProcessedData.filter(item => {
                 if (!item.dataConclusao) return false;
                 const mMatch = `${item.dataConclusao.getFullYear()}-${(item.dataConclusao.getMonth() + 1).toString().padStart(2, '0')}` === mVal;
                 const munMatch = item.municipio === munVal;
                 return mMatch && munMatch;
             });
-            if (dataForMatrix.length === 0) { alert("Não há dados para a combinação selecionada."); return; }
-            
+
+            if (dataForMatrix.length === 0) {
+                alert("Não há dados para a combinação selecionada.");
+                return;
+            }
+
+            // Ordenar
             dataForMatrix.sort((a, b) => {
                 const embA = a.embarcação, embB = b.embarcação;
                 if (embA < embB) return -1; if (embA > embB) return 1;
                 return 0;
             });
 
-            let tableRows = "";
+            // Construir string CSV
+            let csvContent = "\uFEFF"; // BOM para Excel ler UTF-8 corretamente
+            csvContent += "REFERÊNCIA;EMBARCAÇÃO;SERVIÇO;CÓDIGO;DESCRITIVO;UNIDADE;QTD;VL. UNIT;TOTAL\n";
+
             dataForMatrix.forEach(item => {
                 const unitPrice = item.quantidadeNumerica > 0 ? (item.valorCalculado / item.quantidadeNumerica) : 0;
-                tableRows += `
-                    <tr>
-                        <td>${item.referenciaStr || ''}</td>
-                        <td>${item.embarcação || ''}</td>
-                        <td>${item.servico || item.descritivo || ''}</td>
-                        <td style="text-align:center;">${item.codigo || ''}</td>
-                        <td>${item.descritivo || ''}</td>
-                        <td style="text-align:center;">${item.unidade || ''}</td>
-                        <td style="text-align:center;">${item.quantidadeNumerica.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
-                        <td style="text-align:right;">${unitPrice.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
-                        <td style="text-align:right;">${item.valorCalculado.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
-                    </tr>
-                `;
+                const formatCSV = (txt) => `"${(txt || '').toString().replace(/"/g, '""')}"`;
+                
+                const rowString = [
+                    formatCSV(item.referenciaStr || item.dataConclusao.toLocaleDateString('pt-BR')),
+                    formatCSV(item.embarcação),
+                    formatCSV(item.servico || item.descritivo),
+                    formatCSV(item.codigo),
+                    formatCSV(item.descritivo),
+                    formatCSV(item.unidade),
+                    item.quantidadeNumerica.toFixed(2).replace('.',','),
+                    unitPrice.toFixed(2).replace('.',','),
+                    item.valorCalculado.toFixed(2).replace('.',',')
+                ].join(";");
+                csvContent += rowString + "\n";
             });
 
-            const excelTemplate = `
-                <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
-                <head>
-                    <meta charset="UTF-8">
-                    <style>
-                        body { font-family: Calibri, sans-serif; font-size: 11pt; }
-                        table { border-collapse: collapse; width: 100%; }
-                        th { 
-                            background-color: #1f7a38; 
-                            color: #ffffff; 
-                            font-weight: bold; 
-                            text-align: center; 
-                            border: 1px solid #000000;
-                            padding: 10px;
-                            text-transform: uppercase;
-                        }
-                        td { 
-                            border: 1px solid #000000; 
-                            padding: 5px; 
-                            vertical-align: middle;
-                        }
-                    </style>
-                </head>
-                <body>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>REFERÊNCIA</th>
-                                <th>EMBARCAÇÃO</th>
-                                <th>SERVIÇO</th>
-                                <th>CÓDIGO</th>
-                                <th>DESCRITIVO</th>
-                                <th>UNID.</th>
-                                <th>QTD</th>
-                                <th>VL. UNIT</th>
-                                <th>TOTAL</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${tableRows}
-                        </tbody>
-                    </table>
-                </body>
-                </html>
-            `;
-
-            const blob = new Blob([excelTemplate], { type: 'application/vnd.ms-excel;charset=utf-8' });
+            // Criar download
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             const url = URL.createObjectURL(blob);
+            
             link.setAttribute("href", url);
-            link.setAttribute("download", `Medicao_Formatada_${mVal}_${munVal}.xls`);
+            link.setAttribute("download", `Matriz_Lancamento_${mVal}_${munVal}.csv`);
             link.style.visibility = 'hidden';
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
         }
 
-        // --- MATRIZ DE LANÇAMENTO (TELA - RESTAURADA) ---
+        // --- MATRIZ DE LANÇAMENTO ---
         document.getElementById('btn-matriz').addEventListener('click', function() {
             const mVal = document.getElementById('month-filter').value;
             const munVal = document.getElementById('municipio-filter').value;
-            if (mVal === 'all' || munVal === 'all') { alert("Para gerar a Matriz de Lançamento, selecione uma Referência e um Município específico."); return; }
-            
+
+            if (mVal === 'all' || munVal === 'all') {
+                alert("Para gerar a Matriz de Lançamento, selecione uma Referência e um Município específico.");
+                return;
+            }
+
+            // Filtrar dados com segurança
             const dataForMatrix = allProcessedData.filter(item => {
                 if (!item.dataConclusao) return false;
                 const mMatch = `${item.dataConclusao.getFullYear()}-${(item.dataConclusao.getMonth() + 1).toString().padStart(2, '0')}` === mVal;
@@ -990,8 +825,11 @@
                 return mMatch && munMatch;
             });
 
-            if (dataForMatrix.length === 0) { alert("Não há dados para a combinação selecionada."); return; }
-            
+            if (dataForMatrix.length === 0) {
+                alert("Não há dados para a combinação selecionada.");
+                return;
+            }
+
             dataForMatrix.sort((a, b) => {
                 const embA = a.embarcação, embB = b.embarcação;
                 if (embA < embB) return -1; if (embA > embB) return 1;
@@ -1003,15 +841,16 @@
             const monthName = monthSel.options[monthSel.selectedIndex].text;
             const municipioName = munSel.options[munSel.selectedIndex].text;
 
+            // Gerar HTML
             let rowsHtml = '';
             dataForMatrix.forEach(item => {
                 const unitPrice = item.quantidadeNumerica > 0 ? (item.valorCalculado / item.quantidadeNumerica) : 0;
                 rowsHtml += `
                     <tr>
-                        <td class="col-ref">${item.referenciaStr || ''}</td>
+                        <td class="col-ref">${item.referenciaStr || item.dataConclusao.toLocaleDateString('pt-BR')}</td>
                         <td class="col-emb">${item.embarcação || ''}</td>
                         <td class="col-serv">${item.servico || item.descritivo || ''}</td>
-                        <td class="col-item">${item.codigo || ''}</td>
+                        <td class="col-item" style="font-weight:bold;">${item.codigo || ''}</td>
                         <td class="col-desc">${item.descritivo || ''}</td>
                         <td class="col-uni text-center-p">${item.unidade || ''}</td>
                         <td class="col-qtd text-center-p">${item.quantidadeNumerica.toLocaleString('pt-BR', {maximumFractionDigits: 2})}</td>
@@ -1020,15 +859,18 @@
                     </tr>
                 `;
             });
+
             const totalGeral = dataForMatrix.reduce((acc, i) => acc + i.valorCalculado, 0);
 
+            // HTML Compatível com Modal e Impressão
             const html = `
-                <div class="print-area-wrapper">
+                <div class="print-area">
                     <div class="matriz-header">
                         <h1>VILHENA SERVIÇOS LTDA.</h1>
                         <h2>MATRIZ DE LANÇAMENTO</h2>
                         <h3>${monthName} - ${municipioName}</h3>
                     </div>
+                    
                     <table class="matriz-table">
                         <thead>
                             <tr>
@@ -1045,18 +887,92 @@
                         </thead>
                         <tbody>
                             ${rowsHtml}
-                            <tr style="background-color: #eee; font-weight: bold;">
-                                <td colspan="8" class="text-right-p">TOTAL GERAL</td>
+                            <tr style="background-color: #f0f0f0 !important; font-weight: bold;">
+                                <td colspan="9" class="text-right-p">TOTAL GERAL</td>
                                 <td class="text-right-p">${formatCurrency(totalGeral)}</td>
                             </tr>
                         </tbody>
                     </table>
+                    
+                    <div class="report-footer">
+                        <div class="signature-block"><div class="signature-line">RESPONSÁVEL TÉCNICO</div></div>
+                        <div class="signature-block"><div class="signature-line">APROVAÇÃO CLIENTE</div></div>
+                    </div>
                 </div>
             `;
-            document.getElementById('matriz-screen-content').innerHTML = html;
-            document.getElementById('print-content').innerHTML = `<div class="print-area">${html}</div>`;
+
+            // Renderizar no Modal
+            const screenContent = document.getElementById('matriz-screen-content');
+            screenContent.innerHTML = html;
+            // Renderizar na área de impressão
+            document.getElementById('print-content').innerHTML = html;
             openModal('modal-matriz');
         });
+
+        function generateReport() {
+            const reportScreen = document.getElementById('report-screen-content');
+            const reportPrint = document.getElementById('report-body-wrapper');
+            const loading = '<div class="text-center p-4">[ PROCESSANDO RELATÓRIO... ]</div>';
+            reportScreen.innerHTML = loading;
+            reportPrint.innerHTML = loading;
+            openModal('modal-report');
+
+            const getQuarterData = date => {
+                const q = Math.floor(date.getMonth() / 3) + 1;
+                const y = date.getFullYear();
+                const mNames = [["Janeiro","Fevereiro","Março"],["Abril","Maio","Junho"],["Julho","Agosto","Setembro"],["Outubro","Novembro","Dezembro"]][q-1];
+                return { key: `${y}-Q${q}`, name: `${q}º Trimestre de ${y}`, months: mNames };
+            };
+            const getMonthName = d => d.toLocaleString('pt-BR', { month: 'long' }).replace(/^\w/, c => c.toUpperCase());
+            
+            const reportData = {};
+            allProcessedData.forEach(item => {
+                if (!item.dataConclusao) return;
+                const res = item.municipio === 'Delfinópolis' ? 'Mascarenhas de Moraes' : 'Furnas';
+                const { key, name, months } = getQuarterData(item.dataConclusao);
+                const mName = getMonthName(item.dataConclusao);
+                const vName = item.embarcação || 'Não especificada';
+
+                if (!reportData[res]) reportData[res] = {};
+                if (!reportData[res][key]) reportData[res][key] = { name, months, vessels: {} };
+                if (!reportData[res][key].vessels[vName]) reportData[res][key].vessels[vName] = { municipio: item.municipio, totals: {}, qTotal: 0 };
+                
+                const vEntry = reportData[res][key].vessels[vName];
+                if (!vEntry.totals[mName]) vEntry.totals[mName] = 0;
+                vEntry.totals[mName] += item.valorCalculado;
+                vEntry.qTotal += item.valorCalculado;
+            });
+
+            let html = '';
+            ['Furnas', 'Mascarenhas de Moraes'].forEach(res => {
+                if (!reportData[res]) return;
+                html += `<div class="report-section-title">${res}</div>`;
+                const qKeys = Object.keys(reportData[res]).sort().reverse();
+                qKeys.forEach(qKey => {
+                    const q = reportData[res][qKey];
+                    // Correção do cabeçalho da tabela trimestral
+                    html += `<table class="report-table"><thead><tr><th>Embarcação</th><th>Município</th><th>${q.months[0]}</th><th>${q.months[1]}</th><th>${q.months[2]}</th><th>Total Trimestre</th></tr></thead><tbody>`;
+                    let qGrandTotal = 0;
+                    const vSorted = Object.entries(q.vessels).sort(([,a],[,b]) => b.qTotal - a.qTotal);
+                    vSorted.forEach(([vName, vData]) => {
+                        qGrandTotal += vData.qTotal;
+                        html += `<tr>
+                            <td>${vName}</td><td>${vData.municipio}</td>
+                            <td class="text-right">${formatCurrency(vData.totals[q.months[0]] || 0)}</td>
+                            <td class="text-right">${formatCurrency(vData.totals[q.months[1]] || 0)}</td>
+                            <td class="text-right">${formatCurrency(vData.totals[q.months[2]] || 0)}</td>
+                            <td class="text-right" style="font-weight:bold;">${formatCurrency(vData.qTotal)}</td>
+                        </tr>`;
+                    });
+                    html += `<tr><td colspan="5" class="text-right" style="font-weight:bold;">TOTAL GERAL</td><td class="text-right" style="font-weight:bold;">${formatCurrency(qGrandTotal)}</td></tr>`;
+                    html += `</tbody></table>`;
+                });
+            });
+
+            if (!html) html = '<p>Nenhum dado disponível para o relatório.</p>';
+            reportScreen.innerHTML = `<div style="background: white; padding: 20px; border: 1px solid #ccc;">${html}</div>`;
+            reportPrint.innerHTML = html;
+        }
 
         function fetchData() {
             const opts = { download: true, header: true, skipEmptyLines: true, transformHeader: h => h.trim().toLowerCase() };
@@ -1104,13 +1020,10 @@
         // Event Listeners
         document.querySelectorAll('select').forEach(el => el.addEventListener('change', applyFilters));
         document.querySelectorAll('input[name="view-mode"]').forEach(el => el.addEventListener('change', applyFilters));
-        
-        // RESTAURADOS OS LISTENERS DOS TRÊS BOTÕES
         document.getElementById('btn-generate-report').addEventListener('click', generateReport);
-        document.getElementById('btn-generate-boletim').addEventListener('click', generateBoletim);
-        document.getElementById('btn-matriz').addEventListener('click', generateMatriz);
-        
-        document.getElementById('btn-download-xls').addEventListener('click', exportMatrixToXLS);
+
+        // Novo listener para download XLS
+        document.getElementById('btn-download-xls').addEventListener('click', exportMatrixToCSV);
 
         document.getElementById('sort-qty').addEventListener('click', () => {
             currentSort.column = 'quantidadeNumerica';
