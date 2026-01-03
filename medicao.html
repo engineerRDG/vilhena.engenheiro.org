@@ -471,18 +471,35 @@
         let currentSort = { column: 'valorCalculado', direction: 'desc' };
 
         const formatCurrency = (value) => !isNaN(value) ? value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'R$ 0,00';
-        // Mapa de meses atualizado para aceitar abreviações
+        
+        // CORREÇÃO: MAPA DE MESES EXPANDIDO PARA ACEITAR ABREVIAÇÕES
         const monthMap = { 
             'janeiro':0, 'jan':0, 'fevereiro':1, 'fev':1, 'março':2, 'mar':2, 'abril':3, 'abr':3, 'maio':4, 'mai':4, 'junho':5, 'jun':5,
             'julho':6, 'jul':6, 'agosto':7, 'ago':7, 'setembro':8, 'set':8, 'outubro':9, 'out':9, 'novembro':10, 'nov':10, 'dezembro':11, 'dez':11
         };
         
+        // CORREÇÃO: PARSER DE DATA ROBUSTO (ACEITA ANOS DE 2 DÍGITOS)
         const parseDate = dateStr => {
-            if (typeof dateStr !== 'string' || !dateStr.includes('/')) return null;
-            const [monthName, year] = dateStr.trim().toLowerCase().split('/');
-            const monthIndex = monthMap[monthName];
-            return (monthIndex !== undefined && year?.length === 4) ? new Date(year, monthIndex, 1) : null;
+            if (typeof dateStr !== 'string') return null;
+            const cleanStr = dateStr.trim().toLowerCase();
+            // Separa por / ou -
+            const parts = cleanStr.split(/[\/\-]/);
+            if (parts.length < 2) return null;
+            
+            // Verifica mês
+            let monthIndex = isNaN(parts[0]) ? monthMap[parts[0]] : parseInt(parts[0]) - 1;
+            
+            // Verifica ano
+            let year = parseInt(parts[1]);
+            // Se o ano for menor que 100 (ex: 25), assume 2025
+            if (year < 100) year += 2000;
+
+            if (monthIndex !== undefined && monthIndex >= 0 && year > 0) {
+                return new Date(year, monthIndex, 1);
+            }
+            return null;
         };
+
         const parseQuantity = qtyStr => {
             if (typeof qtyStr !== 'string' || qtyStr.trim() === '') return 0;
             return parseFloat(qtyStr.trim().replace(',', '.')) || 0;
@@ -787,7 +804,7 @@
             document.getElementById('print-content').innerHTML = html;
         }
 
-        // --- RELATÓRIO MENSAL (ORIGINAL - RESTAURADO) ---
+        // --- RELATÓRIO MENSAL (ORIGINAL) ---
         function generateReport() {
             document.getElementById('modal-report-title').textContent = "RELATÓRIO MENSAL DETALHADO";
             const reportScreen = document.getElementById('report-screen-content');
