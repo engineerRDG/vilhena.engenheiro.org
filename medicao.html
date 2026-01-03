@@ -216,7 +216,7 @@
         .col-vunit { width: 9%; text-align: right; }
         .col-total { width: 10%; text-align: right; font-weight: bold; color: #000; }
 
-        /* Rodapé do relatório (Vazio agora, mas classe mantida para compatibilidade) */
+        /* Rodapé do relatório */
         .report-footer { margin-top: 40px; display: flex; justify-content: space-between; page-break-inside: avoid; }
         
         /* Gráficos */
@@ -321,7 +321,9 @@
 
         <div class="controls-bar">
             <div class="control-group" style="display: flex; gap: 10px; align-items: flex-end;">
+                <button id="btn-generate-report" class="btn-report">RELATÓRIO MENSAL</button>
                 <button id="btn-generate-boletim" class="btn-secondary" style="background-color: #333; color: white;">BOLETIM</button>
+                <button id="btn-matriz" class="btn-primary" style="background-color: var(--btn-primary);">MATRIZ DE LANÇAMENTO</button>
             </div>
             <div class="control-group">
                 <label>Reservatório</label>
@@ -403,7 +405,7 @@
             </div>
             <div class="modal-body" id="report-screen-content" style="background: #f0f0f0; padding: 10px;">
                 <div style="background: white; padding: 20px; border: 1px solid #ccc;">
-                    <p>Selecione os filtros e clique no botão de Boletim.</p>
+                    <p>Selecione os filtros e clique em um dos botões de relatório.</p>
                 </div>
             </div>
             <div class="modal-header no-print" style="border-top: 1px solid #ccc; border-bottom: none; background: white;">
@@ -435,16 +437,13 @@
     </div>
 
     <script>
-    // --- FUNÇÕES GLOBAIS ---
     window.openModal = function(id) { document.getElementById(id).classList.add('active'); }
     window.closeModal = function(id) { document.getElementById(id).classList.remove('active'); }
     
     // Função para copiar texto ao clicar
     window.copyText = function(el, val) {
-        // Formata para o padrão Brasileiro (Ex: 1.234,56)
         const text = val.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
         navigator.clipboard.writeText(text).then(() => {
-            // Feedback Visual (Piscar verde)
             const originalBg = el.style.backgroundColor;
             el.style.backgroundColor = '#aaffaa';
             setTimeout(() => el.style.backgroundColor = originalBg || 'transparent', 300);
@@ -691,7 +690,7 @@
             renderVesselPerformanceList(filtered);
         }
 
-        // --- GERAÇÃO DE BOLETIM PADRÃO (SEM ASSINATURAS E COM CÓPIA) ---
+        // --- BOLETIM DE MEDIÇÃO PADRÃO (SEM ASSINATURAS, COM CÓPIA) ---
         function generateBoletim() {
             document.getElementById('modal-report-title').textContent = "BOLETIM DE MEDIÇÃO PADRÃO";
 
@@ -727,7 +726,6 @@
 
             const totalGeral = totalServicos + VALOR_FIXO_ADMINISTRACAO;
 
-            // HTML Sem Assinaturas
             let html = `
                 <div style="background: white; padding: 20px; border: 1px solid #ccc; font-family: Arial, sans-serif; font-size: 12pt;">
                     <div style="text-align: center; margin-bottom: 30px;">
@@ -784,6 +782,101 @@
 
             reportScreen.innerHTML = html;
             document.getElementById('print-content').innerHTML = html;
+        }
+
+        // --- RELATÓRIO MENSAL (ORIGINAL - RESTAURADO) ---
+        function generateReport() {
+            document.getElementById('modal-report-title').textContent = "RELATÓRIO MENSAL DETALHADO";
+            const reportScreen = document.getElementById('report-screen-content');
+            const loading = '<div class="text-center p-4">[ PROCESSANDO RELATÓRIO... ]</div>';
+            reportScreen.innerHTML = loading;
+            
+            const mVal = document.getElementById('month-filter').value;
+            const munVal = document.getElementById('municipio-filter').value;
+
+            if(mVal === 'all') {
+                alert("Por favor, selecione um Mês/Referência específico para gerar o relatório.");
+                reportScreen.innerHTML = '';
+                return;
+            }
+
+            openModal('modal-report');
+
+            const filteredData = allProcessedData.filter(item => {
+                if (!item.dataConclusao) return false;
+                const mMatch = `${item.dataConclusao.getFullYear()}-${(item.dataConclusao.getMonth() + 1).toString().padStart(2, '0')}` === mVal;
+                const munMatch = munVal === 'all' || item.municipio === munVal;
+                return mMatch && munMatch;
+            });
+
+            const grouped = {};
+            filteredData.forEach(item => {
+                const city = item.municipio || 'Não Informado';
+                const vessel = item.embarcação || 'Não Informada';
+                if(!grouped[city]) grouped[city] = {};
+                if(!grouped[city][vessel]) grouped[city][vessel] = 0;
+                grouped[city][vessel] += item.valorCalculado;
+            });
+
+            const monthSel = document.getElementById('month-filter');
+            const monthName = monthSel.options[monthSel.selectedIndex].text;
+
+            let html = `
+                <div class="report-header" style="text-align: center; border-bottom: 2px solid #000; margin-bottom: 20px;">
+                    <h1 style="margin:0; font-size:20px;">VILHENA SERVIÇOS LTDA.</h1>
+                    <h2 style="margin:5px 0; font-size:16px;">BOLETIM DE MEDIÇÃO MENSAL (DETALHADO)</h2>
+                    <p style="margin:5px 0 15px 0;">Referência: <strong>${monthName}</strong></p>
+                </div>
+            `;
+
+            const cities = Object.keys(grouped).sort();
+            if(cities.length === 0) {
+                html += '<p class="text-center">Nenhum dado encontrado para os filtros selecionados.</p>';
+            } else {
+                cities.forEach(city => {
+                    const vessels = grouped[city];
+                    const vesselNames = Object.keys(vessels).sort((a,b) => vessels[b] - vessels[a]);
+                    
+                    html += `
+                        <div style="margin-bottom: 30px;">
+                            <div style="background: #333; color: white; padding: 5px 10px; font-weight: bold; text-transform: uppercase; font-size: 14px;">
+                                MUNICÍPIO: ${city}
+                            </div>
+                            <table class="matriz-table" style="margin-top: 0;">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 70%;">EMBARCAÇÃO</th>
+                                        <th style="width: 30%; text-align: right;">VALOR TOTAL</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                    `;
+                    
+                    let cityTotal = 0;
+                    vesselNames.forEach(v => {
+                        cityTotal += vessels[v];
+                        html += `
+                            <tr>
+                                <td>${v}</td>
+                                <td class="text-right-p" style="font-weight: bold;">${formatCurrency(vessels[v])}</td>
+                            </tr>
+                        `;
+                    });
+
+                    html += `
+                                    <tr style="background-color: #eee; font-weight: bold;">
+                                        <td class="text-right-p">TOTAL ${city.toUpperCase()}</td>
+                                        <td class="text-right-p">${formatCurrency(cityTotal)}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                });
+            }
+
+            reportScreen.innerHTML = `<div style="background: white; padding: 20px; border: 1px solid #ccc;">${html}</div>`;
+            document.getElementById('print-content').innerHTML = `<div class="print-area">${html}</div>`;
         }
 
         // --- EXPORTAÇÃO XLS ---
@@ -884,9 +977,8 @@
             document.body.removeChild(link);
         }
 
-        // --- MATRIZ DE LANÇAMENTO (FUNÇÃO MANTIDA MAS SEM BOTÃO) ---
-        // Função preservada caso seja necessário reativar no futuro
-        function generateMatriz() {
+        // --- MATRIZ DE LANÇAMENTO (TELA - RESTAURADA) ---
+        document.getElementById('btn-matriz').addEventListener('click', function() {
             const mVal = document.getElementById('month-filter').value;
             const munVal = document.getElementById('municipio-filter').value;
             if (mVal === 'all' || munVal === 'all') { alert("Para gerar a Matriz de Lançamento, selecione uma Referência e um Município específico."); return; }
@@ -964,7 +1056,7 @@
             document.getElementById('matriz-screen-content').innerHTML = html;
             document.getElementById('print-content').innerHTML = `<div class="print-area">${html}</div>`;
             openModal('modal-matriz');
-        }
+        });
 
         function fetchData() {
             const opts = { download: true, header: true, skipEmptyLines: true, transformHeader: h => h.trim().toLowerCase() };
@@ -1013,9 +1105,11 @@
         document.querySelectorAll('select').forEach(el => el.addEventListener('change', applyFilters));
         document.querySelectorAll('input[name="view-mode"]').forEach(el => el.addEventListener('change', applyFilters));
         
+        // RESTAURADOS OS LISTENERS DOS TRÊS BOTÕES
+        document.getElementById('btn-generate-report').addEventListener('click', generateReport);
         document.getElementById('btn-generate-boletim').addEventListener('click', generateBoletim);
+        document.getElementById('btn-matriz').addEventListener('click', generateMatriz);
         
-        // Listener mantido para o botão XLS dentro do Modal (embora o modal esteja inacessível pelo botão principal)
         document.getElementById('btn-download-xls').addEventListener('click', exportMatrixToXLS);
 
         document.getElementById('sort-qty').addEventListener('click', () => {
