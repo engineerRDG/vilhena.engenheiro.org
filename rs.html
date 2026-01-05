@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Controle de RS - Vilhena Serviços</title>
-    <!-- Biblioteca para leitura de CSV -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-
     <style>
         /* 1. IDENTIDADE VISUAL E CSS PADRÃO (Industrial Monospace) */
         :root {
@@ -25,12 +23,10 @@
             --btn-secondary: #ffc107;
             --btn-secondary-hover: #e0a800;
         }
-
         * { box-sizing: border-box; }
-
         body {
             background-color: var(--bg-page);
-            font-family: 'Courier New', Courier, monospace; /* OBRIGATÓRIO */
+            font-family: 'Courier New', Courier, monospace; /* OBRIGATÓRIO NA TELA */
             color: var(--text-primary);
             margin: 0;
             padding: 30px 20px;
@@ -62,7 +58,6 @@
             flex-wrap: wrap;
             gap: 15px;
         }
-
         .header-left { display: flex; align-items: center; gap: 15px; }
         .header-logo { height: 50px; width: auto; }
         .header-title h1 { margin: 0; font-size: 26px; color: var(--header-bg); text-transform: uppercase; line-height: 1.2; }
@@ -76,7 +71,6 @@
             gap: 15px;
             margin-bottom: 25px;
         }
-
         .kpi-card {
             border: 2px solid var(--header-bg);
             background: #fff;
@@ -89,15 +83,12 @@
             cursor: pointer;
             transition: transform 0.1s;
         }
-        
         .kpi-card:active { transform: translateY(1px); }
-
         .kpi-card.active {
             border-color: var(--btn-secondary);
             background-color: #fffdf0;
             box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.3);
         }
-
         .kpi-label {
             font-size: 12px;
             text-transform: uppercase;
@@ -106,7 +97,6 @@
             font-weight: bold;
             color: #666;
         }
-
         .kpi-value {
             font-size: 36px;
             font-weight: bold;
@@ -124,7 +114,6 @@
             color: #333;
         }
         input:focus, select:focus { outline: none; border-color: var(--header-bg); background-color: #fafafa; }
-
         .controls-bar {
             display: flex;
             flex-wrap: wrap;
@@ -136,7 +125,6 @@
             align-items: flex-end;
             margin-bottom: 20px;
         }
-
         .control-group {
             display: flex;
             flex-direction: column;
@@ -144,7 +132,6 @@
             min-width: 150px;
             flex-grow: 1;
         }
-
         .control-group label {
             font-size: 11px;
             text-transform: uppercase;
@@ -178,11 +165,9 @@
         thead { background-color: var(--header-bg); color: white; }
         th, td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border-color); border-right: 1px solid #eee; }
         th:last-child, td:last-child { border-right: none; }
-        
         tbody tr:nth-child(even) { background-color: #f9f9f9; }
         tbody tr:hover { background-color: #e9ecef; cursor: pointer; }
         tbody tr.table-light { background-color: #f0f0f0; color: #555; }
-
         .text-center { text-align: center; }
 
         /* Status Badges (Texto Puro) */
@@ -238,31 +223,91 @@
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* 3. IMPRESSÃO */
+        /* 3. IMPRESSÃO (Padrão A4 Profissional) */
         .print-area { display: none; }
+        
         @media print {
-            body { background-color: white; margin: 0; padding: 0; }
-            .container, .no-print { display: none !important; }
-            .print-area { display: block; width: 100%; margin: 0 auto; }
-            
-            /* Estilo Específico do Relatório RS (Checklist) */
-            body { font-family: Arial, sans-serif; font-size: 4px; line-height: 1.1; margin: 0; padding: 0; }
-            .print-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-            .print-table th, .print-table td {
-                border: 1px solid #000; padding: 0 1px; vertical-align: middle; word-wrap: break-word;
+            @page { 
+                size: A4; 
+                margin: 15mm; 
             }
-            .print-table th { background-color: #f0f0f0; font-weight: bold; }
-            .chk-col { width: 18px; text-align: center; vertical-align: middle; }
-            .chk { display: block; margin: 0 auto; width: 8px; height: 8px; }
-            .col-rs { width: 32px; }
-            .emb-col { width: 95px; white-space: nowrap; overflow: hidden; text-overflow: clip; }
-            .col-servico { width: auto; }
+            body { 
+                background-color: white; 
+                margin: 0; 
+                padding: 0; 
+                font-family: 'Helvetica', Arial, sans-serif; /* Fonte legível para leitura em papel */
+                color: #000;
+            }
+            
+            /* Esconde a interface web */
+            .container, .no-print, .modal-close, .modal-header, .modal-footer, .header-menu, .controls-bar, .grid-kpi { 
+                display: none !important; 
+            }
+            
+            /* Ajusta o Modal para ocupar a folha e não cortar conteúdo */
+            .modal-overlay { position: static; display: block; background: none; height: auto; width: auto; }
+            .modal-content { position: static; box-shadow: none; border: none; width: 100%; max-width: 100%; height: auto; overflow: visible; }
+            .modal-body { padding: 0; }
+            
+            /* Área de Impressão Visível */
+            .print-area { display: block; width: 100%; }
+            #report-screen-content { display: none; } /* Esconde o preview web na hora de imprimir */
+
+            /* Cabeçalho do Relatório Impresso */
+            .print-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                border-bottom: 2px solid #000;
+                padding-bottom: 10px;
+                margin-bottom: 20px;
+            }
+            .print-logo { height: 50px; }
+            .print-info { text-align: right; font-size: 10px; line-height: 1.4; }
+
+            /* Tabela de Impressão */
+            .print-table { 
+                width: 100%; 
+                border-collapse: collapse; 
+                font-size: 11px; /* Tamanho bom para leitura */
+            }
+            
+            /* AQUI ESTÁ A CORREÇÃO DA COR DA LETRA */
+            .print-table th { 
+                background-color: #eee !important; 
+                color: #000 !important; /* Força a cor PRETA no cabeçalho */
+                border: 1px solid #000; 
+                padding: 6px; 
+                text-transform: uppercase;
+                font-weight: bold;
+                -webkit-print-color-adjust: exact; 
+                print-color-adjust: exact;
+            }
+            
+            .print-table td { 
+                border: 1px solid #999; 
+                padding: 6px; 
+                vertical-align: top;
+            }
+            
+            /* Larguras das colunas */
+            .chk-col { width: 30px; text-align: center; }
+            .chk-box { 
+                width: 12px; height: 12px; 
+                border: 1px solid #000; 
+                display: inline-block; 
+                margin-top: 2px; 
+            }
+            .col-rs { width: 50px; font-weight: bold; text-align: center; }
+            .emb-col { width: 100px; font-weight: bold; }
+            .col-servico { text-align: justify; }
+
+            /* Cores de Fundo (Zebrado) na impressão */
+            tr.zebra-green { background-color: #f0f8f0 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         }
     </style>
 </head>
 <body>
-
-    <!-- Interface Principal -->
     <div class="container">
         <header>
             <div class="header-left">
@@ -278,7 +323,6 @@
             </div>
         </header>
 
-        <!-- KPIs (Filtros Rápidos) -->
         <div class="grid-kpi">
             <div id="card-open" class="kpi-card" style="border-left: 5px solid #ffc107;">
                 <div class="kpi-label">Em Aberto</div>
@@ -294,7 +338,6 @@
             </div>
         </div>
 
-        <!-- Filtros -->
         <div class="controls-bar">
             <div class="control-group" style="flex-grow: 2; max-width: 400px;">
                 <label>Pesquisar (RS/Serviço)</label>
@@ -317,7 +360,6 @@
             </div>
         </div>
 
-        <!-- Tabela de Dados -->
         <div class="table-container">
             <table class="table">
                 <thead>
@@ -334,7 +376,6 @@
             </table>
         </div>
 
-        <!-- Footer -->
         <footer>
             <div class="footer-left">
                 <img src="https://raw.githubusercontent.com/engineerRDG/vilhena.engenheiro.org/refs/heads/main/imagem/eletrobras.png" alt="Logo Eletrobras" class="footer-logo">
@@ -346,7 +387,6 @@
         </footer>
     </div>
 
-    <!-- Modal Relatório -->
     <div id="modal-report" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header no-print">
@@ -354,17 +394,14 @@
                 <button class="modal-close" onclick="closeModal('modal-report')">X</button>
             </div>
             <div class="modal-body">
-                <!-- Área de Visualização (Web) -->
                 <div id="report-screen-content" class="no-print" style="background: #f0f0f0; padding: 10px; font-size: 10px;">
                     <div style="background: white; padding: 20px; border: 1px solid #ccc;">
                         <p class="text-center">Selecione os filtros e clique em "Gerar Relatório".</p>
                     </div>
                 </div>
                 
-                <!-- Área de Impressão (Hidden unless @media print) -->
                 <div id="print-content" class="print-area">
-                    <!-- Conteúdo gerado via JS -->
-                </div>
+                    </div>
             </div>
             <div class="modal-footer no-print">
                 <button class="btn-secondary" onclick="closeModal('modal-report')">FECHAR</button>
@@ -385,7 +422,6 @@
         const vesselFilter = document.getElementById('vessel-filter');
         const searchInput = document.getElementById('search-input');
         const btnRelatorio = document.getElementById('btn-relatorio');
-
         const cardOpen = document.getElementById('card-open');
         const cardInProgress = document.getElementById('card-in-progress');
         const cardCompleted = document.getElementById('card-completed');
@@ -398,9 +434,9 @@
             'Canastra', 
             'Delfinópolis I', 
             'NSDN VII', 
-            'NSDN X',   
-            'RG IV'     
-        ];
+            'NSDN X', 
+            'RG IV' 
+            ];
 
         // Normaliza nome de embarcação
         function normalizeVesselName(name) {
@@ -448,6 +484,7 @@
             const months = new Set();
             requests.forEach(req => { const my = getMonthYear(req.abertura); if (my) months.add(my); });
             const sortedMonths = Array.from(months).sort().reverse();
+
             monthFilter.innerHTML = '<option value="all">Todos os Meses</option>';
             sortedMonths.forEach(month => {
                 const [year, monthNum] = month.split('-');
@@ -462,6 +499,7 @@
             const statuses = new Set();
             requests.forEach(req => { if (req.status) statuses.add(req.status); });
             const sortedStatuses = Array.from(statuses).sort();
+
             statusFilter.innerHTML = '<option value="all">Todos os Status</option>';
             sortedStatuses.forEach(status => {
                 const option = document.createElement('option');
@@ -530,18 +568,18 @@
             if (monthFilter.value !== 'all') {
                 filtered = filtered.filter(req => getMonthYear(req.abertura) === monthFilter.value);
             }
+
             if (statusFilter.value !== 'all') {
                 filtered = filtered.filter(req => req.status === statusFilter.value);
             }
 
             if (statusCardFilter) {
-                if(statusCardFilter === 'completed') {
+                if(statusCardFilter === 'completed') { 
                      filtered = filtered.filter(req => req.status === 'Concluída' || req.status === 'Concluído');
-                } else {
+                } else { 
                      filtered = filtered.filter(req => req.status === statusCardFilter);
                 }
             }
-
             renderTable(filtered);
         }
 
@@ -594,7 +632,7 @@
             applyFilters();
         });
 
-        // RELATÓRIO (Gerar HTML para Impressão)
+        // RELATÓRIO (Gerar HTML Otimizado para Impressão)
         btnRelatorio.addEventListener('click', function() {
             // Inicia com todas as requisições
             let dataForReport = allRequests;
@@ -606,7 +644,7 @@
                 dataForReport = dataForReport.filter(req => req.embarcação === vesselFilter.value);
             }
 
-            // Filtra apenas "Em aberto" para o relatório
+            // Filtra apenas "Em aberto" para o relatório (Checklist)
             let abertas = dataForReport.filter(req => req.status === 'Em aberto');
 
             // Ordena por embarcação e depois por RS
@@ -615,7 +653,6 @@
                 const embB = (b.embarcação || '').toString().toLowerCase();
                 if (embA < embB) return -1;
                 if (embA > embB) return 1;
-
                 const rsA = (a.rs || '').toString().toLowerCase();
                 const rsB = (b.rs || '').toString().toLowerCase();
                 return rsA.localeCompare(rsB);
@@ -626,50 +663,66 @@
             let useGreen = false;
 
             abertas.forEach(req => {
-                // Zebrado por RS
+                // Zebrado por RS (Lógica de cores)
+                let rowClass = "";
                 if (req.rs !== currentRs) {
                     currentRs = req.rs;
                     useGreen = !useGreen;
                 }
-                const background = useGreen ? 'background-color:#e8f6e8;' : 'background-color:#ffffff;';
-                
+                if (useGreen) rowClass = "zebra-green";
+
                 rowsHtml += `
-                    <tr style="${background}">
+                    <tr class="${rowClass}">
                         <td class="chk-col">
-                            <input type="checkbox" class="chk">
-                        </td>
-                        <td>${req.rs || ''}</td>
+                            <span class="chk-box"></span> </td>
+                        <td class="col-rs">${req.rs || ''}</td>
                         <td class="emb-col">${normalizeVesselName(req.embarcação) || ''}</td>
-                        <td>${req.serviço || ''}</td>
+                        <td class="col-servico">${req.serviço || ''}</td>
                     </tr>
                 `;
             });
 
             const vesselLabel = vesselFilter.options[vesselFilter.selectedIndex].text;
+            const dataHoje = new Date().toLocaleDateString('pt-BR');
+            const horaHoje = new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
 
-            // HTML da Tabela de Impressão (Estilo Compacto RS Original)
+            // HTML da Tabela de Impressão (Layout A4 com Cabeçalho)
             const reportHtml = `
-                <h3 style="font-size: 6px; margin-bottom: 5px; text-align: center;">Relatório de Pendências - ${vesselLabel}</h3>
+                <div class="print-header">
+                    <div>
+                        <img src="https://raw.githubusercontent.com/engineerRDG/vilhena.engenheiro.org/refs/heads/main/imagem/logo.png" class="print-logo">
+                    </div>
+                    <div class="print-info">
+                        <h2 style="margin: 0; text-transform: uppercase; font-size: 16px;">Checklist de Pendências</h2>
+                        <div style="font-size: 12px; margin-top: 5px;">${vesselLabel}</div>
+                        <div style="color: #666; margin-top: 2px;">Gerado em: ${dataHoje} às ${horaHoje}</div>
+                    </div>
+                </div>
+
                 <table class="print-table">
                     <thead>
                         <tr>
-                            <th class="chk-col"></th>
+                            <th class="chk-col">OK</th>
                             <th class="col-rs">RS</th>
                             <th class="emb-col">Embarcação</th>
-                            <th class="col-servico">Serviço</th>
+                            <th class="col-servico">Descrição do Serviço</th>
                         </tr>
                     </thead>
                     <tbody>
-                        ${rowsHtml || '<tr><td colspan="4" style="text-align:center;">Nenhuma RS em aberto.</td></tr>'}
+                        ${rowsHtml || '<tr><td colspan="4" style="text-align:center; padding: 20px;">Nenhuma pendência encontrada para os filtros selecionados.</td></tr>'}
                     </tbody>
                 </table>
+
             `;
 
             // Preenche áreas (Modal e Print)
             const reportScreen = document.getElementById('report-screen-content');
             const printArea = document.getElementById('print-content');
-
-            reportScreen.innerHTML = `<div style="background: white; padding: 10px; border: 1px solid #ccc;">${reportHtml}</div>`;
+            
+            // Preview simples na tela (usa o mesmo HTML mas sem o CSS de print forçado)
+            reportScreen.innerHTML = `<div style="background: white; padding: 20px; border: 1px solid #ccc; font-family: Arial;">${reportHtml}</div>`;
+            
+            // Área oculta que será impressa
             printArea.innerHTML = reportHtml;
 
             // Abre Modal
