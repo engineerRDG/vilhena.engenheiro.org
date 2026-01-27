@@ -1,3 +1,381 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cronograma de Atendimento - Vilhena Serviços</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+    <style>
+        /* =========================================
+           1. IDENTIDADE VISUAL (BASEADO EM MEDIÇÃO.TXT)
+           ========================================= */
+        :root {
+            --bg-page: #f0f0f0;
+            --bg-container: #ffffff;
+            --header-bg: #333333;
+            --header-text: #ffffff;
+            --border-color: #cccccc;
+            --text-primary: #333333;
+            --btn-primary: #28a745;
+            --btn-primary-hover: #218838;
+            --btn-report: #007bff;
+            --btn-report-hover: #0056b3;
+            --btn-secondary: #ffc107;
+            --btn-secondary-hover: #e0a800;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg-page);
+            font-family: 'Courier New', Courier, monospace;
+            color: var(--text-primary);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: var(--bg-container);
+            max-width: 1200px;
+            margin: 0 auto;
+            border-radius: 8px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.15), 0 10px 20px rgba(0,0,0,0.1);
+            padding: 25px;
+            border: 1px solid #d0d0d0;
+            position: relative;
+        }
+
+        /* Cabeçalho */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--header-bg);
+            padding-bottom: 20px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .header-left { display: flex; align-items: center; gap: 15px; }
+        .header-logo { height: 50px; width: auto; }
+        .header-title h1 { margin: 0; font-size: 26px; color: var(--header-bg); text-transform: uppercase; line-height: 1.2; }
+        .header-title div { font-size: 13px; color: #666; letter-spacing: 1px; }
+        .header-menu { display: flex; gap: 10px; }
+
+        /* Barra de Título da Seção (com botões de navegação) */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .section-title {
+            background-color: var(--header-bg);
+            color: var(--header-text);
+            padding: 8px 12px;
+            font-size: 16px;
+            font-weight: bold;
+            display: inline-block;
+            text-transform: uppercase;
+        }
+
+        /* Botões */
+        button {
+            font-family: 'Courier New', Courier, monospace;
+            border: none;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 12px;
+            border-radius: 4px;
+            transition: background 0.2s, transform 0.1s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        button:active { transform: translateY(1px); }
+        button a { color: white; text-decoration: none; }
+        
+        .btn-primary { background-color: var(--btn-primary); color: white; }
+        .btn-primary:hover { background-color: var(--btn-primary-hover); }
+        .btn-secondary { background-color: var(--btn-secondary); color: #333; border: 1px solid #d39e00; }
+        .btn-secondary:hover { background-color: var(--btn-secondary-hover); }
+
+        /* Tabela de Cronograma */
+        .table-container { overflow-x: auto; border: 1px solid var(--border-color); margin-bottom: 20px;}
+        
+        .schedule-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            font-size: 13px;
+        }
+
+        .schedule-table th, .schedule-table td {
+            border: 1px solid var(--border-color);
+            text-align: center;
+            vertical-align: top;
+        }
+
+        /* Cabeçalho da Tabela (Retângulo Escuro Reduzido) */
+        .schedule-table thead th {
+            background-color: var(--header-bg);
+            color: white;
+            font-weight: bold;
+            padding: 4px 8px;
+            font-size: 11px;
+            height: 30px;
+        }
+
+        .schedule-table td {
+            height: 150px;
+            padding: 10px;
+        }
+
+        /* Estilo dos Eventos (Cards com Efeito 3D) */
+        .event-card {
+            background-color: #fff;
+            border: 1px solid #555; /* Borda escura sólida */
+            margin-bottom: 8px;
+            padding: 8px;
+            font-size: 0.85rem;
+            text-align: left;
+            cursor: pointer;
+            position: relative;
+            
+            /* EFEITO 3D INDUSTRIAL */
+            border-bottom: 4px solid #000; /* Profundidade inferior */
+            box-shadow: 3px 3px 0px rgba(0,0,0,0.15); /* Sombra projetada */
+            transition: transform 0.1s ease;
+        }
+
+        .event-card:hover {
+            transform: translateY(-2px); /* Levanta ao passar o mouse */
+            box-shadow: 5px 5px 0px rgba(0,0,0,0.2);
+        }
+
+        .event-card:active {
+            border-bottom: 2px solid #000; /* Afunda ao clicar */
+            transform: translateY(2px);
+            box-shadow: 1px 1px 0px rgba(0,0,0,0.1);
+        }
+
+        .event-title { font-weight: bold; display: block; border-bottom: 1px dashed #ccc; padding-bottom: 3px; margin-bottom: 4px; }
+        .event-desc { display: block; margin-bottom: 2px; font-size: 0.9em; }
+        .event-tech { display: block; font-style: italic; text-align: right; font-size: 0.8rem; color: #555; margin-top: 4px; font-weight: bold;}
+
+        /* Cores por Técnico (Ajustadas para 3D) */
+        .event-carlos { 
+            background-color: #f0fff4; 
+            border-right: 4px solid var(--btn-primary); /* Profundidade lateral */
+        }
+        .event-juliana { 
+            background-color: #f0f8ff; 
+            border-right: 4px solid var(--btn-report);
+        }
+        .event-fernando { 
+            background-color: #fffff0; 
+            border-right: 4px solid var(--btn-secondary);
+        }
+
+        /* Rodapé */
+        footer {
+            margin-top: 40px; padding-top: 20px;
+            border-top: 2px solid var(--header-bg);
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;
+        }
+        .footer-logo { height: 40px; width: auto; }
+        .footer-info { text-align: right; font-size: 12px; color: #555; line-height: 1.4; }
+
+        /* Loading Spinner Simples */
+        .loading-container {
+            text-align: center;
+            padding: 20px;
+            font-weight: bold;
+            color: #666;
+        }
+
+        /* =========================================
+           MODAL DE DETALHES (NOVO)
+           ========================================= */
+        .modal-overlay {
+            display: none; 
+            position: fixed; 
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); 
+            z-index: 1000;
+            justify-content: center; 
+            align-items: center;
+        }
+        .modal-overlay.active { display: flex; }
+        
+        .modal-content {
+            background: white; 
+            width: 90%; 
+            max-width: 600px; 
+            max-height: 85vh; 
+            overflow-y: auto;
+            border: 2px solid var(--header-bg); 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        
+        .modal-header {
+            background: var(--header-bg); 
+            color: white; 
+            padding: 15px;
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+        }
+        
+        .modal-header h3 { margin: 0; font-size: 16px; text-transform: uppercase; }
+        .modal-close { 
+            background: transparent; 
+            border: none; 
+            color: white; 
+            font-size: 20px; 
+            cursor: pointer; 
+            font-weight: bold; 
+        }
+        
+        .modal-body { padding: 20px; }
+
+        .role-group {
+            margin-bottom: 15px;
+            border-bottom: 1px dashed #ccc;
+            padding-bottom: 5px;
+        }
+        
+        .role-title {
+            background-color: #eee;
+            padding: 4px 8px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+            display: inline-block;
+        }
+        
+        .role-names {
+            font-size: 1rem;
+            color: #333;
+        }
+
+        /* =========================================
+           IMPRESSÃO
+           ========================================= */
+        .print-area { display: none; }
+        
+        @media print {
+            @page { size: A4 portrait; margin: 20mm; }
+            body { background-color: white; margin: 0; padding: 0; font-family: 'Courier New', monospace; font-size: 10pt; }
+            .container, .section-header button, .no-print, .modal-overlay { display: none !important; }
+            .print-area { display: block; width: 100%; max-width: 210mm; margin: 0 auto; }
+            
+            .report-header { text-align: center; border-bottom: 2px solid #000; margin-bottom: 20px; padding-bottom: 10px; }
+            .report-header h1 { font-size: 16pt; margin: 0; text-transform: uppercase; color: #000; }
+            .report-header h2 { font-size: 12pt; margin: 5px 0 0 0; font-weight: normal; }
+            
+            .report-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+            .report-table th, .report-table td {
+                border: 1px solid #000; padding: 5px; font-size: 10pt; text-align: left;
+            }
+            .report-table th { background-color: #eee !important; -webkit-print-color-adjust: exact; }
+            .report-table td { vertical-align: top; }
+
+            .report-footer { margin-top: 50px; display: flex; justify-content: space-between; page-break-inside: avoid; }
+            .signature-block { width: 45%; text-align: center; }
+            .signature-line { border-top: 1px solid #000; margin-top: 40px; padding-top: 5px; font-weight: bold; }
+        }
+    </style>
+<!-- Code injected by Five-server -->
+  <script async data-id="five-server" data-file="c:\Users\Rodrigo\Documents\~ PROGRAMAÇÃO\vilhena.engenheiro\medicao.html" type="application/javascript" src="/fiveserver.js"></script>
+  </head>
+<body>
+
+    <div class="container">
+        <!-- CABEÇALHO -->
+        <header>
+            <div class="header-left">
+                <img src="https://raw.githubusercontent.com/engineerRDG/vilhena.engenheiro.org/refs/heads/main/imagem/logo.png" alt="Vilhena Serviços Logo" class="header-logo">
+                <div class="header-title">
+                    <h1>Vilhena Serviços Ltda.</h1>
+                    <div>CRONOGRAMA DE ATENDIMENTO</div>
+                </div>
+            </div>
+            <div class="header-menu no-print">
+                <button class="btn-secondary" onclick="window.location.href='rs.html'">RS</button>
+                <button class="btn-secondary" onclick="window.location.href='medicao.html'">MEDIÇÃO</button>
+                <button class="btn-primary" onclick="window.location.href='cronograma.html'">CRONOGRAMA</button>
+            </div>
+        </header>
+
+        <!-- BARRA DE CONTROLE DE SEMANA -->
+        <div class="section-header">
+            <div class="section-title" id="week-label">CARREGANDO DADOS...</div>
+            <div class="header-menu no-print">
+                <button class="btn-secondary" onclick="changeWeek(-1)">&lt; Semana Anterior</button>
+                <button class="btn-secondary" onclick="changeWeek(1)">Próxima Semana &gt;</button>
+            </div>
+        </div>
+        
+        <!-- TABELA DE CRONOGRAMA -->
+        <div class="table-container">
+            <table class="schedule-table">
+                <thead>
+                    <tr id="calendar-header">
+                        <!-- Cabeçalhos gerados via JS -->
+                        <th>Seg</th><th>Ter</th><th>Qua</th><th>Qui</th><th>Sex</th><th>Sáb</th><th>Dom</th>
+                    </tr>
+                </thead>
+                <tbody id="calendar-body">
+                    <tr>
+                        <td colspan="7" class="loading-container">
+                            [ CARREGANDO CRONOGRAMA DA PLANILHA... ]
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- RODAPÉ -->
+        <footer>
+            <div class="footer-left">
+                <img src="https://raw.githubusercontent.com/engineerRDG/vilhena.engenheiro.org/refs/heads/main/imagem/eletrobras.png" alt="Logo Eletrobras" class="footer-logo">
+            </div>
+            <div class="footer-info">
+                <p><b>Vilhena Serviços LTDA</b><br>Departamento de Engenharia e Manutenção</p>
+                <p><b>Rodrigo M. Araujo</b><br>Engenheiro Mecânico<br>Engenheiro de Segurança do Trabalho</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- MODAL DE DETALHES -->
+    <div id="modal-details" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">DETALHES DA EQUIPE</h3>
+                <button class="modal-close" onclick="closeModal()">X</button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Atividade:</strong> <span id="modal-desc"></span></p>
+                <p><strong>Local:</strong> <span id="modal-location"></span></p>
+                <hr style="border: 0; border-top: 1px dashed #ccc; margin: 15px 0;">
+                <div id="modal-team-list"></div>
+            </div>
+            <div style="text-align: center; padding: 10px; background: #f9f9f9;">
+                <button class="btn-secondary" onclick="closeModal()">FECHAR</button>
+            </div>
+        </div>
+    </div>
+
     <!-- ÁREA DE IMPRESSÃO -->
     <div class="print-area" id="print-content">
         <div class="report-header">
@@ -25,3 +403,270 @@
             <div class="signature-block"><div class="signature-line">Aprovação Cliente</div></div>
         </div>
     </div>
+
+    <script>
+        // URL da Planilha CSV
+        const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTu9skDnnYmILUpQ4UvWblPFbq1D4k7Dy4FPK5k-21kgAurdYAJbxyXhbofQGUDHwSefc6w18tDOqPj/pub?gid=502983351&single=true&output=csv';
+
+        // Mapeamento de Cargos (Baseado na lista solicitada)
+        const ROLE_MAP = {
+            "Edgar": "Mecânico", "Wellington": "Mecânico", "Winter": "Mecânico",
+            "Iago": "Eletricista", "Damião": "Eletricista", "Cristhian": "Eletricista",
+            "Vital": "Soldador", "Moisés": "Preposto", "Rodrigo": "Engenheiro", "Marcos": "Técnico de Segurança do Trabalho",
+            "Eduardo": "Auxiliar", "Sidinei": "Auxiliar", "Carlindo": "Terceirizado", "Rogelson": "Terceirizado"
+        };
+
+        // Estado da Aplicação
+        let allEvents = [];       // Todos os eventos parseados
+        let currentMonday = new Date(); // Data da segunda-feira da semana exibida
+
+        // Mapeamento de Colunas da Planilha
+        const COL_MAP = {
+            date: 'data',
+            rs: 'titulo',
+            vessel: 'descricao',
+            desc: '', // Terceira linha vazia
+            tech: 'equipe'
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchData();
+        });
+
+        function fetchData() {
+            Papa.parse(CSV_URL, {
+                download: true,
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    processData(results.data);
+                },
+                error: function(err) {
+                    document.getElementById('calendar-body').innerHTML = '<tr><td colspan="7" style="text-align:center; color:red;">Erro ao carregar dados: ' + err.message + '</td></tr>';
+                }
+            });
+        }
+
+        function processData(data) {
+            let latestDate = new Date(0); // Para definir a semana inicial
+
+            allEvents = data.filter(row => row[COL_MAP.date]).map(row => {
+                const dateParts = row[COL_MAP.date].split('/');
+                if (dateParts.length !== 3) return null;
+                const dateObj = new Date(dateParts[2], dateParts[1] - 1, dateParts[0]);
+                
+                if (isNaN(dateObj)) return null;
+
+                // Rastrear a data mais recente encontrada
+                if (dateObj > latestDate) latestDate = dateObj;
+
+                // Classes CSS baseadas na equipe
+                let techClass = '';
+                const teamStr = (row[COL_MAP.tech] || '').toLowerCase();
+                // Lógica simples para cor da borda baseada no nome do responsável ou primeiro da lista
+                if (teamStr.includes('rodrigo')) techClass = 'event-fernando'; // Atribuindo Rodrigo a Fernando por exemplo visual
+                else if (teamStr.includes('winter') || teamStr.includes('wellington')) techClass = 'event-carlos';
+                else if (teamStr.includes('iago') || teamStr.includes('damião')) techClass = 'event-juliana';
+                else techClass = 'event-carlos'; // Default
+
+                return {
+                    dateObj: dateObj,
+                    dateStr: formatDate(dateObj),
+                    rs: row[COL_MAP.rs] || '',
+                    vessel: row[COL_MAP.vessel] || '',
+                    desc: '',
+                    tech: row[COL_MAP.tech] || '',
+                    techClass: techClass
+                };
+            }).filter(e => e !== null);
+
+            // Ordenar por Data
+            allEvents.sort((a, b) => a.dateObj - b.dateObj);
+
+            // Define a semana inicial para a data mais recente encontrada (ou hoje se estiver vazio)
+            if (latestDate.getTime() !== 0) {
+                currentMonday = getMonday(latestDate);
+            } else {
+                currentMonday = getMonday(new Date());
+            }
+
+            renderCurrentWeek();
+        }
+
+        function renderCurrentWeek() {
+            // Calcula o início e fim da semana baseada em currentMonday
+            const start = new Date(currentMonday);
+            const end = new Date(start);
+            end.setDate(end.getDate() + 6);
+
+            // Atualizar Título
+            const options = { day: '2-digit', month: 'short' };
+            const label = `${start.toLocaleDateString('pt-BR', options)} - ${end.toLocaleDateString('pt-BR', options)}, ${start.getFullYear()}`;
+            document.getElementById('week-label').textContent = `SEMANA: ${label.toUpperCase()}`;
+            document.getElementById('print-date-range').textContent = `Período: ${label} ${start.getFullYear()}`;
+
+            // Renderizar Cabeçalho
+            const headerRow = document.getElementById('calendar-header');
+            headerRow.innerHTML = '';
+            const daysOfWeek = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'];
+            let currentDay = new Date(start);
+            
+            daysOfWeek.forEach(() => {
+                const th = document.createElement('th');
+                th.textContent = `${currentDay.getDate()}/${currentDay.getMonth()+1}`;
+                headerRow.appendChild(th);
+                currentDay.setDate(currentDay.getDate() + 1);
+            });
+
+            // Renderizar Corpo
+            const tbody = document.getElementById('calendar-body');
+            tbody.innerHTML = '';
+            const tr = document.createElement('tr');
+            
+            // Reset currentDay para o início da semana
+            currentDay = new Date(start);
+            
+            daysOfWeek.forEach(() => {
+                const td = document.createElement('td');
+                
+                // Filtra eventos que estão EXATAMENTE neste dia
+                const daysEvents = allEvents.filter(evt => isSameDay(evt.dateObj, currentDay));
+                
+                daysEvents.forEach(evt => {
+                    const div = document.createElement('div');
+                    div.className = `event-card ${evt.techClass}`;
+                    
+                    // Popula o Modal ao clicar
+                    div.onclick = () => openModal(evt);
+                    
+                    div.innerHTML = `
+                        <span class="event-title">${evt.rs}</span>
+                        <span class="event-desc">${evt.vessel}</span>
+                        <span class="event-tech">${evt.tech}</span>
+                    `;
+                    td.appendChild(div);
+                });
+
+                tr.appendChild(td);
+                currentDay.setDate(currentDay.getDate() + 1);
+            });
+
+            tbody.appendChild(tr);
+            updatePrintArea();
+        }
+
+        // Navegação Baseada em Data (+- 7 dias)
+        function changeWeek(direction) {
+            currentMonday.setDate(currentMonday.getDate() + (direction * 7));
+            renderCurrentWeek();
+        }
+
+        // --- Lógica do Modal ---
+
+        function openModal(evt) {
+            const modal = document.getElementById('modal-details');
+            const teamStr = evt.tech; // String original da planilha
+            
+            document.getElementById('modal-desc').textContent = evt.vessel;
+            document.getElementById('modal-location').textContent = evt.rs;
+            
+            const teamContainer = document.getElementById('modal-team-list');
+            teamContainer.innerHTML = '';
+
+            if (!teamStr || teamStr.trim() === '') {
+                teamContainer.innerHTML = '<p style="color:red; font-style:italic;">Equipe não informada.</p>';
+            } else {
+                // Separa nomes por vírgula
+                const names = teamStr.split(',').map(n => n.trim()).filter(n => n.length > 0);
+                
+                // Agrupa por Cargo
+                const grouped = {};
+                
+                names.forEach(name => {
+                    // Busca cargo no mapa (case insensitive)
+                    const normalized = name.charAt(0).toUpperCase() + name.slice(1);
+                    const role = ROLE_MAP[normalized] || "Outros / Não Classificado";
+                    
+                    if (!grouped[role]) grouped[role] = [];
+                    grouped[role].push(normalized);
+                });
+
+                // Renderiza HTML Agrupado
+                Object.keys(grouped).sort().forEach(role => {
+                    const groupDiv = document.createElement('div');
+                    groupDiv.className = 'role-group';
+                    
+                    const titleDiv = document.createElement('div');
+                    titleDiv.className = 'role-title';
+                    titleDiv.textContent = role.toUpperCase();
+                    
+                    const namesDiv = document.createElement('div');
+                    namesDiv.className = 'role-names';
+                    namesDiv.textContent = grouped[role].join(', ');
+                    
+                    groupDiv.appendChild(titleDiv);
+                    groupDiv.appendChild(namesDiv);
+                    teamContainer.appendChild(groupDiv);
+                });
+            }
+            
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modal-details').classList.remove('active');
+        }
+
+        // --- Helpers ---
+
+        function getMonday(d) {
+            d = new Date(d);
+            const day = d.getDay();
+            const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+            return new Date(d.setDate(diff));
+        }
+
+        function isSameDay(d1, d2) {
+            return d1.getFullYear() === d2.getFullYear() &&
+                   d1.getMonth() === d2.getMonth() &&
+                   d1.getDate() === d2.getDate();
+        }
+
+        function formatDate(date) {
+            return `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth()+1).toString().padStart(2, '0')}`;
+        }
+
+        function updatePrintArea() {
+            const printBody = document.getElementById('print-body');
+            const start = new Date(currentMonday);
+            const end = new Date(start);
+            end.setDate(end.getDate() + 6);
+            
+            let html = '';
+            let currentDate = new Date(start);
+
+            while (currentDate <= end) {
+                const daysEvents = allEvents.filter(evt => isSameDay(evt.dateObj, currentDate));
+                const dateStr = currentDate.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' });
+                const formattedDate = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
+
+                if (daysEvents.length === 0) {
+                    html += `<tr><td>${formattedDate}</td><td colspan="3" style="color:#777; font-style:italic;">- Sem atividades -</td></tr>`;
+                } else {
+                    daysEvents.forEach(evt => {
+                        html += `
+                        <tr>
+                            <td>${formattedDate}</td>
+                            <td>${evt.rs}</td>
+                            <td>${evt.vessel}</td>
+                            <td>${evt.tech}</td>
+                        </tr>`;
+                    });
+                }
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+            printBody.innerHTML = html;
+        }
+    </script>
+</body>
+</html>
