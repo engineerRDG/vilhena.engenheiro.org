@@ -42,7 +42,37 @@
             font-size: 14px;
         }
 
-        /* 2. ESTRUTURA E VISUAL3D */
+        /* --- TOAST NOTIFICATION (Substituto do Alert) --- */
+        #toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .toast {
+            background-color: #333;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            font-size: 14px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            border-left: 5px solid var(--btn-primary);
+            min-width: 250px;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .toast.warning { border-left-color: var(--btn-secondary); color: #000; background-color: #fff3cd; }
+        .toast.error { border-left-color: var(--btn-danger); }
+
+        /* 2. ESTRUTURA E VISUAL */
         .container {
             background-color: var(--bg-container);
             max-width: 1200px;
@@ -182,7 +212,32 @@
         .btn-radio-group input { display: none; }
         .btn-radio-group input:checked + label { background: #333; color: white; }
 
+        /* Toggle Table Button */
+        .table-toggle-wrapper {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 10px;
+        }
+        .btn-toggle {
+            background-color: #555;
+            color: white;
+            font-size: 11px;
+            padding: 5px 10px;
+        }
+        .btn-toggle:hover { background-color: #333; }
+
         /* Tabelas Gerais */
+        .table-wrapper {
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out, opacity 0.5s ease-in-out;
+            max-height: 1000px; /* Altura máxima inicial */
+            opacity: 1;
+        }
+        .table-wrapper.collapsed {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+        }
         .table-container { overflow-x: auto; border: 1px solid var(--border-color); }
         #data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
         #data-table thead { background-color: var(--header-bg); color: white; }
@@ -220,11 +275,18 @@
         .report-footer { margin-top: 40px; display: flex; justify-content: space-between; page-break-inside: avoid; }
         
         /* Gráficos */
-        .chart-wrapper { position: relative; height: 300px; width: 100%; border: 1px solid #ddd; padding: 10px; background: #fff; }
-        .chart-label { text-align: center; font-size: 14px; font-weight: bold; margin-bottom: 10px; color: #333; text-transform: uppercase; border-bottom: 1px dashed #ccc; padding-bottom: 5px; }
+        .chart-wrapper { position: relative; height: 220px; width: 100%; border: 1px solid #ddd; padding: 10px; background: #fff; margin-bottom: 15px; }
+        .chart-label { text-align: center; font-size: 12px; font-weight: bold; margin-bottom: 5px; color: #333; text-transform: uppercase; border-bottom: 1px dashed #ccc; padding-bottom: 5px; }
+
+        /* Layout de 2 colunas para gráficos quando houver mais de um */
+        .charts-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
 
         /* Lista Embarcação */
-        #vesselPerformanceContainer { height: 300px; overflow-y: auto; border: 1px solid #333; background: #fff; }
+        #vesselPerformanceContainer { height: 455px; overflow-y: auto; border: 1px solid #333; background: #fff; } /* Altura ajustada para igualar aos 2 charts empilhados */
         .vessel-list-header { display: flex; background-color: var(--header-bg); color: white; padding: 8px 10px; font-weight: bold; font-size: 12px; text-transform: uppercase; position: sticky; top: 0; z-index: 10; }
         .vessel-col-name { flex: 2; } 
         .vessel-col-city { flex: 1; }
@@ -254,7 +316,7 @@
         @media print {
             @page { size: A4 landscape; margin: 10mm; }
             body { background-color: white; margin: 0; padding: 0; font-family: 'Courier New', monospace; font-size: 10pt; }
-            .container, .no-print, .modal-overlay { display: none !important; }
+            .container, .no-print, .modal-overlay, #toast-container { display: none !important; }
             .print-area { display: block; width: 100%; max-width: 100%; margin: 0 auto; }
             .matriz-table th { background-color: #eee !important; color: #000 !important; -webkit-print-color-adjust: exact; }
             .matriz-table tbody tr:nth-child(even) { background-color: transparent !important; }
@@ -266,6 +328,9 @@
     </style>
 </head>
 <body>
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
 
     <div class="container">
         <header>
@@ -309,10 +374,19 @@
                 </div>
             </div>
             
-            <div>
-                <div class="chart-label">ANÁLISE DE PARETO (TOP 8)</div>
-                <div class="chart-wrapper">
-                    <canvas id="paretoChart"></canvas>
+            <!-- Coluna da Direita com 2 Gráficos Empilhados -->
+            <div class="charts-stack">
+                <div>
+                    <div class="chart-label">PARETO - TOP 8 QUANTIDADE</div>
+                    <div class="chart-wrapper">
+                        <canvas id="paretoQtyChart"></canvas>
+                    </div>
+                </div>
+                <div>
+                    <div class="chart-label">PARETO - TOP 8 VALOR (LUCRO)</div>
+                    <div class="chart-wrapper">
+                        <canvas id="paretoValChart"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
@@ -321,7 +395,6 @@
 
         <div class="controls-bar">
             <div class="control-group" style="display: flex; gap: 10px; align-items: flex-end;">
-                <!-- BOTÃO RELATÓRIO MENSAL REMOVIDO CONFORME SOLICITAÇÃO -->
                 <button id="btn-generate-boletim" class="btn-secondary" style="background-color: #333; color: white;">BOLETIM</button>
                 <button id="btn-matriz" class="btn-primary" style="background-color: var(--btn-primary);">MATRIZ DE LANÇAMENTO</button>
             </div>
@@ -350,23 +423,28 @@
                 </div>
             </div>
         </div>
-
-        <!-- TÍTULO "LISTA DE MEDIÇÕES" REMOVIDO CONFORME SOLICITAÇÃO -->
         
-        <div class="table-container">
-            <table id="data-table">
-                <thead>
-                    <tr>
-                        <th>Código</th>
-                        <th>Descritivo</th>
-                        <th class="sortable" id="sort-qty">Qtd. <span id="icon-qty">▼</span></th>
-                        <th class="sortable text-right" id="sort-val">Valor Total <span id="icon-val">▼</span></th>
-                    </tr>
-                </thead>
-                <tbody id="data-table-body">
-                    <tr><td colspan="4" class="text-center">[ CARREGANDO... ]</td></tr>
-                </tbody>
-            </table>
+        <!-- Botão Toggle para Tabela -->
+        <div class="table-toggle-wrapper">
+            <button id="btn-toggle-table" class="btn-toggle">OCULTAR TABELA ▲</button>
+        </div>
+        
+        <div class="table-wrapper" id="table-wrapper">
+            <div class="table-container">
+                <table id="data-table">
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Descritivo</th>
+                            <th class="sortable" id="sort-qty">Qtd. <span id="icon-qty">▼</span></th>
+                            <th class="sortable text-right" id="sort-val">Valor Total <span id="icon-val">▼</span></th>
+                        </tr>
+                    </thead>
+                    <tbody id="data-table-body">
+                        <tr><td colspan="4" class="text-center">[ CARREGANDO... ]</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <footer>
@@ -438,6 +516,26 @@
     </div>
 
     <script>
+    // --- SISTEMA DE NOTIFICAÇÃO (TOAST) ---
+    window.showToast = function(message, type = 'info') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = message;
+        container.appendChild(toast);
+        
+        // Trigger reflow
+        void toast.offsetWidth; 
+        toast.classList.add('show');
+        
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => {
+                if(container.contains(toast)) container.removeChild(toast);
+            }, 300);
+        }, 3000);
+    }
+
     window.openModal = function(id) { document.getElementById(id).classList.add('active'); }
     window.closeModal = function(id) { document.getElementById(id).classList.remove('active'); }
     
@@ -447,26 +545,37 @@
         navigator.clipboard.writeText(text).then(() => {
             const originalBg = el.style.backgroundColor;
             el.style.backgroundColor = '#aaffaa';
+            showToast("Valor copiado!", "info");
             setTimeout(() => el.style.backgroundColor = originalBg || 'transparent', 300);
         });
     }
 
+    // Toggle Table Logic
+    const btnToggleTable = document.getElementById('btn-toggle-table');
+    const tableWrapper = document.getElementById('table-wrapper');
+    
+    btnToggleTable.addEventListener('click', function() {
+        tableWrapper.classList.toggle('collapsed');
+        if(tableWrapper.classList.contains('collapsed')) {
+            this.textContent = "MOSTRAR TABELA ▼";
+        } else {
+            this.textContent = "OCULTAR TABELA ▲";
+        }
+    });
+
     document.addEventListener('DOMContentLoaded', function() {
         
         // --- MAPEAMENTO DE VALORES FIXOS POR MUNICÍPIO ---
-        // para todos os municípios ('default').
-        // EDITE OS VALORES ABAIXO conforme a tabela da imagem para cada município específico.
         const VALORES_FIXOS_MUNICIPIO = {
-            'Delfinópolis': 119142.70, // Alterar se necessário
-            'Alfenas': 39714.23,      // Alterar se necessário
-            'Guapé': 59571.35,        // Alterar se necessário
-            'Carmo do Rio Claro': 39714.23, // Alterar se necessário
-            'Campo Belo': 19857.12,      // Alterar se necessário
-            'Campo do Meio': 19857.12,        // Alterar se necessário
-            'Cristais': 19857.12,        // Alterar se necessário
-            'Fama': 19857.12,      // Alterar se necessário
-            'Três Pontas': 19857.12,        // Alterar se necessário
-            // Adicione outros municípios aqui com seus respectivos valores fixos
+            'Delfinópolis': 119142.70,
+            'Alfenas': 39714.23,
+            'Guapé': 59571.35,
+            'Carmo do Rio Claro': 39714.23,
+            'Campo Belo': 19857.12,
+            'Campo do Meio': 19857.12,
+            'Cristais': 19857.12,
+            'Fama': 19857.12,
+            'Três Pontas': 19857.12,
         };
 
         const SERVICES_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-EzfpINGaWJduqHgUQwgjK2hzakenB8-zIFSO7eqPtAoZzSin9DV0eyxg9_wEPaWE79lYxiGMQ_9b/pub?gid=1132804567&single=true&output=csv';
@@ -504,7 +613,6 @@
             }
             const parsedTime = Date.parse(dateStr);
             if (!isNaN(parsedTime)) return new Date(parsedTime);
-            
             return null;
         };
 
@@ -519,9 +627,14 @@
             document.getElementById('kpi-total-items').textContent = data.length.toLocaleString('pt-BR');
             const totalVal = data.reduce((sum, item) => sum + item.valorCalculado, 0);
             document.getElementById('kpi-total-value').textContent = formatCurrency(totalVal);
+            
             const monthSel = document.getElementById('month-filter');
-            document.getElementById('kpi-month').textContent = selectedMonthValue === 'all' ? 'TODOS' : monthSel.options[monthSel.selectedIndex].text;
-            document.getElementById('kpi-city').textContent = (selectedMunicipioValue === 'all' || !selectedMunicipioValue) ? 'TODOS' : selectedMunicipioValue;
+            const monthText = selectedMonthValue === 'all' ? 'TODOS' : monthSel.options[monthSel.selectedIndex].text;
+            document.getElementById('kpi-month').textContent = monthText;
+            
+            // Se for 'all', mostra GERAL para indicar visualização consolidada
+            const munText = (selectedMunicipioValue === 'all' || !selectedMunicipioValue) ? 'GERAL (TODOS)' : selectedMunicipioValue;
+            document.getElementById('kpi-city').textContent = munText;
         }
 
         function populateReservatorioFilter() { 
@@ -623,14 +736,76 @@
             openModal('modal-details');
         };
 
-        function getContractItemCounts(data) {
-            const itemData = data.reduce((acc, item) => {
+        // --- NOVA LÓGICA DE GRÁFICOS (PARETO QTD E VALOR) ---
+        function renderCharts(data) {
+            // 1. Preparar dados para Top 8 Quantidade
+            const itemDataQty = data.reduce((acc, item) => {
                 const key = item['codigo'] || 'Não especificado';
                 if (!acc[key]) acc[key] = { count: 0, description: item['descritivo'] || 'Sem descrição' };
                 acc[key].count += item.quantidadeNumerica; 
                 return acc;
             }, {});
-            return Object.entries(itemData).map(([name, { count, description }]) => ({ name, count, description })).sort((a, b) => b.count - a.count);
+            const top8Qty = Object.entries(itemDataQty).map(([name, info]) => ({ name, count: info.count, description: info.description }))
+                                .sort((a, b) => b.count - a.count).slice(0, 8);
+            
+            // 2. Preparar dados para Top 8 Valor (Lucro)
+            const itemDataVal = data.reduce((acc, item) => {
+                const key = item['codigo'] || 'Não especificado';
+                if (!acc[key]) acc[key] = { value: 0, description: item['descritivo'] || 'Sem descrição' };
+                acc[key].value += item.valorCalculado; 
+                return acc;
+            }, {});
+            const top8Val = Object.entries(itemDataVal).map(([name, info]) => ({ name, value: info.value, description: info.description }))
+                                .sort((a, b) => b.value - a.value).slice(0, 8);
+
+            // Renderizar Gráfico Quantidade
+            destroyChart('paretoQtyChart');
+            const ctxQty = document.getElementById('paretoQtyChart').getContext('2d');
+            const totalQty = top8Qty.reduce((s, i) => s + i.count, 0);
+            let cumQty = 0;
+            const paretoDataQty = top8Qty.map(i => ({ ...i, cumPct: (cumQty += i.count) / totalQty * 100 }));
+
+            chartInstances['paretoQtyChart'] = new Chart(ctxQty, {
+                type: 'bar',
+                data: {
+                    labels: paretoDataQty.map(d => d.name),
+                    datasets: [
+                        { label: 'Qtd', data: paretoDataQty.map(d => d.count), backgroundColor: '#ffc107', borderColor: '#333', borderWidth: 1, yAxisID: 'y' },
+                        { label: '%', data: paretoDataQty.map(d => d.cumPct.toFixed(1)), type: 'line', borderColor: '#dc3545', yAxisID: 'y1', tension: 0.1 }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, tooltip: { callbacks: { afterLabel: (c) => top8Qty[c.dataIndex].description } } },
+                    scales: { y: { position: 'left', beginAtZero: true }, y1: { type: 'linear', position: 'right', min: 0, max: 100, grid: { drawOnChartArea: false } } }
+                }
+            });
+
+            // Renderizar Gráfico Valor
+            destroyChart('paretoValChart');
+            const ctxVal = document.getElementById('paretoValChart').getContext('2d');
+            const totalVal = top8Val.reduce((s, i) => s + i.value, 0);
+            let cumVal = 0;
+            const paretoDataVal = top8Val.map(i => ({ ...i, cumPct: (cumVal += i.value) / totalVal * 100 }));
+
+            chartInstances['paretoValChart'] = new Chart(ctxVal, {
+                type: 'bar',
+                data: {
+                    labels: paretoDataVal.map(d => d.name),
+                    datasets: [
+                        { label: 'R$', data: paretoDataVal.map(d => d.value), backgroundColor: '#28a745', borderColor: '#333', borderWidth: 1, yAxisID: 'y' },
+                        { label: '%', data: paretoDataVal.map(d => d.cumPct.toFixed(1)), type: 'line', borderColor: '#007bff', yAxisID: 'y1', tension: 0.1 }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, tooltip: { callbacks: { 
+                        label: (c) => `Valor: ${formatCurrency(c.raw)}`,
+                        afterLabel: (c) => top8Val[c.dataIndex].description 
+                    }} },
+                    scales: { y: { position: 'left', beginAtZero: true }, y1: { type: 'linear', position: 'right', min: 0, max: 100, grid: { drawOnChartArea: false } } }
+                }
+            });
         }
 
         function renderVesselPerformanceList(data) {
@@ -662,41 +837,6 @@
             container.innerHTML = html;
         }
 
-        function renderParetoChart(data) {
-            destroyChart('paretoChart');
-            if (data.length === 0) return;
-            const ctx = document.getElementById('paretoChart').getContext('2d');
-            const top8 = getContractItemCounts(data).slice(0, 8);
-            const total = top8.reduce((s, i) => s + i.count, 0);
-            let cum = 0;
-            const paretoData = top8.map(i => ({ ...i, cumPct: (cum += i.count) / total * 100 }));
-            
-            chartInstances['paretoChart'] = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: paretoData.map(d => d.name),
-                    datasets: [
-                        { label: 'Quant', data: paretoData.map(d => d.count), backgroundColor: '#ffc107', borderColor: '#333', borderWidth: 1, yAxisID: 'y' },
-                        { label: '%', data: paretoData.map(d => d.cumPct.toFixed(1)), type: 'line', borderColor: '#dc3545', yAxisID: 'y1', tension: 0.1 }
-                    ]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { 
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                afterLabel: function(context) {
-                                    return paretoData[context.dataIndex].description;
-                                }
-                            }
-                        }
-                    },
-                    scales: { y: { position: 'left' }, y1: { type: 'linear', position: 'right', min: 0, max: 100, grid: { drawOnChartArea: false } } }
-                }
-            });
-        }
-
         function applyFilters() {
             const rVal = document.getElementById('reservatorio-filter').value;
             const mVal = document.getElementById('month-filter').value;
@@ -714,19 +854,19 @@
 
             updateKPIs(filtered, mVal, munVal);
             renderTable(filtered);
-            renderParetoChart(filtered);
+            renderCharts(filtered); // Chama a função que atualiza ambos os gráficos
             renderVesselPerformanceList(filtered);
         }
 
-        // --- BOLETIM DE MEDIÇÃO (ATUALIZADO COM VALORES FIXOS POR MUNICÍPIO) ---
+        // --- BOLETIM DE MEDIÇÃO ---
         function generateBoletim() {
             document.getElementById('modal-report-title').textContent = "BOLETIM DE MEDIÇÃO";
 
             const mVal = document.getElementById('month-filter').value;
             const munVal = document.getElementById('municipio-filter').value;
 
-            if (mVal === 'all') { alert("Selecione uma Referência/Mês para o Boletim."); return; }
-            if (munVal === 'all') { alert("Selecione um Município para o Boletim."); return; }
+            if (mVal === 'all') { showToast("Selecione uma Referência/Mês para o Boletim.", "warning"); return; }
+            if (munVal === 'all') { showToast("Selecione um Município para o Boletim.", "warning"); return; }
 
             openModal('modal-report');
             const reportScreen = document.getElementById('report-screen-content');
@@ -752,9 +892,7 @@
                 totalServicos += item.valorCalculado;
             });
 
-            // BUSCA VALOR FIXO ESPECÍFICO DO MUNICÍPIO OU USA O PADRÃO
-            const valorFixoMunicipio = VALORES_FIXOS_MUNICIPIO[munVal] || VALORES_FIXOS_MUNICIPIO['default'];
-
+            const valorFixoMunicipio = VALORES_FIXOS_MUNICIPIO[munVal] || 0;
             const totalGeral = totalServicos + valorFixoMunicipio;
 
             let html = `
@@ -821,7 +959,7 @@
             const munVal = document.getElementById('municipio-filter').value;
 
             if (mVal === 'all' || munVal === 'all') {
-                alert("Para exportar para Excel, selecione uma Referência e um Município específico.");
+                showToast("Para exportar para Excel, selecione uma Referência e um Município específico.", "warning");
                 return;
             }
             const dataForMatrix = allProcessedData.filter(item => {
@@ -830,7 +968,7 @@
                 const munMatch = item.municipio === munVal;
                 return mMatch && munMatch;
             });
-            if (dataForMatrix.length === 0) { alert("Não há dados para a combinação selecionada."); return; }
+            if (dataForMatrix.length === 0) { showToast("Não há dados para a combinação selecionada.", "error"); return; }
             
             dataForMatrix.sort((a, b) => {
                 const embA = a.embarcação, embB = b.embarcação;
@@ -917,7 +1055,7 @@
         document.getElementById('btn-matriz').addEventListener('click', function() {
             const mVal = document.getElementById('month-filter').value;
             const munVal = document.getElementById('municipio-filter').value;
-            if (mVal === 'all' || munVal === 'all') { alert("Para gerar a Matriz de Lançamento, selecione uma Referência e um Município específico."); return; }
+            if (mVal === 'all' || munVal === 'all') { showToast("Para gerar a Matriz, selecione uma Referência e um Município específico.", "warning"); return; }
             
             const dataForMatrix = allProcessedData.filter(item => {
                 if (!item.dataConclusao) return false;
@@ -926,7 +1064,7 @@
                 return mMatch && munMatch;
             });
 
-            if (dataForMatrix.length === 0) { alert("Não há dados para a combinação selecionada."); return; }
+            if (dataForMatrix.length === 0) { showToast("Não há dados para a combinação selecionada.", "error"); return; }
             
             dataForMatrix.sort((a, b) => {
                 const embA = a.embarcação, embB = b.embarcação;
@@ -1001,13 +1139,6 @@
                 new Promise(r => Papa.parse(PRICES_CSV_URL, {...opts, complete: r})),
                 new Promise(r => Papa.parse(LOCATIONS_CSV_URL, {...opts, complete: r}))
             ]).then(([s, p, l]) => {
-                // --- DEPURAÇÃO E DIAGNÓSTICO ---
-                console.log("SERVICES Headers:", s.meta.fields);
-                console.log("PRICES Headers:", p.meta.fields);
-                console.log("LOCATIONS Headers:", l.meta.fields);
-                // ---------------------------------------
-
-                // Mapeamento de Preços (Robusto)
                 const pMap = new Map(p.data.map(i => {
                     const key = i['código']?.trim() || i['cod']?.trim();
                     const valStr = i['valor'];
@@ -1017,20 +1148,13 @@
 
                 const vcMap = new Map(l.data.map(i => [i['embarcação']?.trim(), i['cidade']?.trim()]));
                 
-                // Mapeamento de Dados (Robusto)
                 allProcessedData = s.data.map(i => {
                     const v = i['embarcação']?.trim();
-                    // Tenta múltiplas formas de chave para o preço
                     const codigo = i['código']?.trim() || i['item']?.trim() || i['cod']?.trim();
                     const price = pMap.get(codigo) || 0;
-                    
-                    // Tenta múltiplas formas de chave para a quantidade
                     const qtyStr = i['quantidade'] || i['qtd'] || i['quantidade numerica'];
                     const q = parseQuantity(qtyStr);
-                    
                     const municipioName = VESSEL_MAPPING[v] || vcMap.get(v) || 'Não especificada';
-                    
-                    // Tenta múltiplas formas de chave para a data
                     const dateStr = i['referência'] || i['mês'] || i['data'];
                     const dataConclusao = parseDate(dateStr); 
                     
@@ -1051,7 +1175,7 @@
                 console.log("Total processado:", allProcessedData.length);
                 
                 if (allProcessedData.length === 0) {
-                    alert("AVISO CRÍTICO: Os dados foram carregados mas foram filtrados pois não há datas válidas ou preços > 0. Verifique o console (F12) para ver os nomes das colunas.");
+                    showToast("Dados carregados, mas nenhum registro válido encontrado após filtrar datas e preços.", "error");
                 }
 
                 populateReservatorioFilter();
@@ -1063,6 +1187,7 @@
             }).catch(err => {
                 console.error("Erro detalhado:", err);
                 document.getElementById('data-table-body').innerHTML = '<tr><td colspan="4" style="color:red; text-align:center;">[ FALHA AO CARREGAR DADOS - VERIFIQUE CONSOLE (F12) ]</td></tr>';
+                showToast("Falha ao carregar dados externos.", "error");
             });
         }
 
@@ -1070,9 +1195,7 @@
         document.querySelectorAll('select').forEach(el => el.addEventListener('change', applyFilters));
         document.querySelectorAll('input[name="view-mode"]').forEach(el => el.addEventListener('change', applyFilters));
         
-        // LISTENER DO BOLETIM MANTIDO
         document.getElementById('btn-generate-boletim').addEventListener('click', generateBoletim);
-        
         document.getElementById('btn-download-xls').addEventListener('click', exportMatrixToXLS);
 
         document.getElementById('sort-qty').addEventListener('click', () => {
