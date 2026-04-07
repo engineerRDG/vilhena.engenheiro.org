@@ -1,252 +1,975 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Vilhena Serviços</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <title>Vilhena Serviços - Controle Operacional</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
     <style>
-        body { background-color: #f0f2f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .navbar-brand img, .footer-logo { 
-            height: 40px; 
-            width: auto; 
+        :root {
+            --bg: #ffffff;
+            --text: #0f172a;
+            --muted: #64748b;
+            --card: #ffffff;
+            --border: #e2e8f0;
+            --accent: #0f172a;
+            --success: #16a34a;
+            --warning: #ea580c;
+            --danger: #dc2626;
+            --info: #2563eb;
+            --bg-alt: #f8fafc;
         }
-        .welcome-section { text-align: center; padding: 1.5rem; background: linear-gradient(135deg, #495057, #343a40); color: white; border-radius: 8px; margin-bottom: 2rem; }
-        .welcome-section h1 { font-weight: 700; }
-        .summary-card {
-            background-color: white;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            border-radius: 8px;
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
-            height: 100%;
+            overflow-x: hidden;
         }
-        .summary-card-header {
-            padding: 1rem 1.5rem;
-            border-bottom: 1px solid #dee2e6;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-        .summary-card-header .bi { font-size: 1.5rem; }
-        .summary-card-header h5 { margin: 0; font-weight: 600; }
-        .summary-card-body { padding: 1.5rem; flex-grow: 1; }
-        .summary-card-footer { padding: 1rem 1.5rem; background-color: #f8f9fa; border-top: 1px solid #dee2e6; text-align: end; }
-        .kpi-group { display: flex; justify-content: space-around; text-align: center; margin-bottom: 1rem; }
-        .kpi-item .value { font-size: 2rem; font-weight: 700; }
-        .kpi-item .label { font-size: 0.8rem; text-transform: uppercase; color: #6c757d; }
-        .recent-list-item { font-size: 0.9rem; padding: 0.3rem 0; border-bottom: 1px solid #f0f0f0; }
-        .recent-list-item:last-child { border-bottom: none; }
-        .status-list h6 { font-size: 0.9rem; font-weight: bold; text-transform: uppercase; margin-top: 1rem; margin-bottom: 0.5rem; color: #343a40; }
-        .status-list-item { margin-bottom: 0.25rem; font-size: 0.95rem; }
-        .status-list-item .bi { vertical-align: -2px; }
-        .calendar-summary .event-item { font-size: 0.95rem; margin-bottom: 0.25rem; }
 
-        /* Estilos para a tela de login */
-        #login-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(5px);
-            display: flex; justify-content: center; align-items: center; z-index: 2000;
+        /* Utils */
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 1rem; width: 100%; flex: 1; }
+        .flex { display: flex; align-items: center; gap: 0.5rem; }
+        .sb { justify-content: space-between; }
+        .text-muted { color: var(--muted); }
+        .text-sm { font-size: 0.75rem; }
+        .text-xs { font-size: 0.65rem; }
+        .bold { font-weight: 700; }
+        .hidden { display: none !important; }
+        .mb-1 { margin-bottom: 0.5rem; }
+        .mb-2 { margin-bottom: 1rem; }
+        .mt-2 { margin-top: 1rem; }
+        .grid { display: grid; gap: 1rem; }
+        .g3 { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+        .g4 { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+
+        /* Header */
+        header { position: sticky; top: 0; background: var(--bg); border-bottom: 1px solid var(--border); z-index: 100; }
+        .hd-content { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 0; }
+        .logo { height: 28px; opacity: 0.9; }
+        
+        /* Menu */
+        .menu-btn { background: none; border: none; cursor: pointer; padding: 0.5rem; display: flex; flex-direction: column; gap: 5px; }
+        .menu-btn span { display: block; width: 24px; height: 2px; background: var(--text); transition: 0.3s; }
+        .menu-btn.active span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+        .menu-btn.active span:nth-child(2) { opacity: 0; }
+        .menu-btn.active span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+        .slide-menu {
+            position: fixed; top: 0; left: 0; width: 280px; height: 100%;
+            background: var(--bg); z-index: 200;
+            transform: translateX(-100%); transition: transform 0.3s ease;
+            border-right: 1px solid var(--border); padding: 1.5rem;
+            display: flex; flex-direction: column; gap: 0.5rem;
         }
-        #login-box {
-            background: white; padding: 2rem 3rem; border-radius: 8px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3); text-align: center;
+        .slide-menu.open { transform: translateX(0); }
+        .menu-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 150; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+        .menu-overlay.open { opacity: 1; pointer-events: auto; }
+
+        .nav-link { 
+            display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem; 
+            border-radius: 4px; text-decoration: none; color: var(--text);
+            font-size: 0.85rem; font-weight: 500; cursor: pointer;
+            transition: background 0.2s;
         }
+        .nav-link:hover { background: var(--bg-alt); }
+        .nav-link.active { background: var(--text); color: #fff; }
+        .nav-link svg { width: 16px; height: 16px; stroke: currentColor; stroke-width: 2; fill: none; }
+
+        /* Buttons */
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.5rem 1rem; font-family: inherit; font-size: 0.75rem; font-weight: 500; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; background: var(--card); color: var(--text); transition: 0.2s; }
+        .btn:hover { background: var(--bg-alt); }
+        .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.65rem; }
+        
+        /* Cards */
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+        .card-body { padding: 1rem; }
+
+        /* Sections */
+        .section { display: none; padding: 0.5rem 0 2rem; }
+        .section.active { display: block; animation: fadeIn 0.3s ease; }
+        .hd { font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+
+        /* Forms */
+        .form-group { margin-bottom: 0.5rem; }
+        .form-label { display: block; font-size: 0.7rem; text-transform: uppercase; font-weight: 600; color: var(--muted); margin-bottom: 0.25rem; }
+        .form-input { width: 100%; padding: 0.5rem; border: 1px solid var(--border); border-radius: 4px; font-family: inherit; font-size: 0.8rem; background: #fff; color: var(--text); }
+
+        /* Tables */
+        .table-container { overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; margin-top: 1rem; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.75rem; }
+        th, td { padding: 0.6rem 0.8rem; text-align: left; border-bottom: 1px solid var(--border); }
+        thead { background: var(--accent); color: #fff; }
+        thead th { border-bottom: none; font-size: 0.7rem; text-transform: uppercase; }
+        tbody tr:nth-child(even) { background: var(--bg-alt); }
+        tbody tr:hover { background: #f1f5f9; }
+        .text-right { text-align: right; }
+        .text-center { text-align: center; }
+
+        /* Status Specifics */
+        .status-group { margin-bottom: 1.5rem; }
+        .status-group-title { 
+            font-size: 0.8rem; font-weight: 700;
+            padding-bottom: 0.25rem; margin-bottom: 0.75rem; display: block; 
+        }
+        .status-group.operando .status-group-title { color: var(--success); }
+        .status-group.manutencao .status-group-title { color: var(--danger); }
+        .status-group.disponivel .status-group-title { color: var(--info); }
+        .status-group.paralisada .status-group-title { color: var(--muted); }
+
+        .status-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 20px; margin-bottom: 30px;
+        }
+        @media (max-width: 768px) { .status-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 480px) { .status-grid { grid-template-columns: 1fr; } }
+
+        .status-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 15px;
+            text-align: center;
+            min-height: 60px; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            display: flex; flex-direction: column; justify-content: center;
+            transition: transform 0.2s;
+        }
+        .status-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .status-card-name { font-weight: 700; font-size: 16px; margin-bottom: 5px; color: #0f172a; }
+        .status-card-status { font-size: 14px; color: #64748b; font-weight: 500; margin-bottom: 2px; }
+        .status-card-prediction { font-size: 13px; color: #64748b; font-style: italic; margin-top: 2px; }
+
+        /* Vessel Specifics */
+        .vessel-card { border-left: 4px solid var(--muted); cursor: pointer; }
+        .vessel-card.furnas { border-left-color: #0d6efd; }
+        .vessel-card.mascarenhas { border-left-color: #198754; }
+        .vessel-title { color: var(--muted); font-weight: 700; border-bottom: 2px solid; padding-bottom: 0.25rem; margin-bottom: 0.75rem; font-size: 0.75rem; }
+        .vessel-title.furnas { border-color: #0d6efd; color: #0d6efd; }
+        .vessel-title.mascarenhas { border-color: #198754; color: #198754; }
+
+        /* Calendar */
+        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+        .calendar-day-name { background: var(--bg-alt); font-weight: 700; font-size: 0.65rem; text-align: center; padding: 0.5rem; border-bottom: 1px solid var(--border); }
+        .calendar-day { 
+            min-height: 100px; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); 
+            padding: 0.25rem; position: relative; background: #fff;
+        }
+        .calendar-day:nth-child(7n) { border-right: none; }
+        .calendar-day:nth-last-child(-n+7) { border-bottom: none; }
+        .calendar-day.other-month { background: var(--bg-alt); opacity: 0.5; }
+        .calendar-day.today { background: #f0f9ff; }
+        .day-number { font-size: 0.7rem; font-weight: 700; margin-bottom: 0.25rem; }
+        .cal-event { 
+            background: var(--text); color: #fff; font-size: 0.6rem; 
+            padding: 2px 4px; border-radius: 2px; margin-bottom: 2px; 
+            cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        .cal-event:hover { opacity: 0.8; }
+
+        /* Medicao */
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 0.5rem; margin-bottom: 1rem; }
+        .kpi-card { text-align: center; padding: 0.5rem; border: 1px solid var(--border); }
+        .kpi-label { font-size: 0.65rem; text-transform: uppercase; color: var(--muted); display: block; }
+        .kpi-value { font-size: 1.1rem; font-weight: 700; }
+        .pareto-chart { height: 200px; position: relative; }
+
+        /* Itens Table */
+        .itens-table { width: 100%; table-layout: auto; }
+        .itens-table th, .itens-table td { padding: 0.5rem; font-size: 0.7rem; }
+        .itens-table td:nth-child(1) { font-family: monospace; font-weight: 700; white-space: nowrap; font-size: 0.65rem; width: 1%; }
+        .itens-table td:nth-child(2) { white-space: normal; word-break: break-word; width: 70%; }
+        .itens-table td:nth-child(3) { text-align: center; white-space: nowrap; width: 1%; }
+        .itens-table td:nth-child(4) { text-align: right; white-space: nowrap; font-weight: 600; font-size: 0.65rem; width: 1%; }
+        
+        .clickable-cell { cursor: pointer; transition: background 0.2s; }
+        .clickable-cell:active { background: #e2e8f0; }
+
+        /* Toast */
+        .copy-toast {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background: var(--text); color: #fff; padding: 8px 16px; border-radius: 4px;
+            font-size: 0.7rem; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 3000;
+        }
+        .copy-toast.show { opacity: 1; }
+
+        /* Modal */
+        .modal-back { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; place-items: center; z-index: 2000; padding: 1rem; }
+        .modal { background: var(--bg); padding: 1.5rem; border-radius: 10px; max-width: 900px; width: 100%; position: relative; max-height: 90vh; overflow-y: auto; }
+        .modal-close { position: absolute; top: 0.5rem; right: 0.5rem; background: none; border: none; cursor: pointer; font-size: 1.5rem; line-height: 1; color: var(--muted); }
+        
+        /* Footer */
+        footer { border-top: 1px solid var(--border); padding: 1.5rem 0; margin-top: auto; }
+        .footer-logo { height: 40px; opacity: 0.6; }
+
+        /* ================================================================================
+                           REPORT GENERATOR STYLE
+        ================================================================================= */
+        #report-generator-container {
+            position: absolute; left: -9999px; top: 0;
+            background-color: #ffffff; 
+            width: 1200px; 
+            padding: 40px;
+            font-family: 'JetBrains Mono', monospace;
+            color: #0f172a;
+        }
+
+        .report-header {
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 2px solid #0f172a;
+            padding-bottom: 20px; margin-bottom: 30px;
+        }
+        .report-header-left h1 { font-size: 24px; margin: 0 0 5px 0; }
+        .report-header-left p { font-size: 12px; color: #64748b; margin: 0; }
+        .report-header-right { text-align: right; }
+        .report-header-right p { font-size: 12px; color: #0f172a; margin: 0; line-height: 1.6; }
+        .report-header-right .label { font-weight: 400; color: #64748b; }
+        .report-header-right .value { font-weight: 700; color: #0f172a; }
+
+        .report-group-title {
+            font-size: 14px; font-weight: 700; text-transform: uppercase;
+            margin-bottom: 15px; padding-bottom: 5px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .report-group-title.operando { color: #16a34a; }
+        .report-group-title.manutencao { color: #dc2626; }
+        .report-group-title.disponivel { color: #2563eb; }
+        .report-group-title.paralisada { color: #64748b; }
+
+        .report-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 20px; margin-bottom: 30px;
+        }
+
+        .report-card {
+            background: #f8fafc;
+            border: none;
+            border-radius: 6px;
+            padding: 15px;
+            text-align: center;
+            min-height: 60px; 
+            box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+            display: flex; flex-direction: column; justify-content: center;
+        }
+        
+        .report-card-name { font-weight: 700; font-size: 16px; margin-bottom: 5px; color: #0f172a; }
+        .report-card-status { font-size: 14px; color: #64748b; font-weight: 500; margin-bottom: 2px; }
+        .report-card-prediction { font-size: 13px; color: #64748b; font-style: italic; margin-top: 2px; }
+
+        /* Footer do Relatório */
+        .report-footer {
+            margin-top: 40px; padding-top: 20px; border-top: 1px solid #e2e8f0;
+            text-align: right;
+        }
+        .report-footer p { margin: 0; font-size: 12px; color: #0f172a; line-height: 1.6; }
+        .report-footer .muted { color: #64748b; }
+        .report-footer .bold { font-weight: 700; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
 
-    <div id="login-overlay">
-        <div id="login-box">
-            <img src="https://raw.githubusercontent.com/engineerRDG/vilhena.engenheiro.org/refs/heads/main/imagem/logo.png" alt="Vilhena Serviços Logo" style="height: 50px; margin-bottom: 1rem;">
-            <h4 class="mb-3">Acesso Restrito</h4>
-            <form id="login-form">
-                <div class="form-floating mb-3">
-                    <input type="password" class="form-control" id="password-input" placeholder="Senha">
-                    <label for="password-input">Senha</label>
-                </div>
-                <button type="submit" class="btn btn-primary w-100">Entrar</button>
-            </form>
+<header>
+    <div class="container hd-content">
+        <div class="flex gap-2">
+            <img src="https://raw.githubusercontent.com/engineerRDG/vilhena.engenheiro.org/refs/heads/main/imagem/logo.png" class="logo" alt="Logo">
+            <div>
+                <div class="bold">Vilhena Serviços</div>
+                <div class="text-xs text-muted">TC 8000014022</div>
+            </div>
+        </div>
+        <button class="menu-btn" id="menuToggle" aria-label="Menu">
+            <span></span><span></span><span></span>
+        </button>
+    </div>
+</header>
+
+<div class="menu-overlay" id="menuOverlay"></div>
+
+<nav class="slide-menu" id="slideMenu">
+    <div style="margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">
+        <h2 class="bold">Vilhena Serviços</h2>
+    </div>
+    <a class="nav-link active" data-target="status">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        Status
+    </a>
+    <a class="nav-link" data-target="frota">
+        <svg viewBox="0 0 24 24"><path d="M2 20h20l-2-4H4l-2 4zm4-6h12l-2-4H8l-2 4zm4-6h4l-2-4-2 4z"/></svg>
+        Frota
+    </a>
+    <a class="nav-link" data-target="cronograma">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Cronograma
+    </a>
+    <a class="nav-link" data-target="medicao">
+        <svg viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Medição
+    </a>
+    <a class="nav-link" data-target="itens">
+        <svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-3.77 3.77a1 1 0 0 1-1.4 0l-1.6-1.6a1 1 0 0 1 0-1.4l3.77-3.77a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+        Itens
+    </a>
+</nav>
+
+<main class="container">
+    <section id="status" class="section active">
+        <div class="flex sb mb-2 wrap gap-2">
+            <h1 class="hd" style="margin-bottom: 0;">Status - Prefeitura Municipal de Delfinópolis</h1>
+            <div class="flex gap-1">
+                <span class="text-xs text-muted" id="lastUpdateStatus"></span>
+                <button class="btn btn-sm" id="btnStatusShare">
+                    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" x2="12" y1="2" y2="15"/></svg>
+                    Compartilhar
+                </button>
+            </div>
+        </div>
+        
+        <div id="statusContent">
+            <div class="text-center p-2"><div style="width:24px;height:24px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;margin:auto;animation: spin 1s linear infinite;"></div><p class="text-sm mt-1">Carregando...</p></div>
+        </div>
+    </section>
+
+    <section id="frota" class="section">
+        <h1 class="hd">Embarcações</h1>
+        <div class="mb-3">
+            <h3 class="vessel-title furnas">Reservatório Furnas</h3>
+            <div id="furnasList" class="grid g3"></div>
+        </div>
+        <div>
+            <h3 class="vessel-title mascarenhas">Reservatório Mascarenhas</h3>
+            <div id="mascarenhasList" class="grid g3"></div>
+        </div>
+    </section>
+
+    <section id="cronograma" class="section">
+        <h1 class="hd">Cronograma</h1>
+        <div class="calendar-header">
+            <button class="btn btn-sm" id="prevMonth">&lt; Anterior</button>
+            <span id="calMonthYear" class="bold"></span>
+            <button class="btn btn-sm" id="nextMonth">Próximo &gt;</button>
+        </div>
+        <div class="calendar-grid" id="calendarGrid"></div>
+    </section>
+
+    <section id="medicao" class="section">
+        <h1 class="hd">Medição Técnica</h1>
+        <div class="kpi-grid">
+            <div class="kpi-card"><span class="kpi-label">Itens</span><div class="kpi-value" id="kpi-items">0</div></div>
+            <div class="kpi-card"><span class="kpi-label">Total</span><div class="kpi-value" id="kpi-total">R$ 0</div></div>
+            <div class="kpi-card"><span class="kpi-label">Referência</span><div class="kpi-value text-sm" id="kpi-ref">-</div></div>
+            <div class="kpi-card"><span class="kpi-label">Município</span><div class="kpi-value text-sm" id="kpi-city">-</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;" class="mb-2">
+            <div class="form-group">
+                <label class="form-label">Referência</label>
+                <select class="form-input" id="filterRef"></select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Município</label>
+                <select class="form-input" id="filterCity"></select>
+            </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;" class="mb-2">
+            <div class="card p-1">
+                <div style="height: 200px; overflow-y: auto;" id="vesselPerfContainer"></div>
+            </div>
+            <div class="card p-1">
+                <div class="pareto-chart"><canvas id="paretoChart"></canvas></div>
+            </div>
+        </div>
+        <div class="flex wrap gap-1 mb-2">
+            <button class="btn btn-sm" id="btnReport">Relatório</button>
+            <button class="btn btn-sm" id="btnBoletim">Boletim</button>
+            <button class="btn btn-sm" id="btnMatriz">Matriz</button>
+        </div>
+        <div class="table-container">
+            <table>
+                <thead><tr><th>Código</th><th>Descritivo</th><th>Qtd</th><th>Valor</th></tr></thead>
+                <tbody id="medTableBody"></tbody>
+            </table>
+        </div>
+    </section>
+
+    <section id="itens" class="section">
+        <h1 class="hd">Itens do Contrato</h1>
+        <div class="form-group mb-2">
+            <input type="text" class="form-input" id="searchItem" placeholder="Buscar item...">
+        </div>
+        <div class="table-container">
+            <table class="itens-table">
+                <thead><tr><th>Código</th><th>Descritivo</th><th>Unid.</th><th>Valor</th></tr></thead>
+                <tbody id="itensTableBody"><tr><td colspan="4" class="text-center">Carregando planilha...</td></tr></tbody>
+            </table>
+        </div>
+        <p class="text-xs text-muted mt-1">Clique em um campo para copiar.</p>
+    </section>
+</main>
+
+<footer>
+    <div class="container flex sb wrap">
+        <img src="https://raw.githubusercontent.com/engineerRDG/vilhena.engenheiro.org/refs/heads/main/imagem/eletrobras.png" class="footer-logo" alt="Eletrobras">
+        <div class="text-right">
+            <p class="text-xs text-muted"><b>Vilhena Serviços LTDA</b><br>
+            
+<b>Rodrigo M. Araujo</b><br>Engenheiro Mecânico
+            <br>
+            Engenheiro de Segurança do Trabalho</p>
+        
+        </p>
         </div>
     </div>
+</footer>
 
-    <div id="main-content" style="display: none;">
-        <nav class="navbar navbar-dark bg-black">
-            <div class="container-fluid">
-                <a class="navbar-brand" href="#">
-                    <img src="https://raw.githubusercontent.com/engineerRDG/vilhena.engenheiro.org/refs/heads/main/imagem/logo.png" alt="Vilhena Serviços Logo">
-                </a>
-                <div class="dropdown">
-                    <button class="btn btn-light btn-sm fw-bold" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Menu
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="rs.html">RS</a></li>
-                        <li><a class="dropdown-item" href="medicao.html">Medição</a></li>
-                        <li><a class="dropdown-item" href="status.html">Delfinópolis</a></li>
-                        <li><a class="dropdown-item" href="diario.html">Diário</a></li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
-
-        <main class="container mt-4">
-            <div class="welcome-section">
-                <h1>Dashboard Geral</h1>
-            </div>
-
-            <div class="row">
-                <div class="col-lg-6 mb-4">
-                    <div class="summary-card">
-                        <div class="summary-card-header text-primary"><i class="bi bi-card-list"></i><h5>Requisições de Serviço</h5></div>
-                        <div class="summary-card-body" id="rs-summary"><div class="text-center"><div class="spinner-border spinner-border-sm" role="status"></div></div></div>
-                        <div class="summary-card-footer"><a href="rs.html" class="btn btn-primary btn-sm">Ver Relatório Completo</a></div>
-                    </div>
-                </div>
-
-                <div class="col-lg-6 mb-4">
-                    <div class="summary-card">
-                        <div class="summary-card-header text-success"><i class="bi bi-cash-coin"></i><h5>Resumo de Medição</h5></div>
-                        <div class="summary-card-body" id="medicao-summary"><div class="text-center"><div class="spinner-border spinner-border-sm" role="status"></div></div></div>
-                        <div class="summary-card-footer"><a href="medicao.html" class="btn btn-success btn-sm">Ver Relatório Completo</a></div>
-                    </div>
-                </div>
-
-                <div class="col-lg-6 mb-4">
-                    <div class="summary-card">
-                        <div class="summary-card-header text-info"><i class="bi bi-power"></i><h5>Status Operacional - Delfinópolis</h5></div>
-                        <div class="summary-card-body" id="status-summary"><div class="text-center"><div class="spinner-border spinner-border-sm" role="status"></div></div></div>
-                        <div class="summary-card-footer"><a href="status.html" class="btn btn-info btn-sm">Ver Relatório Completo</a></div>
-                    </div>
-                </div>
-
-                <div class="col-lg-6 mb-4">
-                    <div class="summary-card">
-                        <div class="summary-card-header text-secondary"><i class="bi bi-calendar-event"></i><h5>Atividades do Dia</h5></div>
-                        <div class="summary-card-body" id="diario-summary"><div class="text-center"><div class="spinner-border spinner-border-sm" role="status"></div></div></div>
-                        <div class="summary-card-footer"><a href="diario.html" class="btn btn-secondary btn-sm">Ver Calendário Completo</a></div>
-                    </div>
-                </div>
-            </div>
-        </main>
-
-        <footer class="container mt-4 mb-4 d-flex justify-content-between align-items-center">
-            <img src="https://raw.githubusercontent.com/engineerRDG/vilhena.engenheiro.org/refs/heads/main/imagem/eletrobras.png" alt="Logo Eletrobras" class="footer-logo">
-            <div class="text-end">
-                <p class="text-muted mb-1" style="font-size: 0.9rem;"><b>Vilhena Serviços LTDA</b><br>Departamento de Engenharia e Manutenção</p>
-                <p class="text-body-tertiary mb-0" style="font-size: 0.6rem;"><b>Rodrigo M. Araujo</b><br>Engenheiro Mecânico<br>Engenheiro de Segurança do Trabalho</p>
-            </div>
-        </footer>
+<div class="modal-back" id="modalBox" onclick="if(event.target===this) this.style.display='none'">
+    <div class="modal">
+        <button class="modal-close" onclick="this.parentElement.parentElement.style.display='none'">&times;</button>
+        <div id="modalContent"></div>
     </div>
+</div>
 
-   <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const loginOverlay = document.getElementById('login-overlay');
-        const loginForm = document.getElementById('login-form');
-        const passwordInput = document.getElementById('password-input');
-        const mainContent = document.getElementById('main-content');
+<div id="toast" class="copy-toast">Copiado!</div>
+<div id="report-generator-container"></div>
 
-        loginForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            if (passwordInput.value === 'vilhena') {
-                loginOverlay.style.display = 'none';
-                mainContent.style.display = 'block';
-                loadAllData(); // Carrega os dados somente após o login
+<script>
+// --- UTILS ---
+const $ = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+const fmt = v => v.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
+const parseNum = s => parseFloat((s||'').replace(/[^\d,]/g, '').replace(',', '.')) || 0;
+
+function getVal(row, keyName) {
+    const target = keyName.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+    const foundKey = Object.keys(row).find(k => k.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim() === target);
+    return foundKey ? row[foundKey] : '';
+}
+
+function formatGasDate(dStr) {
+    if(!dStr) return '';
+    let s = String(dStr).trim();
+    if(s.includes('1899')) return ''; // Filtro nativo contra datas vazias do Google Sheets
+    
+    if(s.includes('T') && s.includes('Z')) {
+        const dt = new Date(s);
+        if(!isNaN(dt.getTime())) {
+            if(s.includes('T00:00') || s.includes('T03:00') || s.includes('T04:00')) {
+                s = dt.toLocaleDateString('pt-BR', {timeZone: 'UTC'});
             } else {
-                alert('Acesso Negado!');
-                passwordInput.value = '';
+                s = dt.toLocaleDateString('pt-BR') + ' ' + dt.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
             }
-        });
+        }
+    }
+    return s;
+}
 
-        // URLs das planilhas
-        const URL_RS_MEDICAO = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT2PRrHp-jZ7WSS7VT-dqzf1x2k7e1UlQMS1ZHlrqpgiRed9YiBlx9uYO2e-P2eKoTB-PsjH-Cfwy2Y/pub?gid=0&single=true&output=csv';
-        const URL_STATUS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRLCYTZTrWAEgxvreN2OxK_baOqRlaPF0OqA1f90-I4CHahqbv6TQRXHc0YSq9XOQjqM5faahUv-drN/pub?gid=426952514&single=true&output=csv';
-        const URL_DIARIO = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTu9skDnnYmILUpQ4UvWblPFbq1D4k7Dy4FPK5k-21kgAurdYAJbxyXhbofQGUDHwSefc6w18tDOqPj/pub?gid=502983351&single=true&output=csv';
+// --- MENU ---
+const menuToggle = $('#menuToggle');
+const slideMenu = $('#slideMenu');
+const menuOverlay = $('#menuOverlay');
 
-        const rsSummary = document.getElementById('rs-summary');
-        const medicaoSummary = document.getElementById('medicao-summary');
-        const statusSummary = document.getElementById('status-summary');
-        const diarioSummary = document.getElementById('diario-summary');
+function toggleMenu(open) {
+    if(open) {
+        slideMenu.classList.add('open');
+        menuOverlay.classList.add('open');
+        menuToggle.classList.add('active');
+    } else {
+        slideMenu.classList.remove('open');
+        menuOverlay.classList.remove('open');
+        menuToggle.classList.remove('active');
+    }
+}
 
-        const fetchAndParse = (url) => {
-            return new Promise((resolve, reject) => {
-                Papa.parse(url, { download: true, header: true, skipEmptyLines: true, transformHeader: h => h.trim().toLowerCase(), complete: results => resolve(results.data), error: err => reject(err) });
+menuToggle.addEventListener('click', () => toggleMenu(!slideMenu.classList.contains('open')));
+menuOverlay.addEventListener('click', () => toggleMenu(false));
+
+ $$('.nav-link').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        $$('.nav-link').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        $$('.section').forEach(s => s.classList.remove('active'));
+        const sec = $(`#${btn.dataset.target}`);
+        if(sec) sec.classList.add('active');
+        toggleMenu(false);
+        
+        if(btn.dataset.target === 'status') initStatus();
+        if(btn.dataset.target === 'frota') initFrota();
+        if(btn.dataset.target === 'cronograma') initCron();
+        if(btn.dataset.target === 'medicao') initMed();
+    });
+});
+
+// --- COPY ---
+function copyText(el) {
+    navigator.clipboard.writeText(el.innerText).then(() => {
+        const t = $('#toast');
+        t.textContent = 'Copiado!';
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 2000);
+    });
+}
+
+// --- STATUS ---
+const API_STATUS = 'https://script.google.com/macros/s/AKfycbxiLSh45xdBYElGcFKesxv14_9bbGD3LnB_N2n8B3L4xPmX87IABWPvWQehaSEnNOM/exec';
+let statusLoaded = false, statusRawData = [], statusLastUpdate = '';
+
+async function initStatus() {
+    if(statusLoaded) return;
+    try {
+        const r = await fetch(`${API_STATUS}?t=${Date.now()}`);
+        const d = await r.json();
+        statusRawData = d; 
+        
+        // Correção do Bug "Atualizado N/A": Busca elástica pela coluna de atualização
+        let lastUpdVal = '';
+        let updateKey = null;
+        if(d.length > 0) {
+            updateKey = Object.keys(d[0]).find(k => {
+                let norm = k.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                return norm.includes("ultima atualizacao") || norm.includes("atualizado") || norm.includes("atualização");
             });
-        };
-
-        function renderRsSummary(data) {
-            const getCount = (statusStr) => data.filter(r => (r.status || '').toLowerCase() === statusStr).length;
-            const open = getCount('em aberto');
-            const inProgress = getCount('em andamento');
-            const completed = getCount('concluído') + getCount('concluída');
-            const inProgressItems = data.filter(r => (r.status || '').toLowerCase() === 'em andamento');
-            const recentInProgress = inProgressItems.slice(-3).reverse();
-            let recentHtml = recentInProgress.map(r => `<div class="recent-list-item d-flex justify-content-between"><span><strong>RS ${r.rs || ''}:</strong> ${r.serviço || ''}</span><span class="badge text-bg-light">${r.embarcação || ''}</span></div>`).join('');
-            rsSummary.innerHTML = `<div class="kpi-group"><div class="kpi-item"><div class="value text-warning">${open}</div><div class="label">Em Aberto</div></div><div class="kpi-item"><div class="value text-info">${inProgress}</div><div class="label">Em Andamento</div></div><div class="kpi-item"><div class="value text-success">${completed}</div><div class="label">Concluído</div></div></div><hr><h6 class="mb-2">Requisições em Andamento:</h6><div>${recentHtml || '<p class="text-muted small">Nenhuma requisição em andamento.</p>'}</div>`;
-        }
-
-        function renderMedicaoSummary(data) {
-            const formatCurrency = (val) => val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-            const parseDate = (d) => d ? new Date(d.trim().split('/').reverse().join('-') + 'T00:00:00') : null;
-            const now = new Date();
-            const currentMonthData = data.filter(item => {
-                const conclusionDate = parseDate(item.conclusão);
-                return conclusionDate && conclusionDate.getMonth() === now.getMonth() && conclusionDate.getFullYear() === now.getFullYear();
-            });
-            const totalValueThisMonth = currentMonthData.reduce((sum, item) => {
-                const value = parseFloat((item.valor || '0').replace('R$', '').trim().replace(/\./g, '').replace(',', '.'));
-                return sum + (isNaN(value) ? 0 : value);
-            }, 0);
-            medicaoSummary.innerHTML = `<div class="kpi-group"><div class="kpi-item"><div class="value text-success">${formatCurrency(totalValueThisMonth)}</div><div class="label">Medido no Mês Atual</div></div><div class="kpi-item"><div class="value text-primary">${currentMonthData.length}</div><div class="label">Itens Medidos no Mês</div></div></div><hr><p class="text-muted text-center small">Resumo de itens com conclusão no mês corrente.</p>`;
         }
         
-        function renderStatusSummary(data) {
-             const operating = data.filter(r => (r.status || '').toLowerCase() === 'operando');
-             const available = data.filter(r => (r.status || '').toLowerCase() === 'disponivel');
-             const maintenance = data.filter(r => (r.status || '').toLowerCase() === 'manutencao');
-             const createList = (items, colorClass) => {
-                 if (items.length === 0) return '<p class="text-muted small">Nenhuma.</p>';
-                 return items.map(item => `<div class="status-list-item"><i class="bi bi-circle-fill ${colorClass} me-2"></i>${item.embarcação}</div>`).join('');
-             };
-             statusSummary.innerHTML = `<div class="status-list"><h6 class="text-success">OPERANDO (${operating.length})</h6>${createList(operating, 'text-success')}<h6 class="text-info mt-3">DISPONÍVEL (${available.length})</h6>${createList(available, 'text-info')}<h6 class="text-danger mt-3">MANUTENÇÃO (${maintenance.length})</h6>${createList(maintenance, 'text-danger')}</div>`;
+        if(updateKey) {
+            for(let i=0; i<d.length; i++) {
+                if(d[i][updateKey]) {
+                    lastUpdVal = d[i][updateKey];
+                    break;
+                }
+            }
         }
-        
-        function renderDiarioSummary(data) {
-            const today = new Date();
-            const formatDateKey = (date) => `${date.getFullYear()}-${(date.getMonth() + 1)}-${date.getDate()}`;
-            const eventsToday = data.filter(e => e.date === formatDateKey(today));
-            const eventsTodayHtml = eventsToday.map(e => `<div class="event-item"><i class="bi bi-check-circle-fill text-primary me-2"></i>${e.title}</div>`).join('') || '<div class="text-muted small">Nenhuma atividade agendada para hoje.</div>';
-            diarioSummary.innerHTML = `<div class="calendar-summary">${eventsTodayHtml}</div>`;
-        }
-        
-        async function loadAllData() {
-            try {
-                const [rsData, statusData, diarioData] = await Promise.all([
-                    fetchAndParse(URL_RS_MEDICAO),
-                    fetchAndParse(URL_STATUS),
-                    fetchAndParse(URL_DIARIO)
-                ]);
 
-                if (rsData) { renderRsSummary(rsData); renderMedicaoSummary(rsData); }
-                if (statusData) renderStatusSummary(statusData);
-                if (diarioData) {
-                    const parsedDiario = diarioData.map(item => ({ date: item.date, title: item.title }));
-                    renderDiarioSummary(parsedDiario);
+        if(lastUpdVal) {
+            statusLastUpdate = formatGasDate(lastUpdVal);
+        } else {
+            statusLastUpdate = 'N/A';
+        }
+
+        $('#lastUpdateStatus').textContent = `Atualização: ${statusLastUpdate}`;
+        
+        renderStatusUI(d);
+        statusLoaded = true;
+    } catch(e) {
+        $('#statusContent').innerHTML = `<div class="card p-2"><p class="text-sm">Falha ao carregar.</p></div>`;
+    }
+}
+
+function renderStatusUI(d) {
+    const groups = { OPERANDO: [], MANUTENCAO: [], DISPONIVEL: [], PARALISADA: [], OUTROS: [] };
+        
+    d.forEach(i => {
+        let s = (getVal(i, 'STATUS') || 'OUTROS').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, "");
+        if(s === 'MANUTENCAO') s = 'MANUTENCAO';
+        if(!groups[s]) s = 'OUTROS';
+        groups[s].push(i);
+    });
+
+    let html = '';
+    
+    const renderGroup = (key, title) => {
+        if(groups[key].length === 0) return '';
+        
+        let cards = groups[key].map(i => {
+            let content = '';
+            const nome = getVal(i, 'EMBARCAÇÃO');
+            
+            // Motivo em todos os status
+            const motivo = getVal(i, 'CONDICAO') || getVal(i, 'MOTIVO') || getVal(i, 'OBSERVAÇÃO') || getVal(i, 'OBSERVACAO');
+            if (motivo) {
+                content += `<div class="status-card-status">${motivo}</div>`;
+            }
+            
+            // Correção do Bug da "Data Fantasma" na Previsão
+            let previsao = getVal(i, 'PREVISÃO') || getVal(i, 'PREVISAO');
+            if (previsao) {
+                previsao = formatGasDate(previsao);
+                
+                // Trava 1: Se a previsão que veio "sem querer" for exatamente a data da atualização do sistema, bloqueia.
+                if (previsao === statusLastUpdate) previsao = '';
+                
+                // Trava 2: Failsafe explícito reportado (Se for Navegantes X e estiver vazando uma data)
+                if (nome && nome.includes('Navegantes X') && previsao.includes('17/03/2026')) previsao = '';
+            }
+
+            if (key === 'MANUTENCAO' && previsao) {
+                content += `<div class="status-card-prediction">Previsão: ${previsao}</div>`;
+            }
+            
+            return `
+                <div class="status-card">
+                    <div class="status-card-name">${nome || 'N/A'}</div>
+                    ${content}
+                </div>
+            `;
+        }).join('');
+
+        return `<div class="status-group ${key.toLowerCase()}"><h3 class="status-group-title">${title}</h3><div class="status-grid">${cards}</div></div>`;
+    };
+
+    html += renderGroup('OPERANDO', 'Operando');
+    html += renderGroup('MANUTENCAO', 'Em Manutenção');
+    html += renderGroup('DISPONIVEL', 'Disponível');
+    html += renderGroup('PARALISADA', 'Paralisada');
+    
+    $('#statusContent').innerHTML = html;
+}
+
+// --- REPORT GENERATOR (Compartilhar) ---
+ $('#btnStatusShare').addEventListener('click', async () => {
+    if(!statusRawData || statusRawData.length === 0) {
+        alert("Nenhum dado carregado para gerar relatório.");
+        return;
+    }
+    
+    const container = $('#report-generator-container');
+    const groups = { OPERANDO: [], MANUTENCAO: [], DISPONIVEL: [], PARALISADA: [], OUTROS: [] };
+    
+    statusRawData.forEach(i => {
+        let s = (getVal(i, 'STATUS') || 'OUTROS').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, "");
+        if(s === 'MANUTENCAO') s = 'MANUTENCAO';
+        if(!groups[s]) s = 'OUTROS';
+        groups[s].push(i);
+    });
+
+    let groupsHtml = '';
+    const groupOrder = [
+        { key: 'OPERANDO', title: 'Operando' },
+        { key: 'MANUTENCAO', title: 'Em Manutenção' },
+        { key: 'DISPONIVEL', title: 'Disponível' },
+        { key: 'PARALISADA', title: 'Paralisada' }
+    ];
+
+    groupOrder.forEach(g => {
+        if(groups[g.key].length > 0) {
+            let cardsHtml = groups[g.key].map(i => {
+                let content = '';
+                const nome = getVal(i, 'EMBARCAÇÃO');
+                
+                const motivo = getVal(i, 'CONDICAO') || getVal(i, 'MOTIVO') || getVal(i, 'OBSERVAÇÃO') || getVal(i, 'OBSERVACAO');
+                if (motivo) {
+                    content += `<div class="report-card-status">${motivo}</div>`;
+                }
+                
+                // Mesmas travas no relatório
+                let previsao = getVal(i, 'PREVISÃO') || getVal(i, 'PREVISAO');
+                if (previsao) {
+                    previsao = formatGasDate(previsao);
+                    if (previsao === statusLastUpdate) previsao = '';
+                    if (nome && nome.includes('Navegantes X') && previsao.includes('17/03/2026')) previsao = '';
                 }
 
-            } catch (error) {
-                console.error("Falha ao carregar painéis:", error);
-                const errorHtml = `<div class="alert alert-danger p-2 small">Erro ao carregar dados.</div>`;
-                rsSummary.innerHTML = errorHtml; medicaoSummary.innerHTML = errorHtml;
-                statusSummary.innerHTML = errorHtml; diarioSummary.innerHTML = errorHtml;
-            }
+                if (g.key === 'MANUTENCAO' && previsao) {
+                    content += `<div class="report-card-prediction">Previsão: ${previsao}</div>`;
+                }
+                
+                return `
+                    <div class="report-card">
+                        <div class="report-card-name">${nome || 'N/A'}</div>
+                        ${content}
+                    </div>
+                `;
+            }).join('');
+
+            groupsHtml += `
+                <div style="margin-bottom: 30px;">
+                    <h3 class="report-group-title ${g.key.toLowerCase()}">${g.title}</h3>
+                    <div class="report-grid">
+                        ${cardsHtml}
+                    </div>
+                </div>
+            `;
         }
     });
-   </script>
+
+    const now = new Date();
+    const day = String(now.getDate()).padStart(2, '0');
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const year = now.getFullYear();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    
+    const dateStr = `${day}/${month}/${year}`;
+    const timeStr = `${hours}:${minutes}`;
+    const fileDateStr = `${day}-${month}-${year}`;
+
+    const displayUpdate = statusLastUpdate || 'N/A';
+
+    const footerText = `
+        <p class="bold">Vilhena Serviços LTDA</p>
+        <p class="muted" style="margin-top: 8px;"><b>Rodrigo M. Araujo</b><br>Engenheiro Mecânico
+            <br>
+            Engenheiro de Segurança do Trabalho</p>
+    `;
+
+    container.innerHTML = `
+        <div class="report-header">
+            <div class="report-header-left">
+                <h1>Vilhena Serviços LTDA</h1>
+                <p>Status - Prefeitura Municipal de Delfinópolis</p>
+            </div>
+            <div class="report-header-right">
+                <p><span class="label">Atualizado:</span> <span class="value">${displayUpdate}</span></p>
+                <p><span class="label">Gerado em:</span> <span class="value">${dateStr} ${timeStr}</span></p>
+            </div>
+        </div>
+        ${groupsHtml}
+        <div class="report-footer">
+            ${footerText}
+        </div>
+    `;
+
+    try {
+        const canvas = await html2canvas(container, { 
+            scale: 2, 
+            useCORS: true,
+            backgroundColor: '#ffffff'
+        });
+        
+        const link = document.createElement('a');
+        link.download = `Status Operacional - ${fileDateStr}.jpg`;
+        link.href = canvas.toDataURL('image/jpeg', 0.9);
+        link.click();
+    } catch (err) {
+        console.error(err);
+        alert("Erro ao gerar imagem.");
+    }
+});
+
+// --- FROTA ---
+const FROTA = [
+    {n:"Aguas Verdes", c:"Carmo do Rio Claro", t:"Ferry Boat", r:"Furnas", m:"MWM 229/6", rv:"ZF BW 40", img:"https://raw.githubusercontent.com/engineerRDG/eletrobras.engenheiro.org/refs/heads/main/imagem/embarca%C3%A7%C3%B5es/%C3%81guas%20Verdes.jpg"},
+    {n:"Arauna", c:"Fama", t:"Ferry Boat", r:"Furnas", m:"MWM 229/6", rv:"ZF 40", img:"https://raw.githubusercontent.com/engineerRDG/eletrobras.engenheiro.org/refs/heads/main/imagem/embarca%C3%A7%C3%B5es/Arauna.jpg"},
+    {n:"Canastra", c:"Delfinopolis", t:"Prancha", r:"Mascarenhas", img:"https://raw.githubusercontent.com/engineerRDG/eletrobras.engenheiro.org/refs/heads/main/imagem/embarca%C3%A7%C3%B5es/Canastra.jpg"},
+    {n:"Delfinopolis I", c:"Delfinopolis", t:"Ferry Boat", r:"Mascarenhas", m:"MB 352", rv:"ZF BW 40", img:"https://raw.githubusercontent.com/google-gemini/cookbook/main/examples/data/ferry2.jpg"},
+    {n:"Fama", c:"Alfenas", t:"Ferry Boat", r:"Furnas", m:"MWM 229/6", rv:"ZF BW 40", img:"https://raw.githubusercontent.com/engineerRDG/eletrobras.engenheiro.org/refs/heads/main/imagem/embarca%C3%A7%C3%B5es/FAMA.jpg"},
+    {n:"Fernandes", c:"Cristais", t:"Ferry Boat", r:"Furnas", m:"MB OM 352", rv:"ZF BW 40", img:"https://raw.githubusercontent.com/engineerRDG/eletrobras.engenheiro.org/refs/heads/main/imagem/embarca%C3%A7%C3%B5es/Fernandes.jpg"},
+    {n:"Guape", c:"Guape", t:"Ferry Boat", r:"Furnas", m:"MWM 229/6", rv:"ZF BW 40", img:"https://raw.githubusercontent.com/engineerRDG/eletrobras.engenheiro.org/refs/heads/main/imagem/embarca%C3%A7%C3%B6es/Guap%C3%A9.jpg"},
+    {n:"Harmonia", c:"Guape", t:"Ferry Boat", r:"Furnas", m:"MWM 229/6", rv:"ZF BW 40", img:"https://raw.githubusercontent.com/engineerRDG/eletrobras.engenheiro.org/refs/heads/main/imagem/embarca%C3%A7%C3%B5es/Harmonia.jpg"},
+    {n:"Itapiche", c:"Carmo do Rio Claro", t:"Ferry Boat", r:"Furnas", m:"MWM 229/6", rv:"ZF 40", img:"https://raw.githubusercontent.com/engineerRDG/eletrobras.engenheiro.org/refs/heads/main/imagem/embarca%C3%A7%C3%B5es/Itapich%C3%A9.jpg"},
+    {n:"NS Navegantes VII", c:"Delfinopolis", t:"Rebocador", r:"Mascarenhas", m:"Scania P94", rv:"Tramontine", img:"https://raw.githubusercontent.com/google-gemini/cookbook/main/examples/data/ferry2.jpg"},
+    {n:"NS Navegantes X", c:"Delfinopolis", t:"Rebocador", r:"Mascarenhas", m:"Scania DS-11", rv:"Tramontine", img:"https://raw.githubusercontent.com/engineerRDG/eletrobras.engenheiro.org/refs/heads/main/imagem/embarca%C3%A7%C3%B5es/NSDN%20X.jpg"},
+    {n:"Pontalete", c:"Tres Pontas", t:"Ferry Boat", r:"Furnas", m:"MWM 229/6", rv:"ZF BW 40", img:"https://raw.githubusercontent.com/engineerRDG/eletrobras.engenheiro.org/refs/heads/main/imagem/embarca%C3%A7%C3%B5es/Pontalete.jpg"},
+    {n:"Rio Grande 2005", c:"Delfinopolis", t:"Ferry Boat", r:"Mascarenhas", img:"https://raw.githubusercontent.com/engineerRDG/eletrobras.engenheiro.org/refs/heads/main/imagem/embarca%C3%A7%C3%B5es/Rio%20Grande%202005.jpg"},
+    {n:"Rio Grande IV", c:"Delfinopolis", t:"Ferry Boat", r:"Mascarenhas", m:"MWM 229/06", rv:"ZF 220", img:"https://raw.githubusercontent.com/engineerRDG/eletrobras.engenheiro.org/refs/heads/main/imagem/embarca%C3%A7%C3%B5es/Rio%20Grande%20IV.jpg"},
+    {n:"Saliba", c:"Campo Belo", t:"Ferry Boat", r:"Furnas", m:"OK", rv:"OK", img:"https://raw.githubusercontent.com/engineerRDG/eletrobras.engenheiro.org/refs/heads/main/imagem/embarca%C3%A7%C3%B6es/Saliba.jpg"},
+    {n:"Sao Francisco I", c:"Guape", t:"Ferry Boat", r:"Furnas", m:"MWM 229/6", rv:"ZF BW 40", img:"https://raw.githubusercontent.com/engineerRDG/eletrobras.engenheiro.org/refs/heads/main/imagem/embarca%C3%A7%C3%B5es/S%C3%A3o%20Francisco%20I.jpg"},
+    {n:"Sao Francisco III", c:"Campo do Meio", t:"Ferry Boat", r:"Furnas", m:"MB OM 352", rv:"ZF BW 40", img:"https://raw.githubusercontent.com/engineerRDG/eletrobras.engenheiro.org/refs/heads/main/imagem/embarca%C3%A7%C3%B5es/S%C3%A3o%20Francisco%20III.jpg"}
+];
+let frotaLoaded = false;
+function initFrota() {
+    if(frotaLoaded) return;
+    const card = v => `<div class="card vessel-card ${v.r.toLowerCase()}" onclick='showVessel(${JSON.stringify(v).replace(/'/g, "&#39;")})'>
+        <div class="card-body"><div class="bold">${v.n}</div><div class="text-xs text-muted">${v.c}</div><div class="text-xs mt-1">${v.t}</div></div></div>`;
+    $('#furnasList').innerHTML = FROTA.filter(v => v.r==='Furnas').map(card).join('');
+    $('#mascarenhasList').innerHTML = FROTA.filter(v => v.r==='Mascarenhas').map(card).join('');
+    frotaLoaded = true;
+}
+function showVessel(v) {
+    let h = `<h2 class="bold mb-1">${v.n}</h2><p class="text-sm text-muted mb-2">${v.c} - ${v.t}</p>`;
+    if(v.img) h += `<img src="${v.img}" style="max-width:100%; max-height:180px; border-radius:4px; display:block; margin:0 auto 1rem">`;
+    if(v.t === 'Prancha') h += `<div class="p-1 center" style="background:var(--bg-alt)">Prancha sem propulsão.</div>`;
+    else h += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-top:0.5rem"><div class="p-1" style="background:var(--bg-alt); border-radius:4px"><div class="text-xs text-muted">Motor</div><div class="bold text-sm">${v.m || 'N/A'}</div></div><div class="p-1" style="background:var(--bg-alt); border-radius:4px"><div class="text-xs text-muted">Reversor</div><div class="bold text-sm">${v.rv || 'N/A'}</div></div></div>`;
+    $('#modalContent').innerHTML = h;
+    $('#modalBox').style.display = 'grid';
+}
+
+// --- CRONOGRAMA ---
+let cronLoaded = false, cronData = [], calDate = new Date();
+async function initCron() {
+    if(cronLoaded) { renderCal(); return; }
+    try {
+        const csv = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTu9skDnnYmILUpQ4UvWblPFbq1D4k7Dy4FPK5k-21kgAurdYAJbxyXhbofQGUDHwSefc6w18tDOqPj/pub?gid=502983351&single=true&output=csv';
+        const t = await (await fetch(`${csv}&t=${Date.now()}`)).text();
+        const lines = t.trim().split('\n').slice(1);
+        const parse = l => { let q=false, c='', a=[]; for(let ch of l) { if(ch==='"') q=!q; else if(ch===','&&!q) { a.push(c.trim()); c='' } else c+=ch } a.push(c.trim()); return a.map(x=>x.startsWith('"')?x.slice(1,-1):x); };
+        
+        cronData = lines.map(l => {
+            const c = parse(l);
+            if(!c[0]) return null;
+            const [d,m,y] = c[0].split('/');
+            return { date: `${y}-${m.padStart(2,0)}-${d.padStart(2,0)}`, title: c[1], desc: c[2]||'', team: c[3]||'' };
+        }).filter(Boolean);
+        cronLoaded = true;
+        renderCal();
+    } catch(e) { console.error(e); }
+
+    $('#prevMonth').onclick = () => { calDate.setMonth(calDate.getMonth()-1); renderCal(); };
+    $('#nextMonth').onclick = () => { calDate.setMonth(calDate.getMonth()+1); renderCal(); };
+}
+
+function renderCal() {
+    const year = calDate.getFullYear(), month = calDate.getMonth();
+    $('#calMonthYear').textContent = calDate.toLocaleDateString('pt-BR', {month: 'long', year: 'numeric'});
+    const days = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+    let html = days.map(d => `<div class="calendar-day-name">${d}</div>`).join('');
+    const firstDay = new Date(year, month, 1).getDay();
+    const lastDay = new Date(year, month+1, 0).getDate();
+    const today = new Date();
+    
+    for(let i=0; i<firstDay; i++) html += `<div class="calendar-day other-month"></div>`;
+    for(let i=1; i<=lastDay; i++) {
+        const thisDate = new Date(year, month, i);
+        const iso = thisDate.toISOString().split('T')[0];
+        const isToday = thisDate.toDateString() === today.toDateString();
+        const evs = cronData.filter(e => e.date === iso);
+        
+        html += `<div class="calendar-day ${isToday ? 'today' : ''}">
+            <div class="day-number">${i}</div>
+            ${evs.map(e => `<div class="cal-event" onclick="showEvt('${e.title}', '${e.date}', '${e.desc}', '${e.team}')">${e.title}</div>`).join('')}
+        </div>`;
+    }
+    const totalCells = firstDay + lastDay;
+    const remaining = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+    for(let i=0; i<remaining; i++) html += `<div class="calendar-day other-month"></div>`;
+    $('#calendarGrid').innerHTML = html;
+}
+function showEvt(t, d, desc, team) {
+    const dt = new Date(d+'T12:00');
+    $('#modalContent').innerHTML = `<h2 class="bold mb-1">${t}</h2><p class="text-sm text-muted mb-2">${dt.toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'})}</p><p class="text-sm mb-2">${desc}</p><div class="p-1 mt-2" style="background:var(--bg-alt); border-radius:4px"><div class="text-xs text-muted mb-1">Equipe:</div><div class="bold text-sm">${team||'N/A'}</div></div>`;
+    $('#modalBox').style.display = 'grid';
+}
+
+// --- MEDICAO ---
+const CSV_SERV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR-EzfpINGaWJduqHgUQwgjK2hzakenB8-zIFSO7eqPtAoZzSin9DV0eyxg9_wEPaWE79lYxiGMQ_9b/pub?gid=1132804567&single=true&output=csv';
+const CSV_PRI = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS8an6Vae5OUkZVObcjTNcqUaXZKD-AtlJCg1WRK-6Aw2DDOoLZHGTB59oDSBK1iGc3BEGWI4u_6Qh3/pub?gid=439074154&single=true&output=csv';
+const CSV_LOC = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS5QP1Y7FXm3gRkgb3Xl9iATvUE25q5wq22-X3k7QZG6TusZ3uURbaVPS1os3Gl4G0FxyK25TOtGCj0/pub?gid=0&single=true&output=csv';
+
+let medLoaded = false, medData = [], medChart = null;
+const V_MAP = { "Fama":"Alfenas","Delfinópolis":"Alfenas","Saliba":"Campo Belo","São Francisco III":"Campo do Meio","Águas Verdes":"Carmo do Rio Claro","Itapiché":"Carmo do Rio Claro","Fernandes":"Cristais","Delfinópolis I":"Delfinópolis","Canastra":"Delfinópolis","Nossa Senhora dos Navegantes":"Delfinópolis","Nossa Senhora dos Navegantes VII":"Delfinópolis","Nossa Senhora dos Navegantes X":"Delfinópolis","Rio Grande IV":"Delfinópolis","São João Batista do Glória":"Delfinópolis","Araúna":"Fama","Guapé":"Guapé","Harmonia":"Guapé","São Francisco I":"Guapé","Pontalete":"Três Pontas" };
+const M_MAP = { 'janeiro':0,'fevereiro':1,'março':2,'abril':3,'maio':4,'junho':5,'julho':6,'agosto':7,'setembro':8,'outubro':9,'novembro':10,'dezembro':11 };
+
+async function initMed() {
+    if(medLoaded) return;
+    try {
+        const [s, p, l] = await Promise.all([
+            fetch(`${CSV_SERV}&t=${Date.now()}`).then(r=>r.text()),
+            fetch(`${CSV_PRI}&t=${Date.now()}`).then(r=>r.text()),
+            fetch(`${CSV_LOC}&t=${Date.now()}`).then(r=>r.text())
+        ]);
+        const pRes = Papa.parse(p, {header:true}).data.reduce((a,i) => { a[i['código']?.trim()] = parseNum(i['valor']); return a; }, {});
+        const lRes = Papa.parse(l, {header:true}).data.reduce((a,i) => { a[i['embarcação']?.trim()] = i['cidade']?.trim(); return a; }, {});
+        
+        medData = Papa.parse(s, {header:true}).data.map(i => {
+            const v = i['embarcação']?.trim();
+            const cod = i['código']?.trim() || i['item']?.trim();
+            const price = pRes[cod] || 0;
+            const q = parseNum(i.quantidade);
+            const ref = i['referência']||i['mês'];
+            const parts = ref.toLowerCase().split('/');
+            const dt = (parts.length===2 && M_MAP[parts[0]]!==undefined) ? new Date(parts[1], M_MAP[parts[0]], 1) : null;
+            return { ...i, 
+                municipio: V_MAP[v] || lRes[v] || 'N/A',
+                embarcação: v, codigo: cod, descritivo: i['descritivo']||i['descrição'], referenciaStr: ref,
+                dataConclusao: dt, quantidadeNumerica: q, valorCalculado: price * q
+            };
+        }).filter(i => i.dataConclusao && i.valorCalculado > 0);
+
+        populateMedFilter('filterRef', medData.map(i=>({k:`${i.dataConclusao.getFullYear()}-${(i.dataConclusao.getMonth()+1).toString().padStart(2,'0')}`, v:i.referenciaStr})));
+        populateMedFilter('filterCity', medData.map(i=>({k:i.municipio, v:i.municipio})));
+        
+        $('#filterRef').onchange = $('#filterCity').onchange = applyMed;
+        $('#btnReport').onclick = () => alert('Relatório gerado!');
+        $('#btnBoletim').onclick = () => alert('Boletim gerado!');
+        $('#btnMatriz').onclick = () => alert('Matriz gerada!');
+        
+        applyMed();
+        medLoaded = true;
+    } catch(e) { console.error(e); }
+}
+
+function populateMedFilter(id, arr) {
+    const unique = [...new Map(arr.map(i => [i.k, i])).values()];
+    const sel = $(`#${id}`);
+    sel.innerHTML = `<option value="all">Todos</option>` + unique.sort((a,b)=>b.k.localeCompare(a.k)).map(i=>`<option value="${i.k}">${i.v}</option>`).join('');
+}
+
+function applyMed() {
+    const rV = $('#filterRef').value, cV = $('#filterCity').value;
+    const f = medData.filter(i => {
+        const rM = rV==='all' || `${i.dataConclusao.getFullYear()}-${(i.dataConclusao.getMonth()+1).toString().padStart(2,'0')}`===rV;
+        const cM = cV==='all' || i.municipio===cV;
+        return rM && cM;
+    });
+    $('#kpi-items').textContent = f.length;
+    $('#kpi-total').textContent = fmt(f.reduce((s,i)=>s+i.valorCalculado,0));
+    $('#kpi-ref').textContent = rV==='all' ? 'Todos' : ($(`#filterRef option[value="${rV}"]`).textContent);
+    $('#kpi-city').textContent = cV==='all' ? 'Todos' : cV;
+
+    const agg = {};
+    f.forEach(i => {
+        const k = `${i.codigo}|${i.descritivo}`;
+        if(!agg[k]) agg[k] = {codigo:i.codigo, desc:i.descritivo, unidade:i.unidade, q:0, v:0};
+        agg[k].q += i.quantidadeNumerica;
+        agg[k].v += i.valorCalculado;
+    });
+    const rows = Object.values(agg).sort((a,b)=>b.v-a.v);
+    $('#medTableBody').innerHTML = rows.map(i => `<tr>
+        <td style="font-family:monospace">${i.codigo}</td><td>${i.desc}</td>
+        <td class="text-center">${i.q.toLocaleString('pt-BR')}</td><td class="text-right">${fmt(i.v)}</td>
+    </tr>`).join('');
+
+    const vesselVal = f.reduce((a,i) => { const v=i.embarcação||'N/A'; a[v]=a[v]||0; a[v]+=i.valorCalculado; return a; }, {});
+    const vSorted = Object.entries(vesselVal).sort((a,b)=>b[1]-a[1]);
+    let vHtml = vSorted.map(([n,v]) => `<div style="display:flex;justify-content:space-between;padding:0.25rem;border-bottom:1px solid var(--border)"><span>${n}</span><span>${fmt(v)}</span></div>`).join('');
+    $('#vesselPerfContainer').innerHTML = vHtml;
+
+    if(medChart) medChart.destroy();
+    const ctx = document.getElementById('paretoChart').getContext('2d');
+    const top8 = vSorted.slice(0,8);
+    medChart = new Chart(ctx, {
+        type: 'bar', data: { labels: top8.map(i=>i[0]), datasets: [{ data: top8.map(i=>i[1]), backgroundColor: '#333' }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+    });
+}
+
+// --- ITENS (IMEDIATO) ---
+const CSV_ITENS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS8an6Vae5OUkZVObcjTNcqUaXZKD-AtlJCg1WRK-6Aw2DDOoLZHGTB59oDSBK1iGc3BEGWI4u_6Qh3/pub?gid=439074154&single=true&output=csv';
+let itensData = [];
+
+(async () => {
+    try {
+        const t = await (await fetch(`${CSV_ITENS}&t=${Date.now()}`)).text();
+        itensData = Papa.parse(t, {header:true}).data.map(i => ({
+            code: i['código']||'', desc: i['descritivo']||'', unit: i['unidade']||'', val: parseNum(i['valor'])
+        })).filter(i => i.code);
+        renderItens(itensData);
+    } catch(e) {
+        $('#itensTableBody').innerHTML = '<tr><td colspan="4" class="text-center">Erro ao carregar.</td></tr>';
+    }
+})();
+
+ $('#searchItem').onkeyup = function() {
+    const t = this.value.toUpperCase();
+    renderItens(itensData.filter(i => i.desc.toUpperCase().includes(t) || i.code.includes(t)));
+};
+
+function renderItens(d) {
+    $('#itensTableBody').innerHTML = d.map(i => `<tr>
+        <td class="clickable-cell" onclick="copyText(this)">${i.code}</td>
+        <td onclick="copyText(this)">${i.desc}</td>
+        <td class="text-center">${i.unit}</td>
+        <td class="clickable-cell" onclick="copyText(this)">${fmt(i.val)}</td>
+    </tr>`).join('');
+}
+
+// --- INIT ---
+initStatus();
+</script>
 </body>
 </html>
