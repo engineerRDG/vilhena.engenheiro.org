@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pré Relatório</title>
+  <style>
+    :root {
+      --texto: #1a1a1a;
+      --texto-suave: #999;
+      --borda: #e0e0e0;
+      --erro: #c0392b;
+      --erro-fundo: #fef6f5;
+    }
+    * { box-sizing: border-box; margin: 0; }
+    body {
+      background: #fafafa;
+      color: var(--texto);
+      font-family: "Segoe UI", system-ui, sans-serif;
+      line-height: 1.5;
+      font-size: 14px;
+    }
+    .conteudo {
+      width: min(1080px, calc(100% - 32px));
+      margin: 32px auto 64px;
+      padding: 40px 0;
+    }
+    
+    /* ── Topo ── */
+    .topo-relatorio {
+      margin-bottom: 32px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--borda);
+    }
+    .topo-relatorio h1 {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    /* ── Estados e Avisos ── */
+    .estado {
+      min-height: 120px;
+      display: grid;
+      place-items: center;
+      color: var(--texto-suave);
+      text-align: center;
+      font-size: 14px;
+    }
+    .estado--erro { color: var(--erro); background: var(--erro-fundo); border-radius: 6px; }
+    .avisos { margin-bottom: 24px; }
+    .aviso { margin-bottom: 6px; padding: 8px 12px; border-radius: 4px; background: #fffbeb; color: #78600f; font-size: 12px; }
+
+    /* ── Tipografia ── */
+    h2 { margin: 48px 0 16px; font-size: 20px; color: #111; border-bottom: 2px solid #ddd; padding-bottom: 4px; }
+    h3 { margin: 24px 0 12px; font-size: 16px; color: #333; }
+    h4 { margin: 16px 0 8px; font-size: 14px; color: #555; }
+
+    /* ── Tabelas e Responsividade ── */
+    .table-responsive {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      margin-bottom: 24px;
+    }
+    table {
+      width: 100%;
+      min-width: 600px;
+      border-collapse: collapse;
+      font-size: 13px;
+      background: #fff;
+    }
+    th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #eee; }
+    thead th { font-size: 11px; font-weight: 600; color: #888; text-transform: uppercase; border-bottom: 2px solid var(--borda); }
+    .centro { text-align: center; }
+    .numero { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+    /* ── Destaques de Totais ── */
+    .total-row td { border-top: 1px solid #ccc; font-weight: 600; color: #444; }
+    .total-secao td { border-top: 2px solid #aaa; font-weight: 700; color: #222; }
+    .total-geral td { border-top: 2px solid #555; font-weight: 800; font-size: 14px; color: #000; }
+
+    /* ── Fotos ── */
+    .photo-report { margin-top: 16px; }
+    .photo-item { margin-bottom: 24px; text-align: center; page-break-inside: avoid; }
+    .photo-item img { max-width: 100%; height: auto; border-radius: 4px; }
+    .caption { margin-top: 8px; color: #777; font-size: 12px; font-style: italic; }
+
+    /* ── Impressão ── */
+    @media print {
+      body { background: #fff; }
+      .conteudo { width: 100%; margin: 0; padding: 0; }
+      .avisos { display: none !important; }
+      h2 { page-break-before: always; }
+      h2:first-of-type { page-break-before: auto; }
+      tr, .photo-item { page-break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <main class="conteudo">
+    <div class="topo-relatorio">
+      <h1>Pré Relatório</h1>
+    </div>
+    
+    <div id="avisos" class="avisos"></div>
+    
+    <div id="relatorio">
+      <div class="estado">Processando dados da planilha...</div>
+    </div>
+  </main>
+
+  <script>
+    "use strict";
+
+    const PLANILHA_ID = "1nkxLWywnxLZuLIv6wuk310MAPKpSaG-AM2v5Yt2fY-E";
+    const FONTES = {
+      servicos: "https://docs.google.com/spreadsheets/d/e/2PACX-1vRELh06Hln7dHa3kPngU2ArD9Ku0XMfp3BvpCVNetdOwxSu-QhAP4S_J9Tv9JkooNOsMghLBG73Vn-K/pub?output=csv",
+      itens: `https://docs.google.com/spreadsheets/d/${PLANILHA_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent("ITENS")}`,
+      frota: `https://docs.google.com/spreadsheets/d/${PLANILHA_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent("FROTA")}`
+    };
+
+    const EMBARCACOES_PERMITIDAS = ["Fama", "Delfinópolis", "Saliba", "São Francisco III", "Águas Verdes", "Itapiché", "Fernandes", "Delfinópolis I", "Canastra", "Nossa Senhora dos Navegantes VII", "Nossa Senhora dos Navegantes X", "Rio Grande IV", "São João Batista do Glória", "Araúna", "Guapé", "Harmonia", "São Francisco I", "Pontalete"];
+    const MUNICIPIOS_FORNECIDOS = ["CAMPO DO MEIO/MG", "CARMO DO RIO CLARO/MG", "CARMO DO RIO CLARO/MG", "CRISTAIS/MG", "DELFINÓPOLIS/MG", "DELFINÓPOLIS/MG", "DELFINÓPOLIS/MG", "DELFINÓPOLIS/MG", "DELFINÓPOLIS/MG", "DELFINÓPOLIS/MG", "FAMA/MG", "GUAPÉ/MG", "GUAPÉ/MG", "GUAPÉ/MG", "TRÊS PONTAS/MG"];
+    
+    const EMBARCACAO_CANONICA = Object.fromEntries(EMBARCACOES_PERMITIDAS.map(nome => [normalizar(nome), nome]));
+    const MUNICIPIO_ALTERNATIVO = Object.fromEntries(EMBARCACOES_PERMITIDAS.slice(0, MUNICIPIOS_FORNECIDOS.length).map((emb, i) => [normalizar(emb), MUNICIPIOS_FORNECIDOS[i]]));
+
+    document.addEventListener("DOMContentLoaded", carregarRelatorio);
+
+    async function carregarRelatorio() {
+      const relatorio = document.getElementById("relatorio");
+      const avisos = document.getElementById("avisos");
+
+      try {
+        const [resServicos, resItens, resFrota] = await Promise.allSettled([baixarCsv(FONTES.servicos), baixarCsv(FONTES.itens), baixarCsv(FONTES.frota)]);
+        
+        if (resServicos.status !== "fulfilled") throw new Error("Falha ao ler a aba SERVIÇOS.");
+        
+        const servicos = resServicos.value;
+        const itens = resItens.status === "fulfilled" ? resItens.value : [];
+        const frota = resFrota.status === "fulfilled" ? resFrota.value : [];
+        
+        const alertas = [];
+        if (resItens.status !== "fulfilled") alertas.push("Aba ITENS falhou. Usando apenas SERVIÇOS.");
+        if (resFrota.status !== "fulfilled") alertas.push("Aba FROTA falhou. Usando dados da aba SERVIÇOS.");
+
+        const dados = prepararDados(servicos, itens, frota, alertas);
+        renderizarRelatorio(dados, relatorio, avisos);
+      } catch (erro) {
+        relatorio.innerHTML = `<div class="estado estado--erro"><strong>Erro Crítico</strong><p>${escapar(erro.message)}</p></div>`;
+      }
+    }
+
+    async function baixarCsv(url) {
+      const resp = await fetch(`${url}${url.includes('?') ? '&' : '?'}_=${Date.now()}`);
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      return csvParaObjetos(await resp.text());
+    }
+
+    function csvParaObjetos(texto) {
+      if (!texto.trim()) return [];
+      const linhas = [];
+      let linha = [], campo = "", aspas = false;
+      
+      for (let i = 0; i < texto.length; i++) {
+        const c = texto[i], prox = texto[i + 1];
+        if (c === '"') {
+          if (aspas && prox === '"') { campo += '"'; i++; } else aspas = !aspas;
+        } else if (c === "," && !aspas) {
+          linha.push(campo); campo = "";
+        } else if ((c === "\n" || c === "\r") && !aspas) {
+          if (c === "\r" && prox === "\n") i++;
+          linha.push(campo); campo = "";
+          if (linha.some(v => v.trim() !== "")) linhas.push(linha);
+          linha = [];
+        } else {
+          campo += c;
+        }
+      }
+      linha.push(campo);
+      if (linha.some(v => v.trim() !== "")) linhas.push(linha);
+      if (!linhas.length) return [];
+      
+      const cabecalhos = linhas[0].map((v, i) => v.trim() || `col_${i}`);
+      return linhas.slice(1).map(val => Object.fromEntries(cabecalhos.map((cab, i) => [cab, val[i] ?? ""])));
+    }
+
+    function prepararDados(servicos, itens, frota, alertas) {
+      if (!servicos.length) return { periodos: [], avisos: ["CSV vazio."] };
+
+      const cab = Object.keys(servicos[0]);
+      const col = {
+        embarcacao: localizarCabecalho(cab, ["embarcação", "frota", "barco"]),
+        municipio: localizarCabecalho(cab, ["município"]),
+        periodo: localizarCabecalho(cab, ["período", "competência"]),
+        rs: localizarCabecalho(cab, ["rs", "requisição"]),
+        item: localizarCabecalho(cab, ["item", "ordem"]),
+        itemContratual: localizarCabecalho(cab, ["item contratual", "código do item"]),
+        descricao: localizarCabecalho(cab, ["descrição", "descritivo"]),
+        unidade: localizarCabecalho(cab, ["unidade", "unid"]),
+        quantidade: localizarCabecalho(cab, ["quantidade", "qtd"]),
+        valor: localizarCabecalho(cab, ["medição", "valor total"]),
+        imagem: localizarCabecalho(cab, ["registro fotográfico", "imagem", "foto"]),
+        legenda: localizarCabecalho(cab, ["legenda"])
+      };
+
+      const catalogoItens = criarCatalogoItens(itens);
+      const catalogoFrota = criarCatalogoFrota(frota);
+      const linhas = [];
+      const ant = {};
+
+      servicos.forEach((linha, indice) => {
+        const val = {
+          embarcacao: obter(linha, col.embarcacao),
+          municipio: obter(linha, col.municipio),
+          periodo: obter(linha, col.periodo),
+          rs: obter(linha, col.rs),
+          item: obter(linha, col.item)
+        };
+        Object.entries(val).forEach(([k, v]) => { if (v) ant[k] = v; });
+
+        const embarcacao = canonizarEmbarcacao(val.embarcacao || ant.embarcacao);
+        if (!embarcacao) return;
+
+        const cadastroFrota = catalogoFrota[normalizar(embarcacao)] || {};
+        const municipio = padronizarMunicipio(val.municipio || ant.municipio || cadastroFrota.municipio || MUNICIPIO_ALTERNATIVO[normalizar(embarcacao)]);
+        if (!municipio) return;
+
+        const itemContratual = obter(linha, col.itemContratual);
+        const itemCatalogo = catalogoItens[normalizarCodigo(itemContratual)] || {};
+        const qtdNumero = numeroOuNulo(obter(linha, col.quantidade));
+        let valorNumero = numeroOuNulo(obter(linha, col.valor));
+        if (valorNumero === null && qtdNumero !== null && typeof itemCatalogo.valor === "number") valorNumero = qtdNumero * itemCatalogo.valor;
+
+        linhas.push({
+          indice,
+          periodo: val.periodo || ant.periodo || "Sem Período",
+          municipio,
+          embarcacao,
+          rs: val.rs || ant.rs || "Sem RS",
+          itemNumero: val.item || ant.item,
+          itemContratual,
+          descricao: obter(linha, col.descricao) || itemCatalogo.descricao || "",
+          unidade: obter(linha, col.unidade) || itemCatalogo.unidade || "",
+          quantidade: obter(linha, col.quantidade),
+          valorNumero,
+          imagens: extrairMultiplasUrls(obter(linha, col.imagem)),
+          legenda: obter(linha, col.legenda)
+        });
+      });
+
+      return { periodos: agruparHierarquia(linhas), avisos: alertas };
+    }
+
+    /* ── Nova Hierarquia: Mês (Período) > Município > Embarcação > RS ── */
+    function agruparHierarquia(linhas) {
+      const mapaPeriodos = new Map();
+
+      linhas.forEach(l => {
+        const kPer = normalizar(l.periodo);
+        if (!mapaPeriodos.has(kPer)) mapaPeriodos.set(kPer, { nome: l.periodo, munis: new Map() });
+        const gPer = mapaPeriodos.get(kPer);
+
+        const kMun = normalizar(l.municipio);
+        if (!gPer.munis.has(kMun)) gPer.munis.set(kMun, { nome: l.municipio, embas: new Map() });
+        const gMun = gPer.munis.get(kMun);
+
+        const kEmb = normalizar(l.embarcacao);
+        if (!gMun.embas.has(kEmb)) gMun.embas.set(kEmb, { nome: l.embarcacao, rss: new Map() });
+        const gEmb = gMun.embas.get(kEmb);
+
+        const kRs = String(l.rs).trim();
+        if (!gEmb.rss.has(kRs)) gEmb.rss.set(kRs, { numero: l.rs, itens: [], fotos: [], total: 0 });
+        const gRs = gEmb.rss.get(kRs);
+
+        if (l.itemNumero || l.itemContratual || l.descricao || l.valorNumero !== null) {
+          gRs.itens.push(l);
+          if (l.valorNumero) gRs.total += l.valorNumero;
+        }
+
+        l.imagens.forEach(img => gRs.fotos.push({ imagem: img, legenda: l.legenda || `ITEM ${l.itemNumero || l.itemContratual || l.rs}` }));
+      });
+
+      return Array.from(mapaPeriodos.values()).sort((a, b) => compararNatural(a.nome, b.nome)).map(p => ({
+        nome: p.nome,
+        municipios: Array.from(p.munis.values()).sort((a, b) => compararNatural(a.nome, b.nome)).map(m => ({
+          nome: m.nome,
+          embarcacoes: Array.from(m.embas.values()).sort((a, b) => compararNatural(a.nome, b.nome)).map(e => ({
+            nome: e.nome,
+            rss: Array.from(e.rss.values()).sort((a, b) => compararNatural(a.numero, b.numero)),
+            total: Array.from(e.rss.values()).reduce((s, rs) => s + rs.total, 0)
+          })),
+          total: Array.from(m.embas.values()).reduce((s, e) => s + Array.from(e.rss.values()).reduce((s2, rs) => s2 + rs.total, 0), 0)
+        })),
+        total: Array.from(p.munis.values()).reduce((s, m) => s + Array.from(m.embas.values()).reduce((s2, e) => s2 + Array.from(e.rss.values()).reduce((s3, rs) => s3 + rs.total, 0), 0), 0)
+      }));
+    }
+
+    function renderizarRelatorio(dados, containerHtml, containerAvisos) {
+      containerAvisos.innerHTML = dados.avisos.map(a => `<div class="aviso">${escapar(a)}</div>`).join("");
+      if (!dados.periodos.length) {
+        containerHtml.innerHTML = '<div class="estado">Nenhum dado válido processado.</div>';
+        return;
+      }
+
+      let html = `<section><h3>Resumo das pré medições</h3><div class="table-responsive"><table><thead><tr><th>Período</th><th>Município</th><th class="numero">Medição Total</th></tr></thead><tbody>`;
+      let totalGeral = 0;
+      dados.periodos.forEach(p => {
+        p.municipios.forEach(m => {
+          html += `<tr><td>${escapar(p.nome)}</td><td>${escapar(m.nome)}</td><td class="numero">${formatarMoeda(m.total)}</td></tr>`;
+        });
+        totalGeral += p.total;
+      });
+      html += `<tr class="total-geral"><td colspan="2" class="numero">Total Geral</td><td class="numero">${formatarMoeda(totalGeral)}</td></tr></tbody></table></div></section>`;
+
+      dados.periodos.forEach(p => {
+        html += `<h2>Período: ${escapar(p.nome)}</h2>`;
+        p.municipios.forEach(m => {
+          html += `<h3>Município: ${escapar(m.nome)}</h3>`;
+          m.embarcacoes.forEach(e => {
+            html += `<h4>Embarcação: ${escapar(e.nome)}</h4>`;
+            e.rss.forEach(rs => {
+              html += `<div class="table-responsive"><table><thead><tr><th class="centro">Item</th><th>Contratual</th><th>Descrição</th><th class="centro">Unid.</th><th class="numero">Qtd.</th><th class="numero">Medição</th></tr></thead><tbody>`;
+              if(!rs.itens.length) html += `<tr><td colspan="6" class="centro">Sem itens</td></tr>`;
+              rs.itens.forEach(i => {
+                html += `<tr><td class="centro">${escapar(i.itemNumero)}</td><td>${escapar(i.itemContratual)}</td><td>${escapar(i.descricao)}</td><td class="centro">${escapar(i.unidade)}</td><td class="numero">${escapar(i.quantidade)}</td><td class="numero">${formatarMoeda(i.valorNumero)}</td></tr>`;
+              });
+              html += `<tr class="total-row"><td colspan="5" class="numero">Total medido</td><td class="numero">${formatarMoeda(rs.total)}</td></tr></tbody></table></div>`;
+              
+              if(rs.fotos.length) {
+                html += `<div class="photo-report">`;
+                rs.fotos.forEach(f => {
+                  html += `<div class="photo-item"><img src="${escapar(f.imagem)}" alt="Foto" loading="lazy" onerror="this.style.display='none'"><div class="caption">${escapar(f.legenda)}</div></div>`;
+                });
+                html += `</div>`;
+              }
+            });
+            html += `<div class="table-responsive"><table><tbody><tr class="total-secao"><td class="numero">Total — ${escapar(e.nome)}</td><td class="numero" style="width:20%;">${formatarMoeda(e.total)}</td></tr></tbody></table></div>`;
+          });
+        });
+      });
+      
+      containerHtml.innerHTML = html;
+    }
+
+    /* ── Utilitários ── */
+    function extrairMultiplasUrls(texto) {
+      if (!texto) return [];
+      const urls = new Set();
+      for (const m of texto.matchAll(/https?:\/\/[^\s,;"'<>]+/ig)) urls.add(m[0].replace(/[\])}>.,;]+$/g, ""));
+      return Array.from(urls);
+    }
+    
+    function criarCatalogoItens(linhas) {
+      const c = {};
+      linhas.forEach(l => {
+        const cod = normalizarCodigo(obter(l, "codigo") || obter(l, "código") || obter(l, "item contratual"));
+        if(cod) c[cod] = { descricao: obter(l, "descritivo") || obter(l, "descrição"), unidade: obter(l, "unidade"), valor: numeroOuNulo(obter(l, "valor")) };
+      });
+      return c;
+    }
+    function criarCatalogoFrota(linhas) {
+      const c = {};
+      linhas.forEach(l => {
+        const emb = canonizarEmbarcacao(obter(l, "embarcacao") || obter(l, "embarcação"));
+        if(emb) c[normalizar(emb)] = { municipio: padronizarMunicipio(obter(l, "município") || obter(l, "municipio")) };
+      });
+      return c;
+    }
+
+    function localizarCabecalho(cabs, alts) {
+      const nCabs = cabs.map(c => ({ o: c, n: normalizar(c) }));
+      const nAlts = alts.map(normalizar);
+      for (const a of nAlts) { const ex = nCabs.find(c => c.n === a); if (ex) return ex.o; }
+      for (const a of nAlts) { const pc = nCabs.find(c => c.n.includes(a) || a.includes(c.n)); if (pc) return pc.o; }
+      return "";
+    }
+
+    function obter(l, c) { return l && c ? String(l[c] ?? "").trim() : ""; }
+    function canonizarEmbarcacao(v) { return EMBARCACAO_CANONICA[normalizar(v)] || ""; }
+    function padronizarMunicipio(v) { const t = String(v||"").trim().replace(/\s*[-–\/]\s*MG\s*$/i, "").trim(); return t ? `${t.toLocaleUpperCase()}/MG` : ""; }
+    function normalizar(v) { return String(v??"").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^\p{L}\p{N}]+/gu, " ").trim().toLowerCase(); }
+    function normalizarCodigo(v) { return normalizar(v).replace(/\s+/g, ""); }
+    function numeroOuNulo(v) { 
+      if (typeof v === "number") return v;
+      const t = String(v??"").replace(/\s|R\$/gi, "").replace(/[^\d,.\-]/g, "");
+      if(!t) return null;
+      const n = Number(t.includes(",") && t.includes(".") ? t.replace(/\./g, "").replace(",", ".") : t.replace(",", "."));
+      return Number.isFinite(n) ? n : null;
+    }
+    function formatarMoeda(v) { return Number.isFinite(Number(v)) ? new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v) : "—"; }
+    function compararNatural(a, b) { return String(a??"").localeCompare(String(b??""), "pt-BR", { numeric: true }); }
+    function escapar(v) { return String(v??"").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;"); }
+  </script>
+</body>
+</html>
