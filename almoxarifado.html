@@ -1,323 +1,631 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Almoxarifado - Vilhena Serviços</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"> 
-    
+    <title>Almoxarifado</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            background-color: #f0f2f5;
+        :root {
+            --bg: #fafafa; --surface: #ffffff; --text: #0f172a; --muted: #64748b;
+            --border: #e2e8f0; --accent: #0f172a; --success: #16a34a; --danger: #dc2626; --info: #2563eb;
         }
 
-        .navbar-brand img {
-            height: 40px;
-            width: auto;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body { font-family: 'JetBrains Mono', monospace; background-color: var(--bg); color: var(--text); line-height: 1.5; min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
 
-        .container-box {
-            background-color: white;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-            padding: 1.5rem;
-        }
+        .container { max-width: 900px; margin: 0 auto; padding: 0 1.5rem; width: 100%; flex: 1; }
+        .flex { display: flex; align-items: center; gap: 1rem; }
+        .sb { justify-content: space-between; }
+        .text-muted { color: var(--muted); } .text-center { text-align: center; } .text-right { text-align: right; }
+        .bold { font-weight: 700; } .mt-1 { margin-top: 1rem; } .mb-1 { margin-bottom: 1rem; } .mb-2 { margin-bottom: 2rem; }
 
-        .nav-buttons {
-            background-color: #ffffff;
-            padding: 1rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            margin-bottom: 2rem;
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
+        /* Cabeçalho Original Restaurado */
+        header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 2rem 1rem 1.5rem; text-align: center; }
+        .logo { height: 50px; margin-bottom: 0.75rem; object-fit: contain; }
+        .header-title { font-size: 1.35rem; font-weight: 700; margin: 0 0 0.2rem; }
         
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 1em;
-        }
+        .nav-buttons { display: flex; justify-content: center; gap: 0.5rem; flex-wrap: wrap; margin-top: 1rem; }
+        .nav-btn { background: var(--bg); border: 1px solid var(--border); color: var(--muted); font-family: inherit; font-size: 0.85rem; font-weight: 700; padding: 0.6rem 1.5rem; border-radius: 99px; cursor: pointer; transition: all 0.2s ease; }
+        .nav-btn:hover { background: #f1f5f9; color: var(--text); }
+        .nav-btn.active { background: var(--accent); color: var(--surface); border-color: var(--accent); }
 
-        th, td {
-            padding: 12px 16px;
-            text-align: left;
-            border-bottom: 1px solid #dee2e6;
-            vertical-align: middle;
-        }
+        .sync-container { display: flex; align-items: center; justify-content: center; gap: 0.4rem; margin-top: 1.5rem; font-size: 0.7rem; color: var(--muted); }
+        .sync-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--muted); }
+        .sync-dot.ok { background: var(--success); } .sync-dot.error { background: var(--danger); } .sync-dot.loading { background: var(--info); animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
 
-        thead th {
-            background-color: #343a40;
-            color: #ffffff;
-            font-weight: 600;
-        }
+        .section { display: none; padding: 2.5rem 0; animation: fadeIn 0.3s ease; }
+        .section.active { display: block; }
+        .hd { font-size: 1.25rem; font-weight: 700; margin-bottom: 1.5rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center; }
 
-        tbody tr:nth-child(even) {
-            background-color: #f8f9fa;
-        }
-        
-        tbody tr:hover {
-            background-color: #e9ecef;
-        }
-        
-        .status-badge {
-            padding: 0.4em 0.7em;
-            font-size: 0.85em;
-            font-weight: 600;
-            border-radius: 15px;
-            text-transform: uppercase;
-        }
+        /* Forms */
+        .form-grid { display: grid; gap: 1rem; grid-template-columns: 1fr; }
+        @media (min-width: 600px) { .form-grid { grid-template-columns: 1fr 1fr; } }
+        .full-span { grid-column: 1 / -1; }
+        .form-group { display: flex; flex-direction: column; gap: 0.3rem; position: relative; }
+        .form-label { font-size: 0.7rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+        .form-input { width: 100%; padding: 0.7rem; border: 1px solid var(--border); border-radius: 6px; font-family: inherit; font-size: 0.85rem; background: var(--surface); color: var(--text); transition: border-color 0.2s; }
+        .form-input:focus { outline: none; border-color: var(--accent); }
+        .form-input:disabled { background: var(--bg); cursor: not-allowed; opacity: 0.7; }
 
-        .info-card {
-            color: white;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 1.5rem;
-        }
-        
-        .info-card .card-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-        }
-        
-        .info-card .card-text {
-            font-size: 2rem;
-            font-weight: 700;
-        }
+        /* Autocomplete Box */
+        .suggestions-box { position: absolute; top: 100%; left: 0; right: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; max-height: 180px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-top: 2px; }
+        .suggestions-box.hidden { display: none; }
+        .sugg-item { padding: 0.6rem 0.8rem; font-size: 0.8rem; cursor: pointer; border-bottom: 1px solid var(--border); }
+        .sugg-item:hover { background: var(--bg); }
+
+        .btn { display: inline-flex; align-items: center; justify-content: center; padding: 0.7rem 1.5rem; font-family: inherit; font-size: 0.8rem; font-weight: 700; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; background: var(--surface); color: var(--text); transition: all 0.2s; }
+        .btn:hover:not(:disabled) { background: var(--bg); }
+        .btn-sm { padding: 0.4rem 0.8rem; font-size: 0.7rem; }
+        .btn-primary { background: var(--accent); color: var(--surface); border-color: var(--accent); width: 100%; }
+        .btn-primary:hover:not(:disabled) { opacity: 0.9; }
+        .btn-danger { background: var(--danger); color: white; border-color: var(--danger); }
+        .btn-danger:hover { background: #b91c1c; }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .btn-export { background: var(--success); color: white; border-color: var(--success); }
+        .btn-export:hover { background: #15803d; }
+
+        /* Tables & Alerts */
+        .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); margin-bottom: 1rem; }
+        table { width: 100%; border-collapse: collapse; min-width: 600px; font-size: 0.8rem; }
+        th, td { padding: 0.85rem 1rem; text-align: left; border-bottom: 1px solid var(--border); }
+        th { font-weight: 700; color: var(--muted); text-transform: uppercase; font-size: 0.7rem; background: var(--bg); }
+        tbody tr:last-child td { border-bottom: none; }
+        .row-danger { background-color: #fef2f2; color: var(--danger); font-weight: bold; }
+
+        .status-msg { font-size: 0.75rem; margin-top: 0.5rem; min-height: 1rem; font-weight: 500; text-align: center; }
+        .status-msg.ok { color: var(--success); } .status-msg.erro { color: var(--danger); }
+
+        .toast-host { position: fixed; right: 1rem; bottom: 1rem; z-index: 1000; display: flex; flex-direction: column; gap: 0.5rem; pointer-events: none; }
+        .toast { pointer-events: auto; background: var(--text); color: var(--surface); padding: 0.85rem 1.2rem; border-radius: 6px; font-size: 0.8rem; animation: fadeIn 0.3s ease; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
+
+<header>
+    <img src="https://raw.githubusercontent.com/engineerRDG/vilhena.engenheiro.org/refs/heads/main/imagem/logo.png" alt="Vilhena Serviços" class="logo">
+    <h1 class="header-title">Almoxarifado</h1>
+
+    <div class="nav-buttons">
+        <button class="nav-btn active" data-target="estoque">Estoque</button>
+        <button class="nav-btn" data-target="movimentacao">Movimentação</button>
+        <button class="nav-btn" data-target="cadastro">Cadastro</button>
+        <button class="nav-btn" data-target="relatorio">Relatório</button>
+    </div>
+
+    <div class="sync-container">
+        <span class="sync-dot" id="syncDot"></span>
+        <span id="atualizacao">Conectando...</span>
+    </div>
+</header>
+
+<main class="container">
     
-    <nav class="navbar navbar-dark bg-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">
-                <img src="https://static.wixstatic.com/media/886e87_d769722dd4f34a86a70fc33591489baf~mv2.png/v1/fill/w_201,h_118,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/VILHENA-SERVI%C3%87OS_LOGO2.png" alt="Vilhena Serviços Logo">
-            </a>
-            <span class="navbar-text">
-                Atualizado em: 30/06/2025, 21:55
-            </span>
+    <!-- ABA: ESTOQUE -->
+    <section id="estoque" class="section active">
+        <h2 class="hd">
+            Estoque
+            <button class="btn btn-sm btn-export" onclick="exportarEstoqueCSV()">⬇️ Exportar</button>
+        </h2>
+        
+        <div id="avisoEstoque"></div>
+        
+        <div class="form-group mb-1">
+            <input class="form-input" id="buscaEstoque" type="search" placeholder="Pesquisar estoque por código ou descrição...">
         </div>
-    </nav>
-
-    <main class="container mt-4">
-    
-        <div class="nav-buttons">
-            <a href="index.html" class="btn btn-primary"><i class="bi bi-house-gear"></i> Início</a>
-            <a href="controle-rs.html" class="btn btn-primary"><i class="bi bi-tools"></i> Controle de RS</a>
-            <a href="status.html" class="btn btn-primary"><i class="bi bi-check-circle"></i> Status - Delfinopolis</a>
-            <a href="cronograma.html" class="btn btn-primary"><i class="bi bi-calendar-week"></i> Cronograma de atendimento</a>
-            <a href="almoxarifado.html" class="btn btn-secondary"><i class="bi bi-box-seam-fill"></i> Almoxarifado</a>
-            <a href="#" class="btn btn-primary"><i class="bi bi-person-lines-fill"></i> Fornecedores</a>
+        
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Descrição</th>
+                        <th class="text-right">Quantidade</th>
+                    </tr>
+                </thead>
+                <tbody id="tabelaEstoque">
+                    <tr><td colspan="3" class="text-center text-muted">Aguardando sincronização...</td></tr>
+                </tbody>
+            </table>
         </div>
+    </section>
 
-        <div class="row">
-            <div class="col-lg-3 col-md-6">
-                <div class="info-card bg-primary">
-                    <div class="card-title">Itens em Estoque</div>
-                    <div class="card-text">328</div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6">
-                <div class="info-card bg-warning text-dark">
-                    <div class="card-title">Itens com Estoque Baixo</div>
-                    <div class="card-text">4</div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6">
-                <div class="info-card bg-success">
-                    <div class="card-title">Valor do Estoque</div>
-                    <div class="card-text">R$ 15.780</div>
-                </div>
-            </div>
-            <div class="col-lg-3 col-md-6">
-                <div class="info-card bg-danger">
-                    <div class="card-title">Requisições Pendentes</div>
-                    <div class="card-text">2</div>
-                </div>
-            </div>
-        </div>
+    <!-- ABA: MOVIMENTAÇÃO -->
+    <section id="movimentacao" class="section">
+        <h2 class="hd">Nova Movimentação</h2>
 
-        <div class="container-box">
-            <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
-                <h2 class="h4 mb-0">Controle de Estoque</h2>
-                <div class="d-flex gap-2">
-                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#entradaModal"><i class="bi bi-plus-lg"></i> Registrar Entrada</button>
-                    <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#saidaModal"><i class="bi bi-dash-lg"></i> Registrar Saída</button>
-                    <button class="btn btn-info text-white" data-bs-toggle="modal" data-bs-target="#novoItemModal"><i class="bi bi-journal-plus"></i> Adicionar Novo Item</button>
-                </div>
-            </div>
-
-            <div class="row g-3 mb-4">
-                <div class="col-md-6">
-                    <input type="text" class="form-control" placeholder="Pesquisar por item ou código...">
-                </div>
-                <div class="col-md-5">
-                    <select class="form-select">
-                        <option selected>Filtrar por Status...</option>
-                        <option value="1">Em Estoque</option>
-                        <option value="2">Estoque Baixo</option>
-                        <option value="3">Fora de Estoque</option>
+        <form id="formMov" class="mb-2">
+            <div class="form-grid">
+                <div class="form-group full-span">
+                    <label class="form-label" for="movTipo">Tipo de Movimentação</label>
+                    <select class="form-input" id="movTipo">
+                        <option value="ENTRADA">Entrada</option>
+                        <option value="USO INTERNO">Uso Interno</option>
+                        <option value="SAIDA">Saída</option>
                     </select>
                 </div>
-                <div class="col-md-1">
-                    <button class="btn btn-primary w-100"><i class="bi bi-search"></i></button>
+                <div class="form-group" id="autocomplete-wrapper">
+                    <label class="form-label" for="movDescricao">Descrição do Produto</label>
+                    <input class="form-input" id="movDescricao" autocomplete="off" placeholder="Digite para buscar nomes similares..." required>
+                    <div id="descSuggestions" class="suggestions-box hidden"></div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="movCodigo">Código do Produto</label>
+                    <input class="form-input" id="movCodigo" autocomplete="off" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="movQuantidade">Quantidade</label>
+                    <input class="form-input" id="movQuantidade" type="number" min="0.000001" step="any" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="movSaldo">Em estoque</label>
+                    <input class="form-input" id="movSaldo" readonly disabled placeholder="Preenchido ao usar código">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="movEmbarcacao">Embarcação</label>
+                    <select class="form-input" id="movEmbarcacao" disabled><option value="">Selecione...</option></select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="movRequisitante">Requisitante</label>
+                    <!-- Inicialmente desativado (pois começa na Entrada) -->
+                    <select class="form-input" id="movRequisitante" disabled><option value="">Selecione...</option></select>
                 </div>
             </div>
+            <div class="mt-1">
+                <button class="btn btn-primary" id="salvarMov" type="submit">Registrar Movimentação</button>
+            </div>
+            <div id="msgMov" class="status-msg" aria-live="polite"></div>
+        </form>
 
-            <div class="table-responsive">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Código</th>
-                            <th>Item</th>
-                            <th>Categoria</th>
-                            <th>Qtd. em Estoque</th>
-                            <th>Estoque Mín.</th>
-                            <th>Status</th>
-                            <th>Localização</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>BAT-001</td>
-                            <td>Bateria Moura 150Ah</td>
-                            <td>Elétrica</td>
-                            <td>2</td>
-                            <td>2</td>
-                            <td><span class="status-badge text-bg-warning">Estoque Baixo</span></td>
-                            <td>Prateleira A-1</td>
-                            <td><a href="#" class="btn btn-sm btn-outline-primary" title="Ver Histórico"><i class="bi bi-clock-history"></i></a></td>
-                        </tr>
-                        <tr>
-                            <td>EIX-PROP-BB</td>
-                            <td>Eixo de Propulsão BB</td>
-                            <td>Mecânica</td>
-                            <td>0</td>
-                            <td>1</td>
-                            <td><span class="status-badge text-bg-danger">Fora de Estoque</span></td>
-                            <td>Prateleira C-4</td>
-                            <td><a href="#" class="btn btn-sm btn-outline-primary" title="Ver Histórico"><i class="bi bi-clock-history"></i></a></td>
-                        </tr>
-                        <tr>
-                            <td>FIL-COMB-05</td>
-                            <td>Filtro de Combustível</td>
-                            <td>Filtros</td>
-                            <td>24</td>
-                            <td>10</td>
-                            <td><span class="status-badge text-bg-success">Em Estoque</span></td>
-                            <td>Prateleira B-2</td>
-                            <td><a href="#" class="btn btn-sm btn-outline-primary" title="Ver Histórico"><i class="bi bi-clock-history"></i></a></td>
-                        </tr>
-                        <tr>
-                            <td>OLEO-15W40</td>
-                            <td>Óleo de Motor 15W40 (Litro)</td>
-                            <td>Lubrificantes</td>
-                            <td>53</td>
-                            <td>20</td>
-                            <td><span class="status-badge text-bg-success">Em Estoque</span></td>
-                            <td>Tambores</td>
-                            <td><a href="#" class="btn btn-sm btn-outline-primary" title="Ver Histórico"><i class="bi bi-clock-history"></i></a></td>
-                        </tr>
-                        <tr>
-                            <td>PARAF-INOX-12</td>
-                            <td>Parafuso Inox M12</td>
-                            <td>Fixadores</td>
-                            <td>150</td>
-                            <td>50</td>
-                            <td><span class="status-badge text-bg-success">Em Estoque</span></td>
-                            <td>Gaveteiro G-7</td>
-                            <td><a href="#" class="btn btn-sm btn-outline-primary" title="Ver Histórico"><i class="bi bi-clock-history"></i></a></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+        <h3 class="hd" style="border:none; margin-bottom:0.5rem; font-size:0.9rem;">
+            Histórico Recente
+            <button class="btn btn-sm btn-export" onclick="exportarHistoricoCSV()">⬇️ Exportar</button>
+        </h3>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Tipo</th>
+                        <th>Cód.</th>
+                        <th>Descrição</th>
+                        <th class="text-right">Qtd.</th>
+                    </tr>
+                </thead>
+                <tbody id="movimentos">
+                    <tr><td colspan="5" class="text-center text-muted">Aguardando sincronização...</td></tr>
+                </tbody>
+            </table>
         </div>
-    </main>
+    </section>
 
-    <div class="modal fade" id="novoItemModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Adicionar Novo Item ao Almoxarifado</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form>
-                        <div class="mb-3"><label class="form-label">Código do Item</label><input type="text" class="form-control" placeholder="Ex: ROL-SKF-6205"></div>
-                        <div class="mb-3"><label class="form-label">Nome do Item</label><input type="text" class="form-control" placeholder="Ex: Rolamento SKF 6205"></div>
-                        <div class="mb-3"><label class="form-label">Categoria</label><input type="text" class="form-control" placeholder="Ex: Rolamentos"></div>
-                        <div class="mb-3"><label class="form-label">Estoque Mínimo</label><input type="number" class="form-control" value="1"></div>
-                        <div class="mb-3"><label class="form-label">Localização</label><input type="text" class="form-control" placeholder="Ex: Prateleira C-3"></div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary">Salvar Item</button>
-                </div>
-            </div>
+    <!-- ABA: RELATÓRIO DE EMBARCAÇÃO -->
+    <section id="relatorio" class="section">
+        <h2 class="hd">
+            Relatório
+            <button class="btn btn-sm btn-export" onclick="exportarRelatorioCSV()">⬇️ Exportar Excel</button>
+        </h2>
+        
+        <div class="form-group mb-1">
+            <select class="form-input" id="filtroRelatorio">
+                <option value="">Todas as Embarcações (Geral)</option>
+            </select>
         </div>
-    </div>
-    
-    <div class="modal fade" id="entradaModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Registrar Entrada de Material</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form>
-                        <div class="mb-3"><label class="form-label">Item</label><input type="text" class="form-control" placeholder="Selecione ou digite o código do item..."></div>
-                        <div class="mb-3"><label class="form-label">Quantidade</label><input type="number" class="form-control" value="1"></div>
-                        <div class="mb-3"><label class="form-label">Fornecedor</label><input type="text" class="form-control" placeholder="Nome do fornecedor"></div>
-                         <div class="mb-3"><label class="form-label">Nota Fiscal</label><input type="text" class="form-control" placeholder="Número da NF-e (opcional)"></div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-success">Confirmar Entrada</button>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <div class="modal fade" id="saidaModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Registrar Saída de Material</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Embarcação</th>
+                        <th>Produto</th>
+                        <th>Requisitante</th>
+                        <th class="text-right">Qtd.</th>
+                    </tr>
+                </thead>
+                <tbody id="tabelaRelatorio">
+                    <tr><td colspan="5" class="text-center text-muted">Aguardando sincronização...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- ABA: CADASTRO -->
+    <section id="cadastro" class="section">
+        <h2 class="hd">Cadastro de materiais</h2>
+
+        <form id="formCadastro" class="mb-2">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label" for="cadCodigo">Código</label>
+                    <input class="form-input" id="cadCodigo" autocomplete="off" required>
                 </div>
-                <div class="modal-body">
-                    <form>
-                        <div class="mb-3"><label class="form-label">Item</label><input type="text" class="form-control" placeholder="Selecione ou digite o código do item..."></div>
-                        <div class="mb-3"><label class="form-label">Quantidade</label><input type="number" class="form-control" value="1"></div>
-                        <div class="mb-3"><label class="form-label">Requisição de Serviço (RS)</label><input type="text" class="form-control" placeholder="Nº da RS associada (Ex: RS-2025-078)"></div>
-                        <div class="mb-3"><label class="form-label">Solicitante</label><input type="text" class="form-control" placeholder="Nome do técnico ou responsável"></div>
-                    </form>
+                <div class="form-group">
+                    <label class="form-label" for="cadDescricao">Descrição do item</label>
+                    <input class="form-input" id="cadDescricao" autocomplete="off" required>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-danger">Confirmar Saída</button>
+                <div class="form-group">
+                    <label class="form-label" for="cadUnidade">Unidade de Medida</label>
+                    <select class="form-input" id="cadUnidade" required><option value="">Carregando...</option></select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="cadCategoria">Categoria</label>
+                    <select class="form-input" id="cadCategoria" required><option value="">Carregando...</option></select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="cadInicial">Estoque Inicial</label>
+                    <input class="form-input" id="cadInicial" type="number" min="0" step="any" value="0" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="cadMinimo">Estoque Mínimo</label>
+                    <input class="form-input" id="cadMinimo" type="number" min="0" step="any" value="0" required>
                 </div>
             </div>
-        </div>
-    </div>
-    
-    <footer class="container mt-4 mb-4">
-        <p class="text-end text-muted" style="font-size: 1rem; color: gray;">
-        <b>
-Vilhena Serviços LTDA
-<br>
-</b>
-Departamento de Engenharia e Manutenção
-</p>
-    </footer>
+            <div class="form-grid mt-1">
+                <button class="btn btn-primary" id="salvarCadastro" type="submit">Salvar Cadastro</button>
+                <button class="btn" id="limparCadastro" type="button">Limpar Formulário</button>
+            </div>
+            <div id="msgCadastro" class="status-msg" aria-live="polite"></div>
+        </form>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <div class="form-group mb-1">
+            <input class="form-input" id="buscaCadastro" type="search" placeholder="Pesquisar cadastros...">
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Descrição</th>
+                        <th class="text-right">Inicial</th>
+                        <th class="text-right">Mínimo</th>
+                        <th>Categoria</th>
+                        <th class="text-center">Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="tabelaCadastro">
+                    <tr><td colspan="6" class="text-center text-muted">Aguardando sincronização...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+
+<div class="toast-host" id="toastHost"></div>
+
+<script>
+    // ============================================================================
+    // ⚠️ COLOQUE SUA NOVA URL DO GOOGLE APPS SCRIPT DENTRO DAS ASPAS ABAIXO:
+    // ============================================================================
+    const API_URL = 'https://script.google.com/macros/s/AKfycbxNmaZCMy7yw4hb2MCzCHEV_ndKvFLk-PnxfxfE5-OANlB09jZpHdBwdztpOse2TU1IhA/exec'; 
+    // ============================================================================
+
+    // --- Navegação em Botões ---
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            
+            btn.classList.add('active');
+            document.getElementById(btn.dataset.target).classList.add('active');
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        });
+    });
+
+    // --- Regras de Movimentação (Entrada / Uso Interno / Saída) ---
+    document.getElementById('movTipo').addEventListener('change', function() {
+        const reqInput = document.getElementById('movRequisitante');
+        const embInput = document.getElementById('movEmbarcacao');
+        
+        if (this.value === 'ENTRADA') {
+            reqInput.disabled = true; reqInput.required = false; reqInput.value = "";
+            embInput.disabled = true; embInput.required = false; embInput.value = "";
+        } else if (this.value === 'USO INTERNO') {
+            reqInput.disabled = false; reqInput.required = true;
+            embInput.disabled = true; embInput.required = false; embInput.value = "";
+        } else { // SAÍDA
+            reqInput.disabled = false; reqInput.required = true;
+            embInput.disabled = false; embInput.required = true;
+        }
+    });
+
+    // --- Variáveis Globais e Helpers ---
+    const $ = id => document.getElementById(id);
+    const fmt = v => Number(v || 0).toLocaleString('pt-BR', { maximumFractionDigits: 3 });
+    const key = v => String(v ?? '').trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase();
+    const padCode = c => String(c).trim().replace(/^([1-9])$/, '0$1');
+
+    // Fuzzy search (Remove acentos e pontuação para busca flexível)
+    const normalizeStr = str => {
+        if (!str) return '';
+        return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    };
+
+    let dados = { itens:[], estoque:[], ultimas:[], relatorio:[], listas:{embarcacoes:[], requisitantes:[], unidades:[], categorias:[]} };
+
+    function toast(mensagem) {
+        const host = $('toastHost');
+        const el = document.createElement('div');
+        el.className = 'toast'; el.textContent = mensagem;
+        host.appendChild(el);
+        setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }, 3000);
+    }
+
+    function setSync(estado, texto) {
+        $('syncDot').className = 'sync-dot ' + estado;
+        $('atualizacao').textContent = texto;
+    }
+
+    // --- API ---
+    async function srv(action, payload = {}) {
+        if (!API_URL || API_URL === 'COLE_A_SUA_URL_AQUI_DEPOIS_DE_FAZER_UMA_NOVA_IMPLANTACAO') {
+            throw new Error("⚠️ URL DA API NÃO CONFIGURADA.");
+        }
+        try {
+            if (action === 'getAppData') {
+                const response = await fetch(API_URL + '?action=getAppData');
+                const result = await response.json();
+                if (result.error) throw new Error(result.error);
+                return result;
+            } else {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }, 
+                    body: JSON.stringify({ action: action, data: payload })
+                });
+                const result = await response.json();
+                if (result.error) throw new Error(result.error);
+                return result;
+            }
+        } catch (e) {
+            console.error("Erro na API:", e);
+            throw new Error("Falha na conexão com o servidor.");
+        }
+    }
+
+    // --- Carregar Dados ---
+    async function carregar() {
+        setSync('loading', 'Sincronizando...');
+        try {
+            const resp = await srv('getAppData');
+            dados = {
+                itens: resp.itens || [], estoque: resp.estoque || [], ultimas: resp.ultimas || [],
+                relatorio: resp.relatorio || [], listas: resp.listas || {embarcacoes: [], requisitantes: [], unidades: [], categorias: []}
+            };
+            setSync('ok', 'Atualizado às ' + (resp.atualizadoEm || ''));
+            
+            popularSelect('movEmbarcacao', dados.listas.embarcacoes, 'Selecione', $('movEmbarcacao').value);
+            popularSelect('movRequisitante', dados.listas.requisitantes, 'Selecione', $('movRequisitante').value);
+            popularSelect('filtroRelatorio', dados.listas.embarcacoes, 'Todas', $('filtroRelatorio').value);
+            popularSelect('cadUnidade', dados.listas.unidades, 'Selecione', $('cadUnidade').value);
+            popularSelect('cadCategoria', dados.listas.categorias, 'Selecione', $('cadCategoria').value);
+            
+            renderEstoque();
+            renderRelatorio();
+            renderMovimentos();
+            renderCadastro();
+        } catch(e) {
+            setSync('error', e.message);
+        }
+    }
+
+    function popularSelect(id, lista, placeholder, valorAtual) {
+        $(id).innerHTML = `<option value="">${placeholder}</option>` + (lista || []).map(v => `<option value="${v}">${v}</option>`).join('');
+        if (lista.includes(valorAtual)) $(id).value = valorAtual;
+    }
+
+    // --- Autocomplete Inteligente (Sem Acentos) ---
+    $('movDescricao').addEventListener('input', function() {
+        const val = normalizeStr(this.value);
+        const suggBox = $('descSuggestions');
+        if (val.length < 2) { suggBox.classList.add('hidden'); return; }
+        
+        const matches = dados.itens.filter(i => normalizeStr(i.descricao).includes(val) || normalizeStr(i.codigo).includes(val));
+        if (matches.length > 0) {
+            suggBox.innerHTML = matches.map(m => `<div class="sugg-item" onclick="selecionarItemBusca('${m.codigo}')"><b>${m.codigo}</b> - ${m.descricao}</div>`).join('');
+            suggBox.classList.remove('hidden');
+        } else {
+            suggBox.classList.add('hidden');
+        }
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('#autocomplete-wrapper')) $('descSuggestions').classList.add('hidden');
+    });
+
+    window.selecionarItemBusca = function(codigo) {
+        const item = dados.itens.find(x => x.codigo === codigo);
+        if (item) {
+            $('movCodigo').value = item.codigo;
+            $('movDescricao').value = item.descricao;
+            const est = dados.estoque.find(x => x.codigo === codigo);
+            $('movSaldo').value = est ? `${fmt(est.saldo)} ${est.unidade}` : '';
+            $('descSuggestions').classList.add('hidden');
+        }
+    };
+
+    $('movCodigo').addEventListener('input', function() {
+        let code = padCode(this.value);
+        const item = dados.itens.find(x => x.codigo === code);
+        if (item) {
+            $('movDescricao').value = item.descricao;
+            const est = dados.estoque.find(x => x.codigo === code);
+            $('movSaldo').value = est ? `${fmt(est.saldo)} ${est.unidade}` : '';
+        } else {
+            $('movSaldo').value = '';
+        }
+    });
+
+    // --- Renderização ---
+    function renderEstoque() {
+        const q = key($('buscaEstoque').value);
+        const lista = dados.estoque.filter(x => !q || key(x.codigo).includes(q) || key(x.descricao).includes(q));
+        
+        const emAlerta = dados.estoque.filter(x => x.saldo <= x.estoqueMinimo);
+        if (emAlerta.length > 0) {
+            let nomesAlerta = emAlerta.map(i => `<b>${i.codigo}</b> (${i.descricao})`).join(', ');
+            $('avisoEstoque').innerHTML = `<div style="background:var(--danger);color:#fff;padding:0.8rem;border-radius:6px;margin-bottom:1rem;text-align:center;font-size:0.8rem;">⚠️ <b>ATENÇÃO:</b> ${emAlerta.length} item(ns) estão zerados ou em estoque mínimo. <br>${nomesAlerta}</div>`;
+        } else {
+            $('avisoEstoque').innerHTML = '';
+        }
+
+        $('tabelaEstoque').innerHTML = lista.length ? lista.map(x => {
+            let classRow = (x.saldo <= x.estoqueMinimo) ? 'row-danger' : '';
+            return `
+            <tr class="${classRow}">
+                <td style="font-family: monospace;">${x.codigo}</td>
+                <td>${x.descricao}</td>
+                <td class="text-right">${fmt(x.saldo)} <span style="font-size:0.7rem">${x.unidade}</span></td>
+            </tr>`;
+        }).join('') : '<tr><td colspan="3" class="text-center text-muted">Nenhum registro.</td></tr>';
+    }
+
+    function renderRelatorio() {
+        const filtro = $('filtroRelatorio').value;
+        const lista = filtro ? dados.relatorio.filter(x => x.embarcacao === filtro) : dados.relatorio;
+        $('tabelaRelatorio').innerHTML = lista.length ? lista.map(x => `
+            <tr>
+                <td class="text-muted" style="white-space:nowrap;">${x.data}</td>
+                <td class="bold">${x.embarcacao}</td>
+                <td>${x.produto}</td>
+                <td>${x.requisitante}</td>
+                <td class="text-right bold">${fmt(x.quantidade)}</td>
+            </tr>`).join('') : '<tr><td colspan="5" class="text-center text-muted">Nenhum registro encontrado.</td></tr>';
+    }
+
+    function renderMovimentos() {
+        $('movimentos').innerHTML = dados.ultimas.length ? dados.ultimas.map(x => `
+            <tr>
+                <td class="text-muted">${x.data}</td>
+                <td class="bold" style="color: ${x.tipo === 'ENTRADA' ? 'var(--success)' : (x.tipo === 'USO INTERNO' ? 'var(--info)' : 'var(--danger)')}">${x.tipo}</td>
+                <td class="bold" style="font-family: monospace;">${x.codigo}</td>
+                <td>${x.descricao}</td>
+                <td class="text-right">${fmt(x.quantidade)}</td>
+            </tr>`).join('') : '<tr><td colspan="5" class="text-center text-muted">Vazio.</td></tr>';
+    }
+
+    function renderCadastro() {
+        const q = key($('buscaCadastro').value);
+        const lista = dados.itens.filter(x => !q || key(x.codigo).includes(q) || key(x.descricao).includes(q));
+        $('tabelaCadastro').innerHTML = lista.length ? lista.map(x => `
+            <tr>
+                <td class="bold" style="font-family: monospace;">${x.codigo}</td>
+                <td>${x.descricao}</td>
+                <td class="text-right">${fmt(x.estoqueInicial)}</td>
+                <td class="text-right">${fmt(x.estoqueMinimo)}</td>
+                <td>${x.categoria}</td>
+                <td class="text-center" style="white-space: nowrap;">
+                    <button class="btn btn-sm" type="button" onclick="editarCadastro('${x.codigo}')">Editar</button>
+                    <button class="btn btn-sm btn-danger" type="button" onclick="excluirCadastro('${x.codigo}')">Excluir</button>
+                </td>
+            </tr>`).join('') : '<tr><td colspan="6" class="text-center text-muted">Vazio.</td></tr>';
+    }
+
+    // --- Exportações CSV (Excel) ---
+    window.exportarEstoqueCSV = function() {
+        let csv = '\uFEFFCódigo,Descrição,Quantidade,Unidade\n'; 
+        const q = key($('buscaEstoque').value);
+        const lista = dados.estoque.filter(x => !q || key(x.codigo).includes(q) || key(x.descricao).includes(q));
+        
+        lista.forEach(row => { csv += `"${row.codigo}","${row.descricao}","${row.saldo}","${row.unidade}"\n`; });
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'Estoque_Almoxarifado.csv'; link.click();
+    };
+
+    window.exportarHistoricoCSV = function() {
+        let csv = '\uFEFFData,Tipo,Código,Descrição,Quantidade,Requisitante\n'; 
+        dados.ultimas.forEach(row => { csv += `"${row.data}","${row.tipo}","${row.codigo}","${row.descricao}","${row.quantidade}","${row.requisitante || ''}"\n`; });
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'Historico_Movimentacao.csv'; link.click();
+    };
+
+    window.exportarRelatorioCSV = function() {
+        let csv = '\uFEFFData,Embarcação,Produto,Requisitante,Quantidade\n'; 
+        const filtro = $('filtroRelatorio').value;
+        const lista = filtro ? dados.relatorio.filter(x => x.embarcacao === filtro) : dados.relatorio;
+        
+        lista.forEach(row => { csv += `"${row.data}","${row.embarcacao}","${row.produto}","${row.requisitante}","${row.quantidade}"\n`; });
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'Relatorio_Embarcacoes.csv'; link.click();
+    };
+
+    // --- Manipulação de Dados (Cadastro) ---
+    window.editarCadastro = function(codigo) {
+        const item = dados.itens.find(x => x.codigo === codigo);
+        if (!item) return;
+        $('cadCodigo').value = item.codigo; $('cadCodigo').readOnly = true;
+        $('cadDescricao').value = item.descricao; $('cadUnidade').value = item.unidade;
+        $('cadCategoria').value = item.categoria; $('cadInicial').value = item.estoqueInicial; $('cadMinimo').value = item.estoqueMinimo;
+        $('msgCadastro').textContent = 'Edição habilitada.'; $('msgCadastro').className = 'status-msg';
+        window.scrollTo({top: 0, behavior: 'smooth'});
+    };
+
+    window.excluirCadastro = async function(codigo) {
+        if (!confirm(`ATENÇÃO! Você tem certeza que deseja excluir permanentemente o item ${codigo}? Isso também afetará o controle de estoque.`)) return;
+        
+        $('msgCadastro').textContent = 'Excluindo...'; $('msgCadastro').className = 'status-msg';
+        try {
+            const r = await srv('excluirCadastroItem', { codigo: padCode(codigo) });
+            $('msgCadastro').textContent = r.message; $('msgCadastro').className = 'status-msg ok';
+            toast(r.message);
+            await carregar(); 
+        } catch(err) {
+            $('msgCadastro').textContent = err.message; $('msgCadastro').className = 'status-msg erro';
+        }
+    };
+
+    $('limparCadastro').addEventListener('click', () => {
+        $('formCadastro').reset(); $('cadCodigo').readOnly = false;
+        $('cadInicial').value = '0'; $('cadMinimo').value = '0'; $('msgCadastro').textContent = '';
+    });
+
+    $('formCadastro').addEventListener('submit', async e => {
+        e.preventDefault();
+        $('salvarCadastro').disabled = true; $('msgCadastro').textContent = 'Enviando...'; $('msgCadastro').className = 'status-msg';
+        try {
+            const r = await srv('salvarCadastroItem', {
+                codigo: padCode($('cadCodigo').value), descricao: $('cadDescricao').value,
+                unidade: $('cadUnidade').value, categoria: $('cadCategoria').value, 
+                estoqueInicial: Number($('cadInicial').value), estoqueMinimo: Number($('cadMinimo').value)
+            });
+            $('msgCadastro').textContent = r.message; $('msgCadastro').className = 'status-msg ok';
+            toast(r.message); await carregar(); 
+        } catch(err) { $('msgCadastro').textContent = err.message; $('msgCadastro').className = 'status-msg erro'; } 
+        finally { $('salvarCadastro').disabled = false; }
+    });
+
+    // --- Submissão de Formulário (Movimentação) ---
+    $('formMov').addEventListener('submit', async e => {
+        e.preventDefault();
+        $('salvarMov').disabled = true; $('msgMov').textContent = 'Validando e enviando...'; $('msgMov').className = 'status-msg';
+        try {
+            const r = await srv('registrarMovimentacao', {
+                codigo: padCode($('movCodigo').value), descricao: $('movDescricao').value,
+                tipo: $('movTipo').value, quantidade: Number($('movQuantidade').value),
+                embarcacao: $('movEmbarcacao').value, requisitante: $('movRequisitante').value
+            });
+            $('msgMov').textContent = r.message; $('msgMov').className = 'status-msg ok';
+            toast(r.message);
+            
+            $('formMov').reset(); $('movSaldo').value = '';
+            $('movRequisitante').disabled = true; $('movRequisitante').required = false;
+            $('movEmbarcacao').disabled = true; $('movEmbarcacao').required = false;
+
+            await carregar(); 
+        } catch(err) { $('msgMov').textContent = err.message; $('msgMov').className = 'status-msg erro'; } 
+        finally { $('salvarMov').disabled = false; }
+    });
+
+    // --- Event Listeners Dinâmicos ---
+    $('buscaCadastro').addEventListener('input', renderCadastro);
+    $('buscaEstoque').addEventListener('input', renderEstoque);
+    $('filtroRelatorio').addEventListener('change', renderRelatorio);
+
+    carregar();
+</script>
 </body>
 </html>
