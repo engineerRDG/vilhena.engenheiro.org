@@ -29,7 +29,7 @@
         header { position: relative; background: var(--surface); border-bottom: 1px solid var(--border); padding: 2rem 1rem 1.5rem; text-align: center; }
         .logo { height: 50px; margin-bottom: 0.75rem; object-fit: contain; }
         .header-title { font-size: 1.35rem; font-weight: 700; margin: 0 0 0.2rem; }
-        .header-subtitle { font-size: 0.8rem; color: var(--muted); margin: 0 0 1.5rem; }
+        .header-subtitle { font-size: 0.8rem; color: var(--muted); margin: 0 0 1.5rem; text-transform: uppercase; letter-spacing: 0.05em; }
         
         .dropdown-wrapper { position: absolute; top: 1.5rem; right: 1.5rem; }
         .menu-icon-btn { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 0.4rem 0.6rem; font-size: 1.2rem; cursor: pointer; color: var(--text); transition: all 0.2s; }
@@ -62,7 +62,9 @@
         .form-label { font-size: 0.7rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
         .form-input { width: 100%; padding: 0.7rem; border: 1px solid var(--border); border-radius: 6px; font-family: inherit; font-size: 0.85rem; background: var(--surface); color: var(--text); transition: border-color 0.2s; }
         .form-input:focus { outline: none; border-color: var(--accent); }
-        .form-input:disabled { background: var(--bg); cursor: not-allowed; opacity: 0.7; }
+        .form-input:disabled, .form-input[readonly] { background: var(--bg); cursor: not-allowed; opacity: 0.7; }
+        
+        .uppercase-field { text-transform: uppercase; }
 
         .suggestions-box { position: absolute; top: 100%; left: 0; right: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; max-height: 180px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-top: 2px; }
         .sugg-item { padding: 0.6rem 0.8rem; font-size: 0.8rem; cursor: pointer; border-bottom: 1px solid var(--border); }
@@ -113,6 +115,7 @@
     <h1 class="header-title">Vilhena Serviços</h1>
     <p class="header-subtitle" id="appSubtitle">Almoxarifado</p>
 
+    <!-- Abas do Almoxarifado -->
     <div class="nav-buttons" id="almoxarifadoTabs">
         <button class="nav-btn active" data-target="estoque">Estoque</button>
         <button class="nav-btn" data-target="movimentacao">Movimentação</button>
@@ -128,7 +131,11 @@
 
 <main class="container">
     
+    <!-- ==============================================
+         SESSÕES ALMOXARIFADO 
+    =================================================== -->
     <div id="almoxarifado-content">
+        <!-- ABA: ESTOQUE -->
         <section id="estoque" class="section active">
             <h2 class="hd">
                 Estoque
@@ -157,6 +164,7 @@
             </div>
         </section>
 
+        <!-- ABA: MOVIMENTAÇÃO -->
         <section id="movimentacao" class="section">
             <h2 class="hd">Nova Movimentação</h2>
 
@@ -172,7 +180,7 @@
                     </div>
                     <div class="form-group" id="autocomplete-wrapper">
                         <label class="form-label" for="movDescricao">Descrição do Produto</label>
-                        <input class="form-input" id="movDescricao" autocomplete="off" placeholder="Digite para buscar nomes similares..." required>
+                        <input class="form-input uppercase-field" id="movDescricao" autocomplete="off" placeholder="Digite para buscar nomes similares..." required>
                         <div id="descSuggestions" class="suggestions-box hidden"></div>
                     </div>
                     <div class="form-group">
@@ -233,6 +241,7 @@
             </div>
         </section>
 
+        <!-- ABA: RELATÓRIO DE EMBARCAÇÃO -->
         <section id="relatorio" class="section">
             <h2 class="hd">
                 Relatório
@@ -263,19 +272,22 @@
             </div>
         </section>
 
+        <!-- ABA: CADASTRO -->
         <section id="cadastro" class="section">
             <h2 class="hd">Cadastro de materiais</h2>
 
             <form id="formCadastro" class="mb-2">
                 <div class="form-grid">
+                    <!-- INVERTIDO AQUI CONFORME O PEDIDO: DESCRIÇÃO NA ESQUERDA, CÓDIGO NA DIREITA -->
+                    <div class="form-group">
+                        <label class="form-label" for="cadDescricao">Descrição do item</label>
+                        <input class="form-input uppercase-field" id="cadDescricao" autocomplete="off" required>
+                    </div>
                     <div class="form-group">
                         <label class="form-label" for="cadCodigo">Código</label>
                         <input class="form-input" id="cadCodigo" autocomplete="off" required>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label" for="cadDescricao">Descrição do item</label>
-                        <input class="form-input" id="cadDescricao" autocomplete="off" required>
-                    </div>
+                    
                     <div class="form-group">
                         <label class="form-label" for="cadUnidade">Unidade de Medida</label>
                         <select class="form-input" id="cadUnidade" required><option value="">Carregando...</option></select>
@@ -323,6 +335,9 @@
         </section>
     </div>
 
+    <!-- ==============================================
+         SESSÃO ITEM CONTRATUAL 
+    =================================================== -->
     <section id="item-contratual" class="section">
         <h2 class="hd">Item Contratual</h2>
         
@@ -355,7 +370,7 @@
     // ============================================================================
     // ⚠️ COLOQUE SUA URL DO GOOGLE APPS SCRIPT DENTRO DAS ASPAS ABAIXO:
     // ============================================================================
-    const API_URL = 'https://script.google.com/macros/s/AKfycby1Kh6J4gSptjk-SBNG5brV9L_G0feK_IOLgFkwXsdnphbQjHSxCYf2ekrzd4xoUSxyUA/exec'; 
+    const API_URL = 'https://script.google.com/macros/s/AKfycbyfyPnTg0NMHViKUysT1VKg0mfmSiEnKUBdCfFkT9wkWF1MMqsRiiyX2pkXiy1SEzeSYw/exec'; 
     // ============================================================================
 
     // --- MENU PRINCIPAL (Top Right Dropdown) ---
@@ -380,7 +395,6 @@
             document.getElementById('syncStatus').style.display = 'flex';
             document.getElementById('almoxarifado-content').style.display = 'block';
             
-            // Ativa aba Estoque por padrão
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             document.querySelector('.nav-btn[data-target="estoque"]').classList.add('active');
             document.getElementById('estoque').classList.add('active');
@@ -443,12 +457,22 @@
         const el = document.createElement('div');
         el.className = 'toast'; el.textContent = mensagem;
         host.appendChild(el);
-        setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }, 3000);
+        setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }, 4000);
     }
 
     function setSync(estado, texto) {
         $('syncDot').className = 'sync-dot ' + estado;
         $('atualizacao').textContent = texto;
+    }
+
+    function sugerirProximoCodigo() {
+        if (!dados.itens || dados.itens.length === 0) return '01';
+        let max = 0;
+        dados.itens.forEach(i => {
+            let n = parseInt(i.codigo, 10);
+            if (!isNaN(n) && n > max) max = n;
+        });
+        return padCode(max + 1);
     }
 
     // --- API Almoxarifado ---
@@ -494,6 +518,12 @@
             popularSelect('cadCategoria', dados.listas.categorias, 'Selecione', $('cadCategoria').value);
             
             renderEstoque(); renderRelatorio(); renderMovimentos(); renderCadastro();
+
+            // Preenche o próximo código automaticamente caso o form de cadastro esteja livre (modo criação)
+            if (!$('cadCodigo').readOnly && $('cadCodigo').value === '') {
+                $('cadCodigo').value = sugerirProximoCodigo();
+            }
+
         } catch(e) { setSync('error', e.message); }
     }
 
@@ -544,10 +574,17 @@
         }
     });
 
+    // Forçar Letras Maiúsculas nos forms
+    $('cadDescricao').addEventListener('input', function() { this.value = this.value.toUpperCase(); });
+    $('movDescricao').addEventListener('input', function() { this.value = this.value.toUpperCase(); });
+
+
     // --- Renderização ---
     function renderEstoque() {
         const q = key($('buscaEstoque').value);
-        const lista = dados.estoque.filter(x => !q || key(x.codigo).includes(q) || key(x.descricao).includes(q));
+        // Filtrar e depois ORDENAR CRESCENTE pelo CÓDIGO
+        let lista = dados.estoque.filter(x => !q || key(x.codigo).includes(q) || key(x.descricao).includes(q));
+        lista.sort((a,b) => String(a.codigo).localeCompare(String(b.codigo), undefined, {numeric: true}));
         
         const emAlerta = dados.estoque.filter(x => x.saldo <= x.estoqueMinimo);
         if (emAlerta.length > 0) {
@@ -578,7 +615,7 @@
                 <td>${x.produto}</td>
                 <td>${x.requisitante}</td>
                 <td class="text-right bold">${fmt(x.quantidade)}</td>
-            </tr>`).join('') : '<tr><td colspan="5" class="text-center text-muted">Nenhum registro.</td></tr>';
+            </tr>`).join('') : '<tr><td colspan="5" class="text-center text-muted">Nenhum registro encontrado.</td></tr>';
     }
 
     function renderMovimentos() {
@@ -597,7 +634,10 @@
 
     function renderCadastro() {
         const q = key($('buscaCadastro').value);
-        const lista = dados.itens.filter(x => !q || key(x.codigo).includes(q) || key(x.descricao).includes(q));
+        // Filtrar e depois ORDENAR DECRESCENTE pelo CÓDIGO
+        let lista = dados.itens.filter(x => !q || key(x.codigo).includes(q) || key(x.descricao).includes(q));
+        lista.sort((a,b) => String(b.codigo).localeCompare(String(a.codigo), undefined, {numeric: true}));
+
         $('tabelaCadastro').innerHTML = lista.length ? lista.map(x => `
             <tr>
                 <td class="bold" style="font-family: monospace;">${x.codigo}</td>
@@ -616,7 +656,8 @@
     window.exportarEstoqueCSV = function() {
         let csv = '\uFEFFCódigo,Descrição,Quantidade,Unidade\n'; 
         const q = key($('buscaEstoque').value);
-        const lista = dados.estoque.filter(x => !q || key(x.codigo).includes(q) || key(x.descricao).includes(q));
+        let lista = dados.estoque.filter(x => !q || key(x.codigo).includes(q) || key(x.descricao).includes(q));
+        lista.sort((a,b) => String(a.codigo).localeCompare(String(b.codigo), undefined, {numeric: true}));
         lista.forEach(row => { csv += `"${row.codigo}","${row.descricao}","${row.saldo}","${row.unidade}"\n`; });
         baixarArquivo(csv, 'Estoque_Almoxarifado.csv');
     };
@@ -660,25 +701,53 @@
             const r = await srv('excluirCadastroItem', { codigo: padCode(codigo) });
             $('msgCadastro').textContent = r.message; $('msgCadastro').className = 'status-msg ok';
             toast(r.message); await carregar(); 
-        } catch(err) { $('msgCadastro').textContent = err.message; $('msgCadastro').className = 'status-msg erro'; }
+        } catch(err) {
+            $('msgCadastro').textContent = err.message; $('msgCadastro').className = 'status-msg erro';
+        }
     };
 
     $('limparCadastro').addEventListener('click', () => {
         $('formCadastro').reset(); $('cadCodigo').readOnly = false;
+        $('cadCodigo').value = sugerirProximoCodigo();
         $('cadInicial').value = '0'; $('cadMinimo').value = '0'; $('msgCadastro').textContent = '';
     });
 
     $('formCadastro').addEventListener('submit', async e => {
         e.preventDefault();
+        
+        // Bloqueio de duplicidade (Apenas se for cadastro novo)
+        const isEditing = $('cadCodigo').readOnly;
+        const tryCode = padCode($('cadCodigo').value);
+        const tryDesc = normalizeStr($('cadDescricao').value);
+        
+        if (!isEditing) {
+            const isDup = dados.itens.find(x => x.codigo === tryCode || normalizeStr(x.descricao) === tryDesc);
+            if (isDup) {
+                toast("Égua mano, olha direitinho isso aí, tem algum cadastro igual. Vê aí se tá tudo certinho.");
+                $('msgCadastro').textContent = "Erro: Já existe um item com esse Código ou Descrição.";
+                $('msgCadastro').className = 'status-msg erro';
+                return;
+            }
+        }
+
         $('salvarCadastro').disabled = true; $('msgCadastro').textContent = 'Enviando...'; $('msgCadastro').className = 'status-msg';
         try {
             const r = await srv('salvarCadastroItem', {
-                codigo: padCode($('cadCodigo').value), descricao: $('cadDescricao').value,
+                codigo: tryCode, descricao: $('cadDescricao').value, // Descrição já está sendo forçada Maiuscula via JS/CSS
                 unidade: $('cadUnidade').value, categoria: $('cadCategoria').value, 
                 estoqueInicial: Number($('cadInicial').value), estoqueMinimo: Number($('cadMinimo').value)
             });
             $('msgCadastro').textContent = r.message; $('msgCadastro').className = 'status-msg ok';
-            toast(r.message); await carregar(); 
+            toast(r.message); 
+            
+            await carregar(); 
+            
+            // Se foi sucesso e não era edição, limpa e sugere o próximo
+            if (!isEditing) {
+                $('formCadastro').reset();
+                $('cadCodigo').value = sugerirProximoCodigo();
+                $('cadInicial').value = '0'; $('cadMinimo').value = '0';
+            }
         } catch(err) { $('msgCadastro').textContent = err.message; $('msgCadastro').className = 'status-msg erro'; } 
         finally { $('salvarCadastro').disabled = false; }
     });
@@ -694,9 +763,11 @@
             });
             $('msgMov').textContent = r.message; $('msgMov').className = 'status-msg ok';
             toast(r.message);
+            
             $('formMov').reset(); $('movSaldo').value = '';
             $('movRequisitante').disabled = true; $('movRequisitante').required = false;
             $('movEmbarcacao').disabled = true; $('movEmbarcacao').required = false;
+
             await carregar(); 
         } catch(err) { $('msgMov').textContent = err.message; $('msgMov').className = 'status-msg erro'; } 
         finally { $('salvarMov').disabled = false; }
@@ -744,10 +815,10 @@
     $('searchItemContratual').addEventListener('input', function() { renderItensContrato(this.value); });
     
     function copyText(el) {
-        navigator.clipboard.writeText(el.innerText).then(() => toast('Copiado!'));
+        navigator.clipboard.writeText(el.innerText).then(() => toast('Copiado para a área de transferência!'));
     }
 
-    // Inicia Almoxarifado
+    // Inicia Almoxarifado e pré-carrega o código novo caso seja a página de cadastro inicial
     carregar();
 </script>
 </body>
