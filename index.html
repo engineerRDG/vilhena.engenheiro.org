@@ -52,7 +52,6 @@
         .section.active { display: block; }
         .hd { font-size: 1.25rem; font-weight: 700; margin-bottom: 1.5rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
 
-        /* Forms */
         .form-grid { display: grid; gap: 1rem; grid-template-columns: 1fr; }
         @media (min-width: 600px) { .form-grid { grid-template-columns: 1fr 1fr; } }
         .full-span { grid-column: 1 / -1; }
@@ -60,7 +59,7 @@
         .form-label { font-size: 0.7rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
         .form-input { width: 100%; padding: 0.7rem; border: 1px solid var(--border); border-radius: 6px; font-family: inherit; font-size: 0.85rem; background: var(--surface); color: var(--text); transition: border-color 0.2s; }
         .form-input:focus { outline: none; border-color: var(--accent); }
-        .form-input:disabled, .form-input[readonly] { background: var(--bg); cursor: not-allowed; opacity: 0.7; }
+        .form-input:disabled { background: var(--bg); cursor: not-allowed; opacity: 0.7; }
         .uppercase-field { text-transform: uppercase; }
 
         .suggestions-box { position: absolute; top: 100%; left: 0; right: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; max-height: 180px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-top: 2px; }
@@ -74,13 +73,12 @@
         .btn-primary:hover:not(:disabled) { opacity: 0.9; }
         .btn-danger { background: var(--danger); color: white; border-color: var(--danger); }
         .btn-danger:hover { background: #b91c1c; }
+        .btn-info { background: var(--info); color: white; border-color: var(--info); }
+        .btn-info:hover { background: #1d4ed8; }
         .btn:disabled { opacity: 0.6; cursor: not-allowed; }
         .btn-export { background: var(--success); color: white; border-color: var(--success); }
         .btn-export:hover { background: #15803d; }
-        .btn-info { background: var(--info); color: white; border-color: var(--info); padding: 0.3rem 0.6rem; font-size: 0.65rem;}
-        .btn-info:hover { background: #1d4ed8; }
 
-        /* Tables & Alerts */
         .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); margin-bottom: 1rem; }
         table { width: 100%; border-collapse: collapse; min-width: 600px; font-size: 0.8rem; }
         th, td { padding: 0.85rem 1rem; text-align: left; border-bottom: 1px solid var(--border); }
@@ -192,7 +190,6 @@
                             <option value="ENTRADA">Entrada</option>
                             <option value="USO INTERNO">Uso Interno</option>
                             <option value="SAIDA">Saída</option>
-                            <!-- Nova opção de Retorno Adicionada -->
                             <option value="RETORNO">Retorno</option>
                         </select>
                     </div>
@@ -236,6 +233,7 @@
                         <option value="ENTRADA">Entradas</option>
                         <option value="SAIDA">Saídas</option>
                         <option value="USO INTERNO">Uso Interno</option>
+                        <option value="RETORNO">Retornos</option>
                     </select>
                     <button class="btn btn-sm btn-export" onclick="exportarHistoricoCSV()">⬇️ Exportar</button>
                 </div>
@@ -244,9 +242,7 @@
             <div class="table-wrap">
                 <table>
                     <thead>
-                        <tr>
-                            <th>Data</th><th>Tipo</th><th>Cód.</th><th>Descrição</th><th class="text-right">Qtd.</th><th class="text-center">Ações</th>
-                        </tr>
+                        <tr><th>Data</th><th>Tipo</th><th>Cód.</th><th>Descrição</th><th class="text-right">Qtd.</th><th class="text-center">Ações</th></tr>
                     </thead>
                     <tbody id="movimentos">
                         <tr><td colspan="6" class="text-center text-muted">Aguardando sincronização...</td></tr>
@@ -373,78 +369,10 @@
     // ============================================================================
     // ⚠️ COLOQUE SUA NOVA URL DO GOOGLE APPS SCRIPT DENTRO DAS ASPAS ABAIXO:
     // ============================================================================
-    const API_URL = 'https://script.google.com/macros/s/AKfycbyRUq8DhwRES-APmBeISs3g3Bha0ABe4GK8wLDkWptVtxv9PRfPZUEO2z4odyVTCJ3d_w/exec'; 
+    const API_URL = 'https://script.google.com/macros/s/AKfycbw529ZY2Gxilbvw3X2fZ-mYn6qZ3DHNq7PpektwCUUVBMdyUxocdEWHkdriFo3exUJkcw/exec'; 
     // ============================================================================
 
-    // --- MENU PRINCIPAL ---
-    document.getElementById('mainMenuBtn').addEventListener('click', (e) => {
-        e.stopPropagation();
-        document.getElementById('mainMenuDropdown').classList.toggle('hidden');
-    });
-
-    document.addEventListener('click', (e) => {
-        if(!e.target.closest('.dropdown-wrapper')) document.getElementById('mainMenuDropdown').classList.add('hidden');
-    });
-
-    function switchAppMode(mode) {
-        document.getElementById('mainMenuDropdown').classList.add('hidden');
-        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-        
-        if (mode === 'almoxarifado') {
-            document.getElementById('appSubtitle').textContent = 'Almoxarifado';
-            document.getElementById('almoxarifadoTabs').style.display = 'flex';
-            document.getElementById('syncStatus').style.display = 'flex';
-            document.getElementById('almoxarifado-content').style.display = 'block';
-            
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.querySelector('.nav-btn[data-target="estoque"]').classList.add('active');
-            document.getElementById('estoque').classList.add('active');
-        } else if (mode === 'atividades') {
-            document.getElementById('appSubtitle').textContent = 'Atividades Diárias';
-            document.getElementById('almoxarifadoTabs').style.display = 'none';
-            document.getElementById('syncStatus').style.display = 'none';
-            document.getElementById('almoxarifado-content').style.display = 'none';
-            document.getElementById('atividades').classList.add('active');
-            renderAtividades();
-        } else if (mode === 'item') {
-            document.getElementById('appSubtitle').textContent = 'Item Contratual';
-            document.getElementById('almoxarifadoTabs').style.display = 'none';
-            document.getElementById('syncStatus').style.display = 'none';
-            document.getElementById('almoxarifado-content').style.display = 'none';
-            document.getElementById('item-contratual').classList.add('active');
-            if (itensContratoData.length === 0) initItensContrato();
-        }
-    }
-
-    // --- Abas Almoxarifado ---
-    document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('almoxarifado-content').querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            btn.classList.add('active');
-            document.getElementById(btn.dataset.target).classList.add('active');
-            window.scrollTo({top: 0, behavior: 'smooth'});
-        });
-    });
-
-    // --- Regras de Movimentação (Incluso o "Retorno" agora desativando embarcação/requisitante) ---
-    document.getElementById('movTipo').addEventListener('change', function() {
-        const reqInput = document.getElementById('movRequisitante');
-        const embInput = document.getElementById('movEmbarcacao');
-        
-        // Entrada e Retorno não precisam de Embarcação ou Requisitante para voltar ao estoque
-        if (this.value === 'ENTRADA' || this.value === 'RETORNO') {
-            reqInput.disabled = true; reqInput.required = false; reqInput.value = "";
-            embInput.disabled = true; embInput.required = false; embInput.value = "";
-        } else if (this.value === 'USO INTERNO') {
-            reqInput.disabled = false; reqInput.required = true;
-            embInput.disabled = true; embInput.required = false; embInput.value = "";
-        } else {
-            reqInput.disabled = false; reqInput.required = true;
-            embInput.disabled = false; embInput.required = true;
-        }
-    });
-
+    // --- Helpers de Elementos e Eventos ---
     const $ = id => document.getElementById(id);
     const fmt = v => Number(v || 0).toLocaleString('pt-BR', { maximumFractionDigits: 3 });
     const key = v => String(v ?? '').trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase();
@@ -460,7 +388,8 @@
     }
 
     function setSync(estado, texto) {
-        $('syncDot').className = 'sync-dot ' + estado; $('atualizacao').textContent = texto;
+        if($('syncDot')) $('syncDot').className = 'sync-dot ' + estado; 
+        if($('atualizacao')) $('atualizacao').textContent = texto;
     }
 
     function sugerirProximoCodigo() {
@@ -468,6 +397,80 @@
         let max = 0;
         dados.itens.forEach(i => { let n = parseInt(i.codigo, 10); if (!isNaN(n) && n > max) max = n; });
         return padCode(max + 1);
+    }
+
+    // --- MENU PRINCIPAL ---
+    if($('mainMenuBtn')) {
+        $('mainMenuBtn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            $('mainMenuDropdown').classList.toggle('hidden');
+        });
+    }
+
+    document.addEventListener('click', (e) => {
+        if(!e.target.closest('.dropdown-wrapper') && $('mainMenuDropdown')) $('mainMenuDropdown').classList.add('hidden');
+        if(!e.target.closest('#autocomplete-wrapper') && $('descSuggestions')) $('descSuggestions').classList.add('hidden');
+    });
+
+    function switchAppMode(mode) {
+        if($('mainMenuDropdown')) $('mainMenuDropdown').classList.add('hidden');
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        
+        if (mode === 'almoxarifado') {
+            if($('appSubtitle')) $('appSubtitle').textContent = 'Almoxarifado';
+            if($('almoxarifadoTabs')) $('almoxarifadoTabs').style.display = 'flex';
+            if($('syncStatus')) $('syncStatus').style.display = 'flex';
+            if($('almoxarifado-content')) $('almoxarifado-content').style.display = 'block';
+            
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            const btnEstoque = document.querySelector('.nav-btn[data-target="estoque"]');
+            if(btnEstoque) btnEstoque.classList.add('active');
+            if($('estoque')) $('estoque').classList.add('active');
+        } else if (mode === 'atividades') {
+            if($('appSubtitle')) $('appSubtitle').textContent = 'Atividades Diárias';
+            if($('almoxarifadoTabs')) $('almoxarifadoTabs').style.display = 'none';
+            if($('syncStatus')) $('syncStatus').style.display = 'none';
+            if($('almoxarifado-content')) $('almoxarifado-content').style.display = 'none';
+            if($('atividades')) $('atividades').classList.add('active');
+            renderAtividades();
+        } else if (mode === 'item') {
+            if($('appSubtitle')) $('appSubtitle').textContent = 'Item Contratual';
+            if($('almoxarifadoTabs')) $('almoxarifadoTabs').style.display = 'none';
+            if($('syncStatus')) $('syncStatus').style.display = 'none';
+            if($('almoxarifado-content')) $('almoxarifado-content').style.display = 'none';
+            if($('item-contratual')) $('item-contratual').classList.add('active');
+            if (itensContratoData.length === 0) initItensContrato();
+        }
+    }
+
+    // --- Abas Almoxarifado ---
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            if($('almoxarifado-content')) $('almoxarifado-content').querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            btn.classList.add('active');
+            const targetSec = $(btn.dataset.target);
+            if(targetSec) targetSec.classList.add('active');
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        });
+    });
+
+    if($('movTipo')) {
+        $('movTipo').addEventListener('change', function() {
+            const reqInput = $('movRequisitante');
+            const embInput = $('movEmbarcacao');
+            
+            if (this.value === 'ENTRADA' || this.value === 'RETORNO') {
+                if(reqInput) { reqInput.disabled = true; reqInput.required = false; reqInput.value = ""; }
+                if(embInput) { embInput.disabled = true; embInput.required = false; embInput.value = ""; }
+            } else if (this.value === 'USO INTERNO') {
+                if(reqInput) { reqInput.disabled = false; reqInput.required = true; }
+                if(embInput) { embInput.disabled = true; embInput.required = false; embInput.value = ""; }
+            } else {
+                if(reqInput) { reqInput.disabled = false; reqInput.required = true; }
+                if(embInput) { embInput.disabled = false; embInput.required = true; }
+            }
+        });
     }
 
     // --- API ---
@@ -501,72 +504,74 @@
             };
             setSync('ok', 'Atualizado às ' + (resp.atualizadoEm || ''));
             
-            popularSelect('movEmbarcacao', dados.listas.embarcacoes, 'Selecione', $('movEmbarcacao').value);
-            popularSelect('movRequisitante', dados.listas.requisitantes, 'Selecione', $('movRequisitante').value);
-            popularSelect('filtroRelatorio', dados.listas.embarcacoes, 'Todas', $('filtroRelatorio').value);
-            popularSelect('cadUnidade', dados.listas.unidades, 'Selecione', $('cadUnidade').value);
-            popularSelect('cadCategoria', dados.listas.categorias, 'Selecione', $('cadCategoria').value);
+            popularSelect('movEmbarcacao', dados.listas.embarcacoes, 'Selecione', $('movEmbarcacao') ? $('movEmbarcacao').value : '');
+            popularSelect('movRequisitante', dados.listas.requisitantes, 'Selecione', $('movRequisitante') ? $('movRequisitante').value : '');
+            popularSelect('filtroRelatorio', dados.listas.embarcacoes, 'Todas as Embarcações (Geral)', $('filtroRelatorio') ? $('filtroRelatorio').value : '');
+            popularSelect('cadUnidade', dados.listas.unidades, 'Selecione', $('cadUnidade') ? $('cadUnidade').value : '');
+            popularSelect('cadCategoria', dados.listas.categorias, 'Selecione', $('cadCategoria') ? $('cadCategoria').value : '');
             
             renderEstoque(); renderRelatorio(); renderMovimentos(); renderCadastro();
-            if (!$('cadCodigo').readOnly && $('cadCodigo').value === '') $('cadCodigo').value = sugerirProximoCodigo();
-            renderAtividades();
+            if ($('cadCodigo') && !$('cadCodigo').readOnly && $('cadCodigo').value === '') $('cadCodigo').value = sugerirProximoCodigo();
         } catch(e) { setSync('error', e.message); }
     }
 
     function popularSelect(id, lista, placeholder, valorAtual) {
+        if(!$(id)) return;
         $(id).innerHTML = `<option value="">${placeholder}</option>` + (lista || []).map(v => `<option value="${v}">${v}</option>`).join('');
         if (lista.includes(valorAtual)) $(id).value = valorAtual;
     }
 
     // --- Autocomplete ---
-    $('movDescricao').addEventListener('input', function() {
-        const val = normalizeStr(this.value); const suggBox = $('descSuggestions');
-        if (val.length < 2) { suggBox.classList.add('hidden'); return; }
-        
-        const matches = dados.itens.filter(i => normalizeStr(i.descricao).includes(val) || normalizeStr(i.codigo).includes(val));
-        if (matches.length > 0) {
-            suggBox.innerHTML = matches.map(m => `<div class="sugg-item" onclick="selecionarItemBusca('${m.codigo}')"><b>${m.codigo}</b> - ${m.descricao}</div>`).join('');
-            suggBox.classList.remove('hidden');
-        } else { suggBox.classList.add('hidden'); }
-    });
-
-    document.addEventListener('click', (e) => {
-        if (!e.target.closest('#autocomplete-wrapper')) $('descSuggestions').classList.add('hidden');
-    });
+    if($('movDescricao')) {
+        $('movDescricao').addEventListener('input', function() {
+            const val = normalizeStr(this.value); const suggBox = $('descSuggestions');
+            if (val.length < 2) { if(suggBox) suggBox.classList.add('hidden'); return; }
+            
+            const matches = dados.itens.filter(i => normalizeStr(i.descricao).includes(val) || normalizeStr(i.codigo).includes(val));
+            if (matches.length > 0 && suggBox) {
+                suggBox.innerHTML = matches.map(m => `<div class="sugg-item" onclick="selecionarItemBusca('${m.codigo}')"><b>${m.codigo}</b> - ${m.descricao}</div>`).join('');
+                suggBox.classList.remove('hidden');
+            } else if (suggBox) { suggBox.classList.add('hidden'); }
+        });
+    }
 
     window.selecionarItemBusca = function(codigo) {
         const item = dados.itens.find(x => x.codigo === codigo);
         if (item) {
-            $('movCodigo').value = item.codigo; $('movDescricao').value = item.descricao;
+            if($('movCodigo')) $('movCodigo').value = item.codigo; 
+            if($('movDescricao')) $('movDescricao').value = item.descricao;
             const est = dados.estoque.find(x => x.codigo === codigo);
-            $('movSaldo').value = est ? `${fmt(est.saldo)} ${est.unidade}` : '';
-            $('descSuggestions').classList.add('hidden');
+            if($('movSaldo')) $('movSaldo').value = est ? `${fmt(est.saldo)} ${est.unidade}` : '';
+            if($('descSuggestions')) $('descSuggestions').classList.add('hidden');
         }
     };
 
-    $('movCodigo').addEventListener('input', function() {
-        let code = padCode(this.value); const item = dados.itens.find(x => x.codigo === code);
-        if (item) {
-            $('movDescricao').value = item.descricao;
-            const est = dados.estoque.find(x => x.codigo === code);
-            $('movSaldo').value = est ? `${fmt(est.saldo)} ${est.unidade}` : '';
-        } else { $('movSaldo').value = ''; }
-    });
+    if($('movCodigo')) {
+        $('movCodigo').addEventListener('input', function() {
+            let code = padCode(this.value); const item = dados.itens.find(x => x.codigo === code);
+            if (item) {
+                if($('movDescricao')) $('movDescricao').value = item.descricao;
+                const est = dados.estoque.find(x => x.codigo === code);
+                if($('movSaldo')) $('movSaldo').value = est ? `${fmt(est.saldo)} ${est.unidade}` : '';
+            } else { if($('movSaldo')) $('movSaldo').value = ''; }
+        });
+    }
 
-    $('cadDescricao').addEventListener('input', function() { this.value = this.value.toUpperCase(); });
-    $('movDescricao').addEventListener('input', function() { this.value = this.value.toUpperCase(); });
+    if($('cadDescricao')) $('cadDescricao').addEventListener('input', function() { this.value = this.value.toUpperCase(); });
+    if($('movDescricao')) $('movDescricao').addEventListener('input', function() { this.value = this.value.toUpperCase(); });
 
     // --- Renderização do Almoxarifado ---
     function renderEstoque() {
-        const q = key($('buscaEstoque').value);
+        if(!$('tabelaEstoque')) return;
+        const q = key($('buscaEstoque') ? $('buscaEstoque').value : '');
         let lista = dados.estoque.filter(x => !q || key(x.codigo).includes(q) || key(x.descricao).includes(q));
         lista.sort((a,b) => String(a.codigo).localeCompare(String(b.codigo), undefined, {numeric: true}));
         
         const emAlerta = dados.estoque.filter(x => x.saldo <= x.estoqueMinimo);
-        if (emAlerta.length > 0) {
+        if (emAlerta.length > 0 && $('avisoEstoque')) {
             let nomesAlerta = emAlerta.map(i => `<b>${i.codigo}</b> (${i.descricao})`).join(', ');
             $('avisoEstoque').innerHTML = `<div style="background:var(--danger);color:#fff;padding:0.8rem;border-radius:6px;margin-bottom:1rem;text-align:center;font-size:0.8rem;">⚠️ <b>ATENÇÃO:</b> ${emAlerta.length} item(ns) estão zerados ou em estoque mínimo. <br>${nomesAlerta}</div>`;
-        } else { $('avisoEstoque').innerHTML = ''; }
+        } else if($('avisoEstoque')) { $('avisoEstoque').innerHTML = ''; }
 
         $('tabelaEstoque').innerHTML = lista.length ? lista.map(x => {
             let classRow = (x.saldo <= x.estoqueMinimo) ? 'row-danger' : '';
@@ -575,57 +580,40 @@
     }
 
     function renderRelatorio() {
-        const filtro = $('filtroRelatorio').value;
+        if(!$('tabelaRelatorio')) return;
+        const filtro = $('filtroRelatorio') ? $('filtroRelatorio').value : '';
         const lista = filtro ? dados.relatorio.filter(x => x.embarcacao === filtro) : dados.relatorio;
         $('tabelaRelatorio').innerHTML = lista.length ? lista.map(x => `<tr><td class="text-muted" style="white-space:nowrap;">${x.data}</td><td class="bold">${x.embarcacao}</td><td>${x.produto}</td><td>${x.requisitante}</td><td class="text-right bold">${fmt(x.quantidade)}</td></tr>`).join('') : '<tr><td colspan="5" class="text-center text-muted">Nenhum registro encontrado nos últimos 3 meses.</td></tr>';
     }
 
     function renderMovimentos() {
-        const filtro = $('filtroHistorico').value;
+        if(!$('movimentos')) return;
+        const filtro = $('filtroHistorico') ? $('filtroHistorico').value : '';
         const lista = filtro ? dados.ultimas.filter(x => x.tipo === filtro) : dados.ultimas;
         
         $('movimentos').innerHTML = lista.length ? lista.map(x => {
-            let acaoHTML = '';
-            // Se for SAÍDA, adiciona o botão de retorno que interage com a linha exata e abate
-            if (x.tipo === 'SAIDA') {
-                acaoHTML = `<button class="btn btn-sm btn-info" onclick="retornarParcial(${x.linha}, ${x.quantidade}, '${x.codigo}')">Retornar</button>`;
-            }
-            return `<tr>
-                <td class="text-muted">${x.data}</td>
-                <td class="bold" style="color: ${x.tipo === 'ENTRADA' || x.tipo === 'RETORNO' ? 'var(--success)' : (x.tipo === 'USO INTERNO' ? 'var(--info)' : 'var(--danger)')}">${x.tipo}</td>
-                <td class="bold" style="font-family: monospace;">${x.codigo}</td>
-                <td>${x.descricao}</td>
-                <td class="text-right">${fmt(x.quantidade)}</td>
-                <td class="text-center">${acaoHTML}</td>
-            </tr>`;
+            let btnRetorno = x.tipo === 'SAIDA' ? `<button class="btn btn-sm btn-info" onclick="retornarParcial(${x.linha}, ${x.quantidade}, '${x.codigo}')">Retornar</button>` : '';
+            return `<tr><td class="text-muted">${x.data}</td><td class="bold" style="color: ${x.tipo === 'ENTRADA'||x.tipo === 'RETORNO' ? 'var(--success)' : (x.tipo === 'USO INTERNO' ? 'var(--info)' : 'var(--danger)')}">${x.tipo}</td><td class="bold" style="font-family: monospace;">${x.codigo}</td><td>${x.descricao}</td><td class="text-right">${fmt(x.quantidade)}</td><td class="text-center">${btnRetorno}</td></tr>`;
         }).join('') : '<tr><td colspan="6" class="text-center text-muted">Nenhuma movimentação neste mês.</td></tr>';
     }
 
-    // --- Nova Função: Retorno a partir da linha de Histórico ---
     window.retornarParcial = async function(linha, qtdAtual, codigo) {
         let qtdRetornoStr = prompt(`Quantos itens você quer retornar do código ${codigo} para o almoxarifado? (Máximo de ${qtdAtual}):`);
         if (!qtdRetornoStr) return;
-        
         let qtdRetorno = parseFloat(qtdRetornoStr.replace(',', '.'));
-        if (isNaN(qtdRetorno) || qtdRetorno <= 0) {
-            toast("Quantidade inválida."); return;
-        }
-        if (qtdRetorno > qtdAtual) {
-            toast("A quantidade não pode ser maior que a saída original (" + qtdAtual + ")."); return;
-        }
+        if (isNaN(qtdRetorno) || qtdRetorno <= 0) { toast("Quantidade inválida."); return; }
+        if (qtdRetorno > qtdAtual) { toast("Não é possível retornar mais do que saiu (" + qtdAtual + ")."); return; }
 
-        $('msgMov').textContent = 'Processando retorno...'; $('msgMov').className = 'status-msg';
+        toast('Processando...');
         try {
             const r = await srv('registrarRetornoParcial', { linha: linha, qtd: qtdRetorno });
-            toast(r.message);
-            await carregar();
-        } catch (err) {
-            toast("Erro: " + err.message);
-        }
+            toast(r.message); await carregar();
+        } catch (err) { toast("Erro: " + err.message); }
     };
 
     function renderCadastro() {
-        const q = key($('buscaCadastro').value);
+        if(!$('tabelaCadastro')) return;
+        const q = key($('buscaCadastro') ? $('buscaCadastro').value : '');
         let lista = dados.itens.filter(x => !q || key(x.codigo).includes(q) || key(x.descricao).includes(q));
         lista.sort((a,b) => String(b.codigo).localeCompare(String(a.codigo), undefined, {numeric: true}));
 
@@ -634,7 +622,7 @@
 
     window.exportarEstoqueCSV = function() {
         let csv = '\uFEFFCódigo,Descrição,Quantidade,Unidade\n'; 
-        const q = key($('buscaEstoque').value);
+        const q = key($('buscaEstoque') ? $('buscaEstoque').value : '');
         let lista = dados.estoque.filter(x => !q || key(x.codigo).includes(q) || key(x.descricao).includes(q));
         lista.sort((a,b) => String(a.codigo).localeCompare(String(b.codigo), undefined, {numeric: true}));
         lista.forEach(row => { csv += `"${row.codigo}","${row.descricao}","${row.saldo}","${row.unidade}"\n`; });
@@ -643,7 +631,7 @@
 
     window.exportarHistoricoCSV = function() {
         let csv = '\uFEFFData,Tipo,Código,Descrição,Quantidade,Requisitante\n'; 
-        const filtro = $('filtroHistorico').value;
+        const filtro = $('filtroHistorico') ? $('filtroHistorico').value : '';
         const lista = filtro ? dados.ultimas.filter(x => x.tipo === filtro) : dados.ultimas;
         lista.forEach(row => { csv += `"${row.data}","${row.tipo}","${row.codigo}","${row.descricao}","${row.quantidade}","${row.requisitante || ''}"\n`; });
         baixarArquivo(csv, 'Historico_Movimentacao_Mes.csv');
@@ -651,7 +639,7 @@
 
     window.exportarRelatorioCSV = function() {
         let csv = '\uFEFFData,Embarcação,Produto,Requisitante,Quantidade\n'; 
-        const filtro = $('filtroRelatorio').value;
+        const filtro = $('filtroRelatorio') ? $('filtroRelatorio').value : '';
         const lista = filtro ? dados.relatorio.filter(x => x.embarcacao === filtro) : dados.relatorio;
         lista.forEach(row => { csv += `"${row.data}","${row.embarcacao}","${row.produto}","${row.requisitante}","${row.quantidade}"\n`; });
         baixarArquivo(csv, 'Relatorio_Embarcacoes.csv');
@@ -667,7 +655,7 @@
     function renderAtividades() {
         if(!$('#calendarGrid')) return;
         const year = dataCalendario.getFullYear(); const month = dataCalendario.getMonth();
-        $('#calMonthYear').textContent = dataCalendario.toLocaleDateString('pt-BR', {month: 'long', year: 'numeric'}).toUpperCase();
+        if($('#calMonthYear')) $('#calMonthYear').textContent = dataCalendario.toLocaleDateString('pt-BR', {month: 'long', year: 'numeric'}).toUpperCase();
         
         const days = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
         let html = days.map(d => `<div class="calendar-day-name">${d}</div>`).join('');
@@ -728,8 +716,8 @@
         $('#calendarGrid').innerHTML = html;
     }
     
-    $('#prevMonth').addEventListener('click', () => { dataCalendario.setMonth(dataCalendario.getMonth()-1); renderAtividades(); });
-    $('#nextMonth').addEventListener('click', () => { dataCalendario.setMonth(dataCalendario.getMonth()+1); renderAtividades(); });
+    if($('#prevMonth')) $('#prevMonth').addEventListener('click', () => { dataCalendario.setMonth(dataCalendario.getMonth()-1); renderAtividades(); });
+    if($('#nextMonth')) $('#nextMonth').addEventListener('click', () => { dataCalendario.setMonth(dataCalendario.getMonth()+1); renderAtividades(); });
 
     // --- Cadastros (Editar/Excluir) ---
     window.editarCadastro = function(codigo) {
@@ -752,72 +740,78 @@
         } catch(err) { $('msgCadastro').textContent = err.message; $('msgCadastro').className = 'status-msg erro'; }
     };
 
-    $('limparCadastro').addEventListener('click', () => {
-        $('formCadastro').reset(); $('cadCodigo').readOnly = false;
-        $('cadCodigo').value = sugerirProximoCodigo();
-        $('cadInicial').value = '0'; $('cadMinimo').value = '0'; $('msgCadastro').textContent = '';
-    });
+    if($('limparCadastro')) {
+        $('limparCadastro').addEventListener('click', () => {
+            $('formCadastro').reset(); $('cadCodigo').readOnly = false;
+            $('cadCodigo').value = sugerirProximoCodigo();
+            $('cadInicial').value = '0'; $('cadMinimo').value = '0'; $('msgCadastro').textContent = '';
+        });
+    }
 
-    $('formCadastro').addEventListener('submit', async e => {
-        e.preventDefault();
-        const isEditing = $('cadCodigo').readOnly;
-        const tryCode = padCode($('cadCodigo').value);
-        const tryDesc = normalizeStr($('cadDescricao').value);
-        
-        if (!isEditing) {
-            const isDup = dados.itens.find(x => x.codigo === tryCode || normalizeStr(x.descricao) === tryDesc);
-            if (isDup) {
-                toast("Égua mano, olha direitinho isso aí, tem algum cadastro igual. Vê aí se tá tudo certinho.");
-                $('msgCadastro').textContent = "Erro: Já existe um item com esse Código ou Descrição.";
-                $('msgCadastro').className = 'status-msg erro';
-                return;
-            }
-        }
-
-        $('salvarCadastro').disabled = true; $('msgCadastro').textContent = 'Enviando...'; $('msgCadastro').className = 'status-msg';
-        try {
-            const r = await srv('salvarCadastroItem', {
-                codigo: tryCode, descricao: $('cadDescricao').value,
-                unidade: $('cadUnidade').value, categoria: $('cadCategoria').value, 
-                estoqueInicial: Number($('cadInicial').value), estoqueMinimo: Number($('cadMinimo').value)
-            });
-            $('msgCadastro').textContent = r.message; $('msgCadastro').className = 'status-msg ok';
-            toast(r.message); 
-            await carregar(); 
-            if (!isEditing) {
-                $('formCadastro').reset();
-                $('cadCodigo').value = sugerirProximoCodigo();
-                $('cadInicial').value = '0'; $('cadMinimo').value = '0';
-            }
-        } catch(err) { $('msgCadastro').textContent = err.message; $('msgCadastro').className = 'status-msg erro'; } 
-        finally { $('salvarCadastro').disabled = false; }
-    });
-
-    $('formMov').addEventListener('submit', async e => {
-        e.preventDefault();
-        $('salvarMov').disabled = true; $('msgMov').textContent = 'Enviando...'; $('msgMov').className = 'status-msg';
-        try {
-            const r = await srv('registrarMovimentacao', {
-                codigo: padCode($('movCodigo').value), descricao: $('movDescricao').value,
-                tipo: $('movTipo').value, quantidade: Number($('movQuantidade').value),
-                embarcacao: $('movEmbarcacao').value, requisitante: $('movRequisitante').value
-            });
-            $('msgMov').textContent = r.message; $('msgMov').className = 'status-msg ok';
-            toast(r.message);
+    if($('formCadastro')) {
+        $('formCadastro').addEventListener('submit', async e => {
+            e.preventDefault();
+            const isEditing = $('cadCodigo').readOnly;
+            const tryCode = padCode($('cadCodigo').value);
+            const tryDesc = normalizeStr($('cadDescricao').value);
             
-            $('formMov').reset(); $('movSaldo').value = '';
-            $('movRequisitante').disabled = true; $('movRequisitante').required = false;
-            $('movEmbarcacao').disabled = true; $('movEmbarcacao').required = false;
+            if (!isEditing) {
+                const isDup = dados.itens.find(x => x.codigo === tryCode || normalizeStr(x.descricao) === tryDesc);
+                if (isDup) {
+                    toast("Égua mano, olha direitinho isso aí, tem algum cadastro igual. Vê aí se tá tudo certinho.");
+                    $('msgCadastro').textContent = "Erro: Já existe um item com esse Código ou Descrição.";
+                    $('msgCadastro').className = 'status-msg erro';
+                    return;
+                }
+            }
 
-            await carregar(); 
-        } catch(err) { $('msgMov').textContent = err.message; $('msgMov').className = 'status-msg erro'; } 
-        finally { $('salvarMov').disabled = false; }
-    });
+            $('salvarCadastro').disabled = true; $('msgCadastro').textContent = 'Enviando...'; $('msgCadastro').className = 'status-msg';
+            try {
+                const r = await srv('salvarCadastroItem', {
+                    codigo: tryCode, descricao: $('cadDescricao').value,
+                    unidade: $('cadUnidade').value, categoria: $('cadCategoria').value, 
+                    estoqueInicial: Number($('cadInicial').value), estoqueMinimo: Number($('cadMinimo').value)
+                });
+                $('msgCadastro').textContent = r.message; $('msgCadastro').className = 'status-msg ok';
+                toast(r.message); 
+                await carregar(); 
+                if (!isEditing) {
+                    $('formCadastro').reset();
+                    $('cadCodigo').value = sugerirProximoCodigo();
+                    $('cadInicial').value = '0'; $('cadMinimo').value = '0';
+                }
+            } catch(err) { $('msgCadastro').textContent = err.message; $('msgCadastro').className = 'status-msg erro'; } 
+            finally { $('salvarCadastro').disabled = false; }
+        });
+    }
 
-    $('filtroHistorico').addEventListener('change', renderMovimentos);
-    $('buscaCadastro').addEventListener('input', renderCadastro);
-    $('buscaEstoque').addEventListener('input', renderEstoque);
-    $('filtroRelatorio').addEventListener('change', renderRelatorio);
+    if($('formMov')) {
+        $('formMov').addEventListener('submit', async e => {
+            e.preventDefault();
+            $('salvarMov').disabled = true; $('msgMov').textContent = 'Enviando...'; $('msgMov').className = 'status-msg';
+            try {
+                const r = await srv('registrarMovimentacao', {
+                    codigo: padCode($('movCodigo').value), descricao: $('movDescricao').value,
+                    tipo: $('movTipo').value, quantidade: Number($('movQuantidade').value),
+                    embarcacao: $('movEmbarcacao').value, requisitante: $('movRequisitante').value
+                });
+                $('msgMov').textContent = r.message; $('msgMov').className = 'status-msg ok';
+                toast(r.message);
+                
+                $('formMov').reset(); $('movSaldo').value = '';
+                $('movRequisitante').disabled = true; $('movRequisitante').required = false;
+                $('movEmbarcacao').disabled = true; $('movEmbarcacao').required = false;
+
+                await carregar(); 
+            } catch(err) { $('msgMov').textContent = err.message; $('msgMov').className = 'status-msg erro'; } 
+            finally { $('salvarMov').disabled = false; }
+        });
+    }
+
+    if($('filtroHistorico')) $('filtroHistorico').addEventListener('change', renderMovimentos);
+    if($('buscaCadastro')) $('buscaCadastro').addEventListener('input', renderCadastro);
+    if($('buscaEstoque')) $('buscaEstoque').addEventListener('input', renderEstoque);
+    if($('filtroRelatorio')) $('filtroRelatorio').addEventListener('change', renderRelatorio);
 
     // ============================================================================
     // ITEM CONTRATUAL (CSV)
@@ -835,11 +829,12 @@
             })).filter(i => i.code);
             renderItensContrato();
         } catch(e) {
-            $('itensTableBody').innerHTML = '<tr><td colspan="4" class="text-center text-muted">Erro ao carregar itens contratuais.</td></tr>';
+            if($('itensTableBody')) $('itensTableBody').innerHTML = '<tr><td colspan="4" class="text-center text-muted">Erro ao carregar itens contratuais.</td></tr>';
         }
     }
 
     function renderItensContrato(filtro = '') {
+        if(!$('itensTableBody')) return;
         const termo = normalizeStr(filtro);
         const lista = termo ? itensContratoData.filter(i => normalizeStr(i.desc).includes(termo) || normalizeStr(i.code).includes(termo)) : itensContratoData;
         const fmtMoeda = v => v.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
@@ -852,7 +847,7 @@
         </tr>`).join('') : '<tr><td colspan="4" class="text-center text-muted">Nenhum item encontrado.</td></tr>';
     }
 
-    $('searchItemContratual').addEventListener('input', function() { renderItensContrato(this.value); });
+    if($('searchItemContratual')) $('searchItemContratual').addEventListener('input', function() { renderItensContrato(this.value); });
     function copyText(el) { navigator.clipboard.writeText(el.innerText).then(() => toast('Copiado para a área de transferência!')); }
 
     carregar();
