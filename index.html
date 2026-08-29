@@ -60,7 +60,7 @@
         .form-label { font-size: 0.7rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
         .form-input { width: 100%; padding: 0.7rem; border: 1px solid var(--border); border-radius: 6px; font-family: inherit; font-size: 0.85rem; background: var(--surface); color: var(--text); transition: border-color 0.2s; }
         .form-input:focus { outline: none; border-color: var(--accent); }
-        .form-input:disabled, .form-input[readonly] { background: var(--bg); cursor: not-allowed; opacity: 0.7; }
+        .form-input:disabled { background: var(--bg); cursor: not-allowed; opacity: 0.7; }
         .uppercase-field { text-transform: uppercase; }
 
         .suggestions-box { position: absolute; top: 100%; left: 0; right: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; max-height: 180px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-top: 2px; }
@@ -75,11 +75,11 @@
         .btn-primary:hover:not(:disabled) { opacity: 0.9; }
         .btn-danger { background: var(--danger); color: white; border-color: var(--danger); }
         .btn-danger:hover { background: #b91c1c; }
+        .btn-info { background: var(--info); color: white; border-color: var(--info); padding: 0.3rem 0.6rem; font-size: 0.65rem;}
+        .btn-info:hover { background: #1d4ed8; }
         .btn:disabled { opacity: 0.6; cursor: not-allowed; }
         .btn-export { background: var(--success); color: white; border-color: var(--success); }
         .btn-export:hover { background: #15803d; }
-        .btn-info { background: var(--info); color: white; border-color: var(--info); padding: 0.3rem 0.6rem; font-size: 0.65rem;}
-        .btn-info:hover { background: #1d4ed8; }
 
         /* Tables & Alerts */
         .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); margin-bottom: 1rem; }
@@ -135,27 +135,19 @@
          SESSÕES ALMOXARIFADO 
     =================================================== -->
     <div id="almoxarifado-content">
-        <!-- ABA: ESTOQUE -->
         <section id="estoque" class="section active">
             <h2 class="hd">
                 Estoque
                 <button class="btn btn-sm btn-export" onclick="exportarEstoqueCSV()">⬇️ Exportar</button>
             </h2>
-            
             <div id="avisoEstoque"></div>
-            
             <div class="form-group mb-1">
                 <input class="form-input" id="buscaEstoque" type="search" placeholder="Pesquisar estoque por código ou descrição...">
             </div>
-            
             <div class="table-wrap">
                 <table>
                     <thead>
-                        <tr>
-                            <th>Código</th>
-                            <th>Descrição</th>
-                            <th class="text-right">Quantidade</th>
-                        </tr>
+                        <tr><th>Código</th><th>Descrição</th><th class="text-right">Quantidade</th></tr>
                     </thead>
                     <tbody id="tabelaEstoque">
                         <tr><td colspan="3" class="text-center text-muted">Aguardando sincronização...</td></tr>
@@ -164,10 +156,8 @@
             </div>
         </section>
 
-        <!-- ABA: MOVIMENTAÇÃO -->
         <section id="movimentacao" class="section">
             <h2 class="hd">Nova Movimentação</h2>
-
             <form id="formMov" class="mb-2">
                 <div class="form-grid">
                     <div class="form-group full-span">
@@ -244,29 +234,18 @@
             </div>
         </section>
 
-        <!-- ABA: RELATÓRIO DE EMBARCAÇÃO -->
         <section id="relatorio" class="section">
             <h2 class="hd">
-                Relatório de Saídas (Últimos 3 Meses)
+                Relatório de Saída
                 <button class="btn btn-sm btn-export" onclick="exportarRelatorioCSV()">⬇️ Exportar Excel</button>
             </h2>
-            
             <div class="form-group mb-1">
-                <select class="form-input" id="filtroRelatorio">
-                    <option value="">Todas as Embarcações (Geral)</option>
-                </select>
+                <select class="form-input" id="filtroRelatorio"><option value="">Todas as Embarcações (Geral)</option></select>
             </div>
-
             <div class="table-wrap">
                 <table>
                     <thead>
-                        <tr>
-                            <th>Data</th>
-                            <th>Embarcação</th>
-                            <th>Produto</th>
-                            <th>Requisitante</th>
-                            <th class="text-right">Qtd.</th>
-                        </tr>
+                        <tr><th>Data</th><th>Embarcação</th><th>Produto</th><th>Requisitante</th><th class="text-right">Qtd.</th></tr>
                     </thead>
                     <tbody id="tabelaRelatorio">
                         <tr><td colspan="5" class="text-center text-muted">Aguardando sincronização...</td></tr>
@@ -275,10 +254,8 @@
             </div>
         </section>
 
-        <!-- ABA: CADASTRO -->
         <section id="cadastro" class="section">
             <h2 class="hd">Cadastro de materiais</h2>
-
             <form id="formCadastro" class="mb-2">
                 <div class="form-grid">
                     <div class="form-group">
@@ -319,14 +296,7 @@
             <div class="table-wrap">
                 <table>
                     <thead>
-                        <tr>
-                            <th>Código</th>
-                            <th>Descrição</th>
-                            <th class="text-right">Inicial</th>
-                            <th class="text-right">Mínimo</th>
-                            <th>Categoria</th>
-                            <th class="text-center">Ações</th>
-                        </tr>
+                        <tr><th>Código</th><th>Descrição</th><th class="text-right">Inicial</th><th class="text-right">Mínimo</th><th>Categoria</th><th class="text-center">Ações</th></tr>
                     </thead>
                     <tbody id="tabelaCadastro">
                         <tr><td colspan="6" class="text-center text-muted">Aguardando sincronização...</td></tr>
@@ -370,7 +340,7 @@
     // ============================================================================
     // ⚠️ COLOQUE SUA NOVA URL DO GOOGLE APPS SCRIPT DENTRO DAS ASPAS ABAIXO:
     // ============================================================================
-    const API_URL = 'https://script.google.com/macros/s/AKfycbwG4Hhmm_Qw9ZnbbAf53HBtYKobjJ5JqjxBKGWKlrJbLA5gLn_EMSxlOPLKE3rK9Vd68w/exec'; 
+    const API_URL = 'https://script.google.com/macros/s/AKfycbwxANVn2mUNDD1DJOQHVmC7vLKMqrBr7K8jHE28M2r8s32OnORCEdAyco5KcLOnm1PPWQ/exec'; 
     // ============================================================================
 
     // --- MENU PRINCIPAL (Top Right Dropdown) ---
@@ -638,7 +608,7 @@
         }).join('') : '<tr><td colspan="6" class="text-center text-muted">Nenhuma movimentação neste mês.</td></tr>';
     }
 
-    // --- Nova Função: Retorno Parcial a partir do Histórico ---
+    // --- Retorno Parcial a partir do Histórico ---
     window.retornarParcial = async function(linha, qtdAtual, codigo) {
         let qtdRetornoStr = prompt(`Quantos itens você quer retornar do código ${codigo} para o almoxarifado? (Máximo de ${qtdAtual}):`);
         if (!qtdRetornoStr) return;
@@ -723,7 +693,9 @@
     };
 
     window.excluirCadastro = async function(codigo) {
-        if (!confirm(`ATENÇÃO! Deseja excluir permanentemente o item ${codigo}? Isso também afetará o controle de estoque.`)) return;
+        const confirmacao = confirm(`ATENÇÃO!\n\nVocê está prestes a excluir permanentemente o item código: ${codigo}.\nIsso apagará o item do sistema e afetará o controle de estoque.\n\nDeseja realmente excluir?`);
+        if (!confirmacao) return;
+
         $('msgCadastro').textContent = 'Excluindo...'; $('msgCadastro').className = 'status-msg';
         try {
             const r = await srv('excluirCadastroItem', { codigo: padCode(codigo) });
@@ -826,7 +798,6 @@
     function renderItensContrato(filtro = '') {
         const termo = normalizeStr(filtro);
         const lista = termo ? itensContratoData.filter(i => normalizeStr(i.desc).includes(termo) || normalizeStr(i.code).includes(termo)) : itensContratoData;
-        
         const fmtMoeda = v => v.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
 
         $('itensTableBody').innerHTML = lista.length ? lista.map(i => `<tr>
@@ -838,12 +809,8 @@
     }
 
     $('searchItemContratual').addEventListener('input', function() { renderItensContrato(this.value); });
-    
-    function copyText(el) {
-        navigator.clipboard.writeText(el.innerText).then(() => toast('Copiado para a área de transferência!'));
-    }
+    function copyText(el) { navigator.clipboard.writeText(el.innerText).then(() => toast('Copiado para a área de transferência!')); }
 
-    // Inicia Almoxarifado
     carregar();
 </script>
 </body>
