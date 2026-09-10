@@ -1,816 +1,307 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vilhena Serviços</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-    
-    <style>
-        :root {
-            --bg: #fafafa; --surface: #ffffff; --text: #0f172a; --muted: #64748b;
-            --border: #e2e8f0; --accent: #0f172a; --success: #16a34a; --danger: #dc2626; --info: #2563eb;
-        }
+<!DOCTYPE html> <html lang="pt-BR"> <head>     <meta charset="UTF-8">     <meta name="viewport" content="width=device-width, initial-scale=1.0">     <title>Vilhena Serviços</title>          <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>          <style>         :root {             --bg: #fafafa; --surface: #ffffff; --text: #0f172a; --muted: #64748b;             --border: #e2e8f0; --accent: #0f172a; --success: #16a34a; --danger: #dc2626; --info: #2563eb;         }          * { box-sizing: border-box; margin: 0; padding: 0; }         html { scroll-behavior: smooth; }         body { font-family: 'JetBrains Mono', monospace; background-color: var(--bg); color: var(--text); line-height: 1.5; min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }          .container { max-width: 1000px; margin: 0 auto; padding: 0 1.5rem; width: 100%; flex: 1; }         .flex { display: flex; align-items: center; gap: 1rem; }         .sb { justify-content: space-between; }         .text-muted { color: var(--muted); } .text-center { text-align: center; } .text-right { text-align: right; }         .bold { font-weight: 700; } .mt-1 { margin-top: 1rem; } .mb-1 { margin-bottom: 1rem; } .mb-2 { margin-bottom: 2rem; }         .hidden { display: none !important; }          header { position: relative; background: var(--surface); border-bottom: 1px solid var(--border); padding: 2rem 1rem 1.5rem; text-align: center; }         .logo { height: 50px; margin-bottom: 0.75rem; object-fit: contain; }         .header-title { font-size: 1.35rem; font-weight: 700; margin: 0 0 0.2rem; }         .header-subtitle { font-size: 0.8rem; color: var(--muted); margin: 0 0 1.5rem; text-transform: uppercase; letter-spacing: 0.05em; }                  .dropdown-wrapper { position: absolute; top: 1.5rem; right: 1.5rem; }         .menu-icon-btn { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 0.4rem 0.6rem; font-size: 1.2rem; cursor: pointer; color: var(--text); transition: all 0.2s; }         .menu-icon-btn:hover { background: #f1f5f9; }         .dropdown-menu { position: absolute; top: 100%; right: 0; background: var(--surface); border: 1px solid var(--border); box-shadow: 0 4px 10px rgba(0,0,0,0.1); border-radius: 6px; min-width: 200px; text-align: left; z-index: 200; overflow: hidden; margin-top: 0.5rem; }         .dropdown-menu a { display: block; padding: 0.85rem 1rem; text-decoration: none; color: var(--text); font-size: 0.85rem; font-weight: 500; border-bottom: 1px solid var(--border); }         .dropdown-menu a:hover { background: #f1f5f9; color: var(--accent); }         .dropdown-menu a:last-child { border-bottom: none; }          .nav-buttons { display: flex; justify-content: center; gap: 0.5rem; flex-wrap: wrap; margin-top: 1rem; }         .nav-btn { background: var(--bg); border: 1px solid var(--border); color: var(--muted); font-family: inherit; font-size: 0.85rem; font-weight: 700; padding: 0.6rem 1.5rem; border-radius: 99px; cursor: pointer; transition: all 0.2s ease; }         .nav-btn:hover { background: #f1f5f9; color: var(--text); }         .nav-btn.active { background: var(--accent); color: var(--surface); border-color: var(--accent); }          .sync-container { display: flex; align-items: center; justify-content: center; gap: 0.4rem; margin-top: 1.5rem; font-size: 0.7rem; color: var(--muted); }         .sync-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--muted); }         .sync-dot.ok { background: var(--success); } .sync-dot.error { background: var(--danger); } .sync-dot.loading { background: var(--info); animation: pulse 1s infinite; }         @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }          .section { display: none; padding: 2.5rem 0; animation: fadeIn 0.3s ease; }         .section.active { display: block; }         .hd { font-size: 1.25rem; font-weight: 700; margin-bottom: 1.5rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }          /* Forms */         .form-grid { display: grid; gap: 1rem; grid-template-columns: 1fr; }         @media (min-width: 600px) { .form-grid { grid-template-columns: 1fr 1fr; } }         .full-span { grid-column: 1 / -1; }         .form-group { display: flex; flex-direction: column; gap: 0.3rem; position: relative; }         .form-label { font-size: 0.7rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }         .form-input { width: 100%; padding: 0.7rem; border: 1px solid var(--border); border-radius: 6px; font-family: inherit; font-size: 0.85rem; background: var(--surface); color: var(--text); transition: border-color 0.2s; }         .form-input:focus { outline: none; border-color: var(--accent); }         .form-input:disabled { background: var(--bg); cursor: not-allowed; opacity: 0.7; }          .uppercase-field { text-transform: uppercase; }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        html { scroll-behavior: smooth; }
-        body { font-family: 'JetBrains Mono', monospace; background-color: var(--bg); color: var(--text); line-height: 1.5; min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
+        /* Cadastro de subitens (ex.: 101A, 101B, 101C) */
+        .code-label-row { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; min-height: 1.2rem; }
+        .subitem-controls { display: flex; align-items: center; justify-content: flex-end; gap: 0.45rem; flex-wrap: wrap; }
+        .subitem-toggle { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.66rem; font-weight: 700; color: var(--muted); cursor: pointer; user-select: none; text-transform: uppercase; letter-spacing: 0.04em; }
+        .subitem-toggle input { width: 15px; height: 15px; margin: 0; accent-color: var(--accent); cursor: pointer; }
+        .subitem-toggle input:disabled { cursor: not-allowed; }
+        .subitem-toggle:has(input:disabled) { opacity: 0.65; cursor: not-allowed; }
+        .subitem-new-btn { border: 1px solid var(--border); background: var(--surface); color: var(--text); border-radius: 5px; padding: 0.22rem 0.48rem; font-family: inherit; font-size: 0.62rem; font-weight: 700; cursor: pointer; white-space: nowrap; }
+        .subitem-new-btn:hover { background: var(--bg); }
+        .code-composer { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.45rem; align-items: center; }
+        .subitem-suffix-wrap { display: flex; align-items: center; gap: 0.35rem; }
+        .subitem-join { color: var(--muted); font-weight: 700; }
+        .subitem-letter-input { width: 62px; text-align: center; font-weight: 700; text-transform: uppercase; }
+        .subitem-hint { min-height: 0.9rem; font-size: 0.65rem; color: var(--muted); line-height: 1.35; }
+        .subitem-hint strong { color: var(--text); }
+        .subitem-hint.warning { color: #b45309; }
+        @media (max-width: 599px) {
+            .code-label-row { align-items: flex-start; }
+            .subitem-controls { gap: 0.3rem; }
+            .subitem-new-btn { white-space: normal; text-align: center; }
+        }          .suggestions-box { position: absolute; top: 100%; left: 0; right: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; max-height: 180px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-top: 2px; }         .suggestions-box.hidden { display: none; }         .sugg-item { padding: 0.6rem 0.8rem; font-size: 0.8rem; cursor: pointer; border-bottom: 1px solid var(--border); }         .sugg-item:hover { background: var(--bg); }          .btn { display: inline-flex; align-items: center; justify-content: center; padding: 0.7rem 1.5rem; font-family: inherit; font-size: 0.8rem; font-weight: 700; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; background: var(--surface); color: var(--text); transition: all 0.2s; }         .btn:hover:not(:disabled) { background: var(--bg); }         .btn-sm { padding: 0.4rem 0.8rem; font-size: 0.7rem; }         .btn-primary { background: var(--accent); color: var(--surface); border-color: var(--accent); width: 100%; }         .btn-primary:hover:not(:disabled) { opacity: 0.9; }         .btn-danger { background: var(--danger); color: white; border-color: var(--danger); }         .btn-danger:hover { background: #b91c1c; }         .btn-info { background: var(--info); color: white; border-color: var(--info); padding: 0.3rem 0.6rem; font-size: 0.65rem;}         .btn-info:hover { background: #1d4ed8; }         .btn:disabled { opacity: 0.6; cursor: not-allowed; }         .btn-export { background: var(--success); color: white; border-color: var(--success); }         .btn-export:hover { background: #15803d; }          /* Tables & Alerts */         .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); margin-bottom: 1rem; }         table { width: 100%; border-collapse: collapse; min-width: 600px; font-size: 0.8rem; }         th, td { padding: 0.85rem 1rem; text-align: left; border-bottom: 1px solid var(--border); }         th { font-weight: 700; color: var(--muted); text-transform: uppercase; font-size: 0.7rem; background: var(--bg); }         tbody tr:last-child td { border-bottom: none; }         .row-danger { background-color: #fef2f2; color: var(--danger); font-weight: bold; }         .clickable-cell { cursor: pointer; transition: background 0.2s; }         .clickable-cell:active { background: #f1f5f9; }          .status-msg { font-size: 0.75rem; margin-top: 0.5rem; min-height: 1rem; font-weight: 500; text-align: center; }         .status-msg.ok { color: var(--success); } .status-msg.erro { color: var(--danger); }          .toast-host { position: fixed; right: 1rem; bottom: 1rem; z-index: 1000; display: flex; flex-direction: column; gap: 0.5rem; pointer-events: none; }         .toast { pointer-events: auto; background: var(--text); color: var(--surface); padding: 0.85rem 1.2rem; border-radius: 6px; font-size: 0.8rem; animation: fadeIn 0.3s ease; }          @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }     </style> </head> <body>  <header>     <div class="dropdown-wrapper">         <button class="menu-icon-btn" id="mainMenuBtn" aria-label="Menu Principal">☰</button>         <div class="dropdown-menu hidden" id="mainMenuDropdown">             <a href="#" onclick="switchAppMode('almoxarifado')">Almoxarifado</a>             <a href="#" onclick="switchAppMode('item')">Item Contratual</a>         </div>     </div>      <img src="https://raw.githubusercontent.com/engineerRDG/vilhena.engenheiro.org/refs/heads/main/imagem/logo.png" alt="Vilhena Serviços" class="logo">     <h1 class="header-title">Vilhena Serviços</h1>     <p class="header-subtitle" id="appSubtitle">Almoxarifado</p>      <!-- Abas do Almoxarifado -->     <div class="nav-buttons" id="almoxarifadoTabs">         <button class="nav-btn active" data-target="estoque">Estoque</button>         <button class="nav-btn" data-target="movimentacao">Movimentação</button>         <button class="nav-btn" data-target="cadastro">Cadastro</button>         <button class="nav-btn" data-target="relatorio">Relatório</button>     </div>      <div class="sync-container" id="syncStatus">         <span class="sync-dot" id="syncDot"></span>         <span id="atualizacao">Conectando...</span>     </div> </header>  <main class="container">          <!-- ==============================================          SESSÕES ALMOXARIFADO      =================================================== -->     <div id="almoxarifado-content">         <section id="estoque" class="section active">             <h2 class="hd">                 Estoque                 <button class="btn btn-sm btn-export" onclick="exportarEstoqueCSV()">⬇️ Exportar</button>             </h2>             <div id="avisoEstoque"></div>             <div class="form-group mb-1">                 <input class="form-input" id="buscaEstoque" type="search" placeholder="Pesquisar estoque por código ou descrição...">             </div>             <div class="table-wrap">                 <table>                     <thead>                         <tr><th>Código</th><th>Descrição</th><th class="text-right">Quantidade</th></tr>                     </thead>                     <tbody id="tabelaEstoque">                         <tr><td colspan="3" class="text-center text-muted">Aguardando sincronização...</td></tr>                     </tbody>                 </table>             </div>         </section>          <section id="movimentacao" class="section">             <h2 class="hd">Nova Movimentação</h2>             <form id="formMov" class="mb-2">                 <div class="form-grid">                     <div class="form-group full-span">                         <label class="form-label" for="movTipo">Tipo de Movimentação</label>                         <select class="form-input" id="movTipo">                             <option value="ENTRADA">Entrada</option>                             <option value="USO INTERNO">Uso Interno</option>                             <option value="SAIDA">Saída</option>                             <option value="RETORNO">Retorno</option>                         </select>                     </div>                     <div class="form-group" id="autocomplete-wrapper">                         <label class="form-label" for="movDescricao">Descrição do Produto</label>                         <input class="form-input uppercase-field" id="movDescricao" autocomplete="off" placeholder="Digite para buscar nomes similares..." required>                         <div id="descSuggestions" class="suggestions-box hidden"></div>                     </div>                     <div class="form-group">                         <label class="form-label" for="movCodigo">Código do Produto</label>                         <input class="form-input" id="movCodigo" autocomplete="off" required>                     </div>                     <div class="form-group">                         <label class="form-label" for="movQuantidade">Quantidade</label>                         <input class="form-input" id="movQuantidade" type="number" min="0.000001" step="any" required>                     </div>                     <div class="form-group">                         <label class="form-label" for="movSaldo">Em estoque</label>                         <input class="form-input" id="movSaldo" readonly disabled placeholder="Preenchido ao usar código">                     </div>                     <div class="form-group">                         <label class="form-label" for="movEmbarcacao">Embarcação</label>                         <select class="form-input" id="movEmbarcacao" disabled><option value="">Selecione...</option></select>                     </div>                     <div class="form-group">                         <label class="form-label" for="movRequisitante">Requisitante</label>                         <select class="form-input" id="movRequisitante" disabled><option value="">Selecione...</option></select>                     </div>                 </div>                 <div class="mt-1">                     <button class="btn btn-primary" id="salvarMov" type="submit">Registrar Movimentação</button>                 </div>                 <div id="msgMov" class="status-msg" aria-live="polite"></div>             </form>              <div class="flex sb mb-1 wrap mt-2" style="border-bottom: 2px solid var(--border); padding-bottom: 0.5rem;">                 <h3 class="hd" style="border:none; margin:0; font-size:1.15rem;">Histórico Recente (Mês Atual)</h3>                 <div class="flex gap-1">                     <select class="form-input" id="filtroHistorico" style="padding: 0.4rem; font-size: 0.75rem; width: auto; font-weight: bold;">                         <option value="">Todos</option>                         <option value="ENTRADA">Entradas</option>                         <option value="SAIDA">Saídas</option>                         <option value="USO INTERNO">Uso Interno</option>                         <option value="RETORNO">Retornos</option>                     </select>                     <button class="btn btn-sm btn-export" onclick="exportarHistoricoCSV()">⬇️ Exportar</button>                 </div>             </div>                          <div class="table-wrap">                 <table>                     <thead>                         <tr>                             <th>Data</th>                             <th>Tipo</th>                             <th>Cód.</th>                             <th>Descrição</th>                             <th class="text-right">Qtd.</th>                             <th class="text-center">Ações</th>                         </tr>                     </thead>                     <tbody id="movimentos">                         <tr><td colspan="6" class="text-center text-muted">Aguardando sincronização...</td></tr>                     </tbody>                 </table>             </div>         </section>          <section id="relatorio" class="section">             <h2 class="hd">                 Relatório de Saída                 <button class="btn btn-sm btn-export" onclick="exportarRelatorioCSV()">⬇️ Exportar Excel</button>             </h2>             <div class="form-group mb-1">                 <select class="form-input" id="filtroRelatorio"><option value="">Todas as Embarcações (Geral)</option></select>             </div>             <div class="table-wrap">                 <table>                     <thead>                         <tr><th>Data</th><th>Embarcação</th><th>Produto</th><th>Requisitante</th><th class="text-right">Qtd.</th></tr>                     </thead>                     <tbody id="tabelaRelatorio">                         <tr><td colspan="5" class="text-center text-muted">Aguardando sincronização...</td></tr>                     </tbody>                 </table>             </div>         </section>          <section id="cadastro" class="section">             <h2 class="hd">Cadastro de materiais</h2>             <form id="formCadastro" class="mb-2">                 <div class="form-grid">                     <div class="form-group">                         <label class="form-label" for="cadDescricao">Descrição do item</label>                         <input class="form-input uppercase-field" id="cadDescricao" autocomplete="off" required>                     </div>                     <div class="form-group">                         <div class="code-label-row">                             <label class="form-label" for="cadCodigo">Código</label>                             <div class="subitem-controls">                                 <label class="subitem-toggle" title="Marque para criar uma variação do código, como 101A, 101B ou 101C">                                     <input type="checkbox" id="cadUsarSubitem">                                     <span>Subitem</span>                                 </label>                                 <button class="subitem-new-btn hidden" id="novoSubitemBtn" type="button" title="Cadastrar outra variação deste mesmo código">+ Novo subitem</button>                             </div>                         </div>                         <div class="code-composer">                             <input class="form-input" id="cadCodigo" autocomplete="off" inputmode="numeric" required>                             <div id="subitemSuffixWrap" class="subitem-suffix-wrap hidden">                                 <span class="subitem-join">+</span>                                 <input class="form-input subitem-letter-input" id="cadSubitemLetra" autocomplete="off" maxlength="1" placeholder="A" aria-label="Letra do subitem">                             </div>                         </div>                         <div id="subitemHint" class="subitem-hint hidden"></div>                     </div>                     <div class="form-group">                         <label class="form-label" for="cadUnidade">Unidade de Medida</label>                         <select class="form-input" id="cadUnidade" required><option value="">Carregando...</option></select>                     </div>                     <div class="form-group">                         <label class="form-label" for="cadCategoria">Categoria</label>                         <select class="form-input" id="cadCategoria" required><option value="">Carregando...</option></select>                     </div>                     <div class="form-group">                         <label class="form-label" for="cadInicial">Estoque Inicial</label>                         <input class="form-input" id="cadInicial" type="number" min="0" step="any" value="0" required>                     </div>                     <div class="form-group">                         <label class="form-label" for="cadMinimo">Estoque Mínimo</label>                         <input class="form-input" id="cadMinimo" type="number" min="0" step="any" value="0" required>                     </div>                 </div>                 <div class="form-grid mt-1">                     <button class="btn btn-primary" id="salvarCadastro" type="submit">Salvar Cadastro</button>                     <button class="btn" id="limparCadastro" type="button">Limpar Formulário</button>                 </div>                 <div id="msgCadastro" class="status-msg" aria-live="polite"></div>             </form>              <div class="form-group mb-1">                 <input class="form-input" id="buscaCadastro" type="search" placeholder="Pesquisar cadastros...">             </div>             <div class="table-wrap">                 <table>                     <thead>                         <tr><th>Código</th><th>Descrição</th><th class="text-right">Inicial</th><th class="text-right">Mínimo</th><th>Categoria</th><th class="text-center">Ações</th></tr>                     </thead>                     <tbody id="tabelaCadastro">                         <tr><td colspan="6" class="text-center text-muted">Aguardando sincronização...</td></tr>                     </tbody>                 </table>             </div>         </section>     </div>      <!-- ==============================================          SESSÃO ITEM CONTRATUAL      =================================================== -->     <section id="item-contratual" class="section">         <h2 class="hd">Item Contratual</h2>         <div class="form-group mb-1">             <input class="form-input" id="searchItemContratual" type="search" placeholder="Buscar por código ou descritivo...">         </div>         <div class="table-wrap">             <table class="itens-table">                 <thead>                     <tr>                         <th>Código</th>                         <th>Descritivo</th>                         <th class="text-center">Unid.</th>                         <th class="text-right">Valor</th>                     </tr>                 </thead>                 <tbody id="itensTableBody">                     <tr><td colspan="4" class="text-center text-muted">Buscando informações contratuais...</td></tr>                 </tbody>             </table>         </div>     </section>  </main>  <div class="toast-host" id="toastHost"></div>  <script>     /* ============================================================================ */     /* ⚠️ COLOQUE SUA NOVA URL DO GOOGLE APPS SCRIPT DENTRO DAS ASPAS ABAIXO: */     /* ============================================================================ */     const API_URL = 'https://script.google.com/macros/s/AKfycbwxANVn2mUNDD1DJOQHVmC7vLKMqrBr7K8jHE28M2r8s32OnORCEdAyco5KcLOnm1PPWQ/exec';      /* ============================================================================ */      /* --- MENU PRINCIPAL (Top Right Dropdown) --- */     document.getElementById('mainMenuBtn').addEventListener('click', (e) => {         e.stopPropagation();         document.getElementById('mainMenuDropdown').classList.toggle('hidden');     });      document.addEventListener('click', (e) => {         if(!e.target.closest('.dropdown-wrapper')) {             document.getElementById('mainMenuDropdown').classList.add('hidden');         }     });      function switchAppMode(mode) {         document.getElementById('mainMenuDropdown').classList.add('hidden');         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));                  if (mode === 'almoxarifado') {             document.getElementById('appSubtitle').textContent = 'Almoxarifado';             document.getElementById('almoxarifadoTabs').style.display = 'flex';             document.getElementById('syncStatus').style.display = 'flex';             document.getElementById('almoxarifado-content').style.display = 'block';                          /* Ativa aba Estoque por padrão */             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));             document.querySelector('.nav-btn[data-target="estoque"]').classList.add('active');             document.getElementById('estoque').classList.add('active');         } else if (mode === 'item') {             document.getElementById('appSubtitle').textContent = 'Item Contratual';             document.getElementById('almoxarifadoTabs').style.display = 'none';             document.getElementById('syncStatus').style.display = 'none';             document.getElementById('almoxarifado-content').style.display = 'none';             document.getElementById('item-contratual').classList.add('active');                          if (itensContratoData.length === 0) initItensContrato();         }     }      /* --- Navegação em Botões (Almoxarifado) --- */     document.querySelectorAll('.nav-btn').forEach(btn => {         btn.addEventListener('click', () => {             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));             document.getElementById('almoxarifado-content').querySelectorAll('.section').forEach(s => s.classList.remove('active'));                          btn.classList.add('active');             document.getElementById(btn.dataset.target).classList.add('active');             window.scrollTo({top: 0, behavior: 'smooth'});         });     });      /* --- Regras de Movimentação (Entrada / Uso Interno / Saída / Retorno) --- */     document.getElementById('movTipo').addEventListener('change', function() {         const reqInput = document.getElementById('movRequisitante');         const embInput = document.getElementById('movEmbarcacao');                  if (this.value === 'ENTRADA' || this.value === 'RETORNO') {             reqInput.disabled = true; reqInput.required = false; reqInput.value = "";             embInput.disabled = true; embInput.required = false; embInput.value = "";         } else if (this.value === 'USO INTERNO') {             reqInput.disabled = false; reqInput.required = true;             embInput.disabled = true; embInput.required = false; embInput.value = "";         } else { /* SAÍDA */             reqInput.disabled = false; reqInput.required = true;             embInput.disabled = false; embInput.required = true;         }     });      /* --- Variáveis Globais e Helpers --- */     const $ = id => document.getElementById(id);     const fmt = v => Number(v || 0).toLocaleString('pt-BR', { maximumFractionDigits: 3 });     const key = v => String(v ?? '').trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase();     const padCode = c => {         let v = String(c ?? '').trim().toUpperCase().replace(/\s+/g, '');         const sub = v.match(/^([1-9])([A-Z])$/);         if (sub) return `0${sub[1]}${sub[2]}`;         return v.replace(/^([1-9])$/, '0$1');     };      /* Fuzzy search (Remove acentos e pontuação para busca flexível) */     const normalizeStr = str => {         if (!str) return '';         return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');     };      let dados = { itens:[], estoque:[], ultimas:[], relatorio:[], listas:{embarcacoes:[], requisitantes:[], unidades:[], categorias:[]} };
 
-        .container { max-width: 1000px; margin: 0 auto; padding: 0 1.5rem; width: 100%; flex: 1; }
-        .flex { display: flex; align-items: center; gap: 1rem; }
-        .sb { justify-content: space-between; }
-        .text-muted { color: var(--muted); } .text-center { text-align: center; } .text-right { text-align: right; }
-        .bold { font-weight: 700; } .mt-1 { margin-top: 1rem; } .mb-1 { margin-bottom: 1rem; } .mb-2 { margin-bottom: 2rem; }
-        .hidden { display: none !important; }
+    // Estado do formulário de Cadastro
+    let cadastroEditandoCodigo = null;
+    let cadastroBaseFixa = null;
 
-        header { position: relative; background: var(--surface); border-bottom: 1px solid var(--border); padding: 2rem 1rem 1.5rem; text-align: center; }
-        .logo { height: 50px; margin-bottom: 0.75rem; object-fit: contain; }
-        .header-title { font-size: 1.35rem; font-weight: 700; margin: 0 0 0.2rem; }
-        .header-subtitle { font-size: 0.8rem; color: var(--muted); margin: 0 0 1.5rem; text-transform: uppercase; letter-spacing: 0.05em; }
-        
-        .dropdown-wrapper { position: absolute; top: 1.5rem; right: 1.5rem; }
-        .menu-icon-btn { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 0.4rem 0.6rem; font-size: 1.2rem; cursor: pointer; color: var(--text); transition: all 0.2s; }
-        .menu-icon-btn:hover { background: #f1f5f9; }
-        .dropdown-menu { position: absolute; top: 100%; right: 0; background: var(--surface); border: 1px solid var(--border); box-shadow: 0 4px 10px rgba(0,0,0,0.1); border-radius: 6px; min-width: 200px; text-align: left; z-index: 200; overflow: hidden; margin-top: 0.5rem; }
-        .dropdown-menu a { display: block; padding: 0.85rem 1rem; text-decoration: none; color: var(--text); font-size: 0.85rem; font-weight: 500; border-bottom: 1px solid var(--border); }
-        .dropdown-menu a:hover { background: #f1f5f9; color: var(--accent); }
-        .dropdown-menu a:last-child { border-bottom: none; }
-
-        .nav-buttons { display: flex; justify-content: center; gap: 0.5rem; flex-wrap: wrap; margin-top: 1rem; }
-        .nav-btn { background: var(--bg); border: 1px solid var(--border); color: var(--muted); font-family: inherit; font-size: 0.85rem; font-weight: 700; padding: 0.6rem 1.5rem; border-radius: 99px; cursor: pointer; transition: all 0.2s ease; }
-        .nav-btn:hover { background: #f1f5f9; color: var(--text); }
-        .nav-btn.active { background: var(--accent); color: var(--surface); border-color: var(--accent); }
-
-        .sync-container { display: flex; align-items: center; justify-content: center; gap: 0.4rem; margin-top: 1.5rem; font-size: 0.7rem; color: var(--muted); }
-        .sync-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--muted); }
-        .sync-dot.ok { background: var(--success); } .sync-dot.error { background: var(--danger); } .sync-dot.loading { background: var(--info); animation: pulse 1s infinite; }
-        @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
-
-        .section { display: none; padding: 2.5rem 0; animation: fadeIn 0.3s ease; }
-        .section.active { display: block; }
-        .hd { font-size: 1.25rem; font-weight: 700; margin-bottom: 1.5rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
-
-        /* Forms */
-        .form-grid { display: grid; gap: 1rem; grid-template-columns: 1fr; }
-        @media (min-width: 600px) { .form-grid { grid-template-columns: 1fr 1fr; } }
-        .full-span { grid-column: 1 / -1; }
-        .form-group { display: flex; flex-direction: column; gap: 0.3rem; position: relative; }
-        .form-label { font-size: 0.7rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
-        .form-input { width: 100%; padding: 0.7rem; border: 1px solid var(--border); border-radius: 6px; font-family: inherit; font-size: 0.85rem; background: var(--surface); color: var(--text); transition: border-color 0.2s; }
-        .form-input:focus { outline: none; border-color: var(--accent); }
-        .form-input:disabled { background: var(--bg); cursor: not-allowed; opacity: 0.7; }
-        .uppercase-field { text-transform: uppercase; }
-
-        .suggestions-box { position: absolute; top: 100%; left: 0; right: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; max-height: 180px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-top: 2px; }
-        .suggestions-box.hidden { display: none; }
-        .sugg-item { padding: 0.6rem 0.8rem; font-size: 0.8rem; cursor: pointer; border-bottom: 1px solid var(--border); }
-        .sugg-item:hover { background: var(--bg); }
-
-        .btn { display: inline-flex; align-items: center; justify-content: center; padding: 0.7rem 1.5rem; font-family: inherit; font-size: 0.8rem; font-weight: 700; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; background: var(--surface); color: var(--text); transition: all 0.2s; }
-        .btn:hover:not(:disabled) { background: var(--bg); }
-        .btn-sm { padding: 0.4rem 0.8rem; font-size: 0.7rem; }
-        .btn-primary { background: var(--accent); color: var(--surface); border-color: var(--accent); width: 100%; }
-        .btn-primary:hover:not(:disabled) { opacity: 0.9; }
-        .btn-danger { background: var(--danger); color: white; border-color: var(--danger); }
-        .btn-danger:hover { background: #b91c1c; }
-        .btn-info { background: var(--info); color: white; border-color: var(--info); padding: 0.3rem 0.6rem; font-size: 0.65rem;}
-        .btn-info:hover { background: #1d4ed8; }
-        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
-        .btn-export { background: var(--success); color: white; border-color: var(--success); }
-        .btn-export:hover { background: #15803d; }
-
-        /* Tables & Alerts */
-        .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); margin-bottom: 1rem; }
-        table { width: 100%; border-collapse: collapse; min-width: 600px; font-size: 0.8rem; }
-        th, td { padding: 0.85rem 1rem; text-align: left; border-bottom: 1px solid var(--border); }
-        th { font-weight: 700; color: var(--muted); text-transform: uppercase; font-size: 0.7rem; background: var(--bg); }
-        tbody tr:last-child td { border-bottom: none; }
-        .row-danger { background-color: #fef2f2; color: var(--danger); font-weight: bold; }
-        .clickable-cell { cursor: pointer; transition: background 0.2s; }
-        .clickable-cell:active { background: #f1f5f9; }
-
-        .status-msg { font-size: 0.75rem; margin-top: 0.5rem; min-height: 1rem; font-weight: 500; text-align: center; }
-        .status-msg.ok { color: var(--success); } .status-msg.erro { color: var(--danger); }
-
-        .toast-host { position: fixed; right: 1rem; bottom: 1rem; z-index: 1000; display: flex; flex-direction: column; gap: 0.5rem; pointer-events: none; }
-        .toast { pointer-events: auto; background: var(--text); color: var(--surface); padding: 0.85rem 1.2rem; border-radius: 6px; font-size: 0.8rem; animation: fadeIn 0.3s ease; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-    </style>
-</head>
-<body>
-
-<header>
-    <div class="dropdown-wrapper">
-        <button class="menu-icon-btn" id="mainMenuBtn" aria-label="Menu Principal">☰</button>
-        <div class="dropdown-menu hidden" id="mainMenuDropdown">
-            <a href="#" onclick="switchAppMode('almoxarifado')">Almoxarifado</a>
-            <a href="#" onclick="switchAppMode('item')">Item Contratual</a>
-        </div>
-    </div>
-
-    <img src="https://raw.githubusercontent.com/engineerRDG/vilhena.engenheiro.org/refs/heads/main/imagem/logo.png" alt="Vilhena Serviços" class="logo">
-    <h1 class="header-title">Vilhena Serviços</h1>
-    <p class="header-subtitle" id="appSubtitle">Almoxarifado</p>
-
-    <!-- Abas do Almoxarifado -->
-    <div class="nav-buttons" id="almoxarifadoTabs">
-        <button class="nav-btn active" data-target="estoque">Estoque</button>
-        <button class="nav-btn" data-target="movimentacao">Movimentação</button>
-        <button class="nav-btn" data-target="cadastro">Cadastro</button>
-        <button class="nav-btn" data-target="relatorio">Relatório</button>
-    </div>
-
-    <div class="sync-container" id="syncStatus">
-        <span class="sync-dot" id="syncDot"></span>
-        <span id="atualizacao">Conectando...</span>
-    </div>
-</header>
-
-<main class="container">
-    
-    <!-- ==============================================
-         SESSÕES ALMOXARIFADO 
-    =================================================== -->
-    <div id="almoxarifado-content">
-        <section id="estoque" class="section active">
-            <h2 class="hd">
-                Estoque
-                <button class="btn btn-sm btn-export" onclick="exportarEstoqueCSV()">⬇️ Exportar</button>
-            </h2>
-            <div id="avisoEstoque"></div>
-            <div class="form-group mb-1">
-                <input class="form-input" id="buscaEstoque" type="search" placeholder="Pesquisar estoque por código ou descrição...">
-            </div>
-            <div class="table-wrap">
-                <table>
-                    <thead>
-                        <tr><th>Código</th><th>Descrição</th><th class="text-right">Quantidade</th></tr>
-                    </thead>
-                    <tbody id="tabelaEstoque">
-                        <tr><td colspan="3" class="text-center text-muted">Aguardando sincronização...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
-        <section id="movimentacao" class="section">
-            <h2 class="hd">Nova Movimentação</h2>
-            <form id="formMov" class="mb-2">
-                <div class="form-grid">
-                    <div class="form-group full-span">
-                        <label class="form-label" for="movTipo">Tipo de Movimentação</label>
-                        <select class="form-input" id="movTipo">
-                            <option value="ENTRADA">Entrada</option>
-                            <option value="USO INTERNO">Uso Interno</option>
-                            <option value="SAIDA">Saída</option>
-                            <option value="RETORNO">Retorno</option>
-                        </select>
-                    </div>
-                    <div class="form-group" id="autocomplete-wrapper">
-                        <label class="form-label" for="movDescricao">Descrição do Produto</label>
-                        <input class="form-input uppercase-field" id="movDescricao" autocomplete="off" placeholder="Digite para buscar nomes similares..." required>
-                        <div id="descSuggestions" class="suggestions-box hidden"></div>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="movCodigo">Código do Produto</label>
-                        <input class="form-input" id="movCodigo" autocomplete="off" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="movQuantidade">Quantidade</label>
-                        <input class="form-input" id="movQuantidade" type="number" min="0.000001" step="any" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="movSaldo">Em estoque</label>
-                        <input class="form-input" id="movSaldo" readonly disabled placeholder="Preenchido ao usar código">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="movEmbarcacao">Embarcação</label>
-                        <select class="form-input" id="movEmbarcacao" disabled><option value="">Selecione...</option></select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="movRequisitante">Requisitante</label>
-                        <select class="form-input" id="movRequisitante" disabled><option value="">Selecione...</option></select>
-                    </div>
-                </div>
-                <div class="mt-1">
-                    <button class="btn btn-primary" id="salvarMov" type="submit">Registrar Movimentação</button>
-                </div>
-                <div id="msgMov" class="status-msg" aria-live="polite"></div>
-            </form>
-
-            <div class="flex sb mb-1 wrap mt-2" style="border-bottom: 2px solid var(--border); padding-bottom: 0.5rem;">
-                <h3 class="hd" style="border:none; margin:0; font-size:1.15rem;">Histórico Recente (Mês Atual)</h3>
-                <div class="flex gap-1">
-                    <select class="form-input" id="filtroHistorico" style="padding: 0.4rem; font-size: 0.75rem; width: auto; font-weight: bold;">
-                        <option value="">Todos</option>
-                        <option value="ENTRADA">Entradas</option>
-                        <option value="SAIDA">Saídas</option>
-                        <option value="USO INTERNO">Uso Interno</option>
-                        <option value="RETORNO">Retornos</option>
-                    </select>
-                    <button class="btn btn-sm btn-export" onclick="exportarHistoricoCSV()">⬇️ Exportar</button>
-                </div>
-            </div>
-            
-            <div class="table-wrap">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Data</th>
-                            <th>Tipo</th>
-                            <th>Cód.</th>
-                            <th>Descrição</th>
-                            <th class="text-right">Qtd.</th>
-                            <th class="text-center">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody id="movimentos">
-                        <tr><td colspan="6" class="text-center text-muted">Aguardando sincronização...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
-        <section id="relatorio" class="section">
-            <h2 class="hd">
-                Relatório de Saída
-                <button class="btn btn-sm btn-export" onclick="exportarRelatorioCSV()">⬇️ Exportar Excel</button>
-            </h2>
-            <div class="form-group mb-1">
-                <select class="form-input" id="filtroRelatorio"><option value="">Todas as Embarcações (Geral)</option></select>
-            </div>
-            <div class="table-wrap">
-                <table>
-                    <thead>
-                        <tr><th>Data</th><th>Embarcação</th><th>Produto</th><th>Requisitante</th><th class="text-right">Qtd.</th></tr>
-                    </thead>
-                    <tbody id="tabelaRelatorio">
-                        <tr><td colspan="5" class="text-center text-muted">Aguardando sincronização...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
-        <section id="cadastro" class="section">
-            <h2 class="hd">Cadastro de materiais</h2>
-            <form id="formCadastro" class="mb-2">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label class="form-label" for="cadDescricao">Descrição do item</label>
-                        <input class="form-input uppercase-field" id="cadDescricao" autocomplete="off" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="cadCodigo">Código</label>
-                        <input class="form-input" id="cadCodigo" autocomplete="off" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="cadUnidade">Unidade de Medida</label>
-                        <select class="form-input" id="cadUnidade" required><option value="">Carregando...</option></select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="cadCategoria">Categoria</label>
-                        <select class="form-input" id="cadCategoria" required><option value="">Carregando...</option></select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="cadInicial">Estoque Inicial</label>
-                        <input class="form-input" id="cadInicial" type="number" min="0" step="any" value="0" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="cadMinimo">Estoque Mínimo</label>
-                        <input class="form-input" id="cadMinimo" type="number" min="0" step="any" value="0" required>
-                    </div>
-                </div>
-                <div class="form-grid mt-1">
-                    <button class="btn btn-primary" id="salvarCadastro" type="submit">Salvar Cadastro</button>
-                    <button class="btn" id="limparCadastro" type="button">Limpar Formulário</button>
-                </div>
-                <div id="msgCadastro" class="status-msg" aria-live="polite"></div>
-            </form>
-
-            <div class="form-group mb-1">
-                <input class="form-input" id="buscaCadastro" type="search" placeholder="Pesquisar cadastros...">
-            </div>
-            <div class="table-wrap">
-                <table>
-                    <thead>
-                        <tr><th>Código</th><th>Descrição</th><th class="text-right">Inicial</th><th class="text-right">Mínimo</th><th>Categoria</th><th class="text-center">Ações</th></tr>
-                    </thead>
-                    <tbody id="tabelaCadastro">
-                        <tr><td colspan="6" class="text-center text-muted">Aguardando sincronização...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
-    </div>
-
-    <!-- ==============================================
-         SESSÃO ITEM CONTRATUAL 
-    =================================================== -->
-    <section id="item-contratual" class="section">
-        <h2 class="hd">Item Contratual</h2>
-        <div class="form-group mb-1">
-            <input class="form-input" id="searchItemContratual" type="search" placeholder="Buscar por código ou descritivo...">
-        </div>
-        <div class="table-wrap">
-            <table class="itens-table">
-                <thead>
-                    <tr>
-                        <th>Código</th>
-                        <th>Descritivo</th>
-                        <th class="text-center">Unid.</th>
-                        <th class="text-right">Valor</th>
-                    </tr>
-                </thead>
-                <tbody id="itensTableBody">
-                    <tr><td colspan="4" class="text-center text-muted">Buscando informações contratuais...</td></tr>
-                </tbody>
-            </table>
-        </div>
-    </section>
-
-</main>
-
-<div class="toast-host" id="toastHost"></div>
-
-<script>
-    // ============================================================================
-    // ⚠️ COLOQUE SUA NOVA URL DO GOOGLE APPS SCRIPT DENTRO DAS ASPAS ABAIXO:
-    // ============================================================================
-    const API_URL = 'https://script.google.com/macros/s/AKfycbwxANVn2mUNDD1DJOQHVmC7vLKMqrBr7K8jHE28M2r8s32OnORCEdAyco5KcLOnm1PPWQ/exec'; 
-    // ============================================================================
-
-    // --- MENU PRINCIPAL (Top Right Dropdown) ---
-    document.getElementById('mainMenuBtn').addEventListener('click', (e) => {
-        e.stopPropagation();
-        document.getElementById('mainMenuDropdown').classList.toggle('hidden');
-    });
-
-    document.addEventListener('click', (e) => {
-        if(!e.target.closest('.dropdown-wrapper')) {
-            document.getElementById('mainMenuDropdown').classList.add('hidden');
-        }
-    });
-
-    function switchAppMode(mode) {
-        document.getElementById('mainMenuDropdown').classList.add('hidden');
-        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-        
-        if (mode === 'almoxarifado') {
-            document.getElementById('appSubtitle').textContent = 'Almoxarifado';
-            document.getElementById('almoxarifadoTabs').style.display = 'flex';
-            document.getElementById('syncStatus').style.display = 'flex';
-            document.getElementById('almoxarifado-content').style.display = 'block';
-            
-            // Ativa aba Estoque por padrão
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.querySelector('.nav-btn[data-target="estoque"]').classList.add('active');
-            document.getElementById('estoque').classList.add('active');
-        } else if (mode === 'item') {
-            document.getElementById('appSubtitle').textContent = 'Item Contratual';
-            document.getElementById('almoxarifadoTabs').style.display = 'none';
-            document.getElementById('syncStatus').style.display = 'none';
-            document.getElementById('almoxarifado-content').style.display = 'none';
-            document.getElementById('item-contratual').classList.add('active');
-            
-            if (itensContratoData.length === 0) initItensContrato();
-        }
+    function separarCodigoCadastro(codigo) {
+        const valor = padCode(codigo);
+        const m = valor.match(/^(\d+)([A-Z])?$/);
+        if (!m) return { base: valor.replace(/[^0-9]/g, ''), letra: '' };
+        return { base: padCode(m[1]), letra: m[2] || '' };
     }
 
-    // --- Navegação em Botões (Almoxarifado) ---
-    document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('almoxarifado-content').querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            
-            btn.classList.add('active');
-            document.getElementById(btn.dataset.target).classList.add('active');
-            window.scrollTo({top: 0, behavior: 'smooth'});
+    function baseDoCodigo(codigo) {
+        return separarCodigoCadastro(codigo).base;
+    }
+
+    function letrasSubitensUsadas(base) {
+        const baseNorm = String(base || '').toUpperCase();
+        const usadas = new Set();
+        (dados.itens || []).forEach(item => {
+            const cod = String(item.codigo || '').trim().toUpperCase();
+            const m = cod.match(/^(\d+)([A-Z])$/);
+            if (m && padCode(m[1]) === baseNorm) usadas.add(m[2]);
         });
-    });
+        return usadas;
+    }
 
-    // --- Regras de Movimentação (Entrada / Uso Interno / Saída / Retorno) ---
-    document.getElementById('movTipo').addEventListener('change', function() {
-        const reqInput = document.getElementById('movRequisitante');
-        const embInput = document.getElementById('movEmbarcacao');
-        
-        if (this.value === 'ENTRADA' || this.value === 'RETORNO') {
-            reqInput.disabled = true; reqInput.required = false; reqInput.value = "";
-            embInput.disabled = true; embInput.required = false; embInput.value = "";
-        } else if (this.value === 'USO INTERNO') {
-            reqInput.disabled = false; reqInput.required = true;
-            embInput.disabled = true; embInput.required = false; embInput.value = "";
-        } else { // SAÍDA
-            reqInput.disabled = false; reqInput.required = true;
-            embInput.disabled = false; embInput.required = true;
+    function proximaLetraSubitem(base) {
+        const usadas = letrasSubitensUsadas(base);
+        for (let i = 65; i <= 90; i++) {
+            const letra = String.fromCharCode(i);
+            if (!usadas.has(letra)) return letra;
         }
-    });
-
-    // --- Variáveis Globais e Helpers ---
-    const $ = id => document.getElementById(id);
-    const fmt = v => Number(v || 0).toLocaleString('pt-BR', { maximumFractionDigits: 3 });
-    const key = v => String(v ?? '').trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase();
-    const padCode = c => String(c).trim().replace(/^([1-9])$/, '0$1');
-
-    // Fuzzy search (Remove acentos e pontuação para busca flexível)
-    const normalizeStr = str => {
-        if (!str) return '';
-        return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
-    };
-
-    let dados = { itens:[], estoque:[], ultimas:[], relatorio:[], listas:{embarcacoes:[], requisitantes:[], unidades:[], categorias:[]} };
-
-    function toast(mensagem) {
-        const host = $('toastHost');
-        const el = document.createElement('div');
-        el.className = 'toast'; el.textContent = mensagem;
-        host.appendChild(el);
-        setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }, 3000);
+        return '';
     }
 
-    function setSync(estado, texto) {
-        $('syncDot').className = 'sync-dot ' + estado;
-        $('atualizacao').textContent = texto;
+    function codigoFinalCadastro() {
+        const base = padCode(String($('cadCodigo').value || '').replace(/[^0-9]/g, ''));
+        if (!$('cadUsarSubitem').checked) return base;
+        const letra = String($('cadSubitemLetra').value || '').trim().toUpperCase().replace(/[^A-Z]/g, '').slice(0, 1);
+        return base + letra;
     }
 
-    function sugerirProximoCodigo() {
-        if (!dados.itens || dados.itens.length === 0) return '01';
-        let max = 0;
-        dados.itens.forEach(i => {
-            let n = parseInt(i.codigo, 10);
-            if (!isNaN(n) && n > max) max = n;
-        });
-        return padCode(max + 1);
-    }
+    function atualizarResumoSubitem(sugerirLetra = false) {
+        const usar = $('cadUsarSubitem').checked;
+        $('subitemSuffixWrap').classList.toggle('hidden', !usar);
+        const hint = $('subitemHint');
 
-    // --- API Almoxarifado ---
-    async function srv(action, payload = {}) {
-        if (!API_URL || API_URL === 'COLE_A_SUA_URL_AQUI_DEPOIS_DE_FAZER_UMA_NOVA_IMPLANTACAO') {
-            throw new Error("⚠️ URL DA API NÃO CONFIGURADA.");
+        if (!usar) {
+            hint.classList.add('hidden');
+            hint.classList.remove('warning');
+            hint.innerHTML = '';
+            return;
         }
-        try {
-            if (action === 'getAppData') {
-                const response = await fetch(API_URL + '?action=getAppData');
-                const result = await response.json();
-                if (result.error) throw new Error(result.error);
-                return result;
-            } else {
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }, 
-                    body: JSON.stringify({ action: action, data: payload })
-                });
-                const result = await response.json();
-                if (result.error) throw new Error(result.error);
-                return result;
-            }
-        } catch (e) {
-            throw new Error("Falha na conexão com o servidor.");
+
+        const base = padCode(String($('cadCodigo').value || '').replace(/[^0-9]/g, ''));
+        if (base && sugerirLetra && !$('cadSubitemLetra').value) {
+            $('cadSubitemLetra').value = proximaLetraSubitem(base);
         }
-    }
 
-    async function carregar() {
-        setSync('loading', 'Sincronizando...');
-        try {
-            const resp = await srv('getAppData');
-            dados = {
-                itens: resp.itens || [], estoque: resp.estoque || [], ultimas: resp.ultimas || [],
-                relatorio: resp.relatorio || [], listas: resp.listas || {embarcacoes: [], requisitantes: [], unidades: [], categorias: []}
-            };
-            setSync('ok', 'Atualizado às ' + (resp.atualizadoEm || ''));
-            
-            popularSelect('movEmbarcacao', dados.listas.embarcacoes, 'Selecione', $('movEmbarcacao').value);
-            popularSelect('movRequisitante', dados.listas.requisitantes, 'Selecione', $('movRequisitante').value);
-            popularSelect('filtroRelatorio', dados.listas.embarcacoes, 'Todas', $('filtroRelatorio').value);
-            popularSelect('cadUnidade', dados.listas.unidades, 'Selecione', $('cadUnidade').value);
-            popularSelect('cadCategoria', dados.listas.categorias, 'Selecione', $('cadCategoria').value);
-            
-            renderEstoque(); renderRelatorio(); renderMovimentos(); renderCadastro();
+        const letra = String($('cadSubitemLetra').value || '').toUpperCase().replace(/[^A-Z]/g, '').slice(0, 1);
+        $('cadSubitemLetra').value = letra;
+        const usadas = base ? Array.from(letrasSubitensUsadas(base)).sort() : [];
+        const final = base && letra ? base + letra : (base ? base + '?' : '—');
 
-            if (!$('cadCodigo').readOnly && $('cadCodigo').value === '') {
-                $('cadCodigo').value = sugerirProximoCodigo();
-            }
-
-        } catch(e) { setSync('error', e.message); }
-    }
-
-    function popularSelect(id, lista, placeholder, valorAtual) {
-        $(id).innerHTML = `<option value="">${placeholder}</option>` + (lista || []).map(v => `<option value="${v}">${v}</option>`).join('');
-        if (lista.includes(valorAtual)) $(id).value = valorAtual;
-    }
-
-    // --- Autocomplete Inteligente ---
-    $('movDescricao').addEventListener('input', function() {
-        const val = normalizeStr(this.value);
-        const suggBox = $('descSuggestions');
-        if (val.length < 2) { suggBox.classList.add('hidden'); return; }
-        
-        const matches = dados.itens.filter(i => normalizeStr(i.descricao).includes(val) || normalizeStr(i.codigo).includes(val));
-        if (matches.length > 0) {
-            suggBox.innerHTML = matches.map(m => `<div class="sugg-item" onclick="selecionarItemBusca('${m.codigo}')"><b>${m.codigo}</b> - ${m.descricao}</div>`).join('');
-            suggBox.classList.remove('hidden');
+        hint.classList.remove('hidden');
+        if (!base) {
+            hint.classList.add('warning');
+            hint.textContent = 'Informe primeiro o código-base numérico.';
+        } else if (!letra) {
+            hint.classList.add('warning');
+            hint.innerHTML = `Código-base <strong>${base}</strong>. Escolha uma letra de A a Z.`;
         } else {
-            suggBox.classList.add('hidden');
+            hint.classList.remove('warning');
+            hint.innerHTML = `Código final: <strong>${final}</strong>${usadas.length ? ` · Já existentes: ${usadas.map(l => base + l).join(', ')}` : ''}`;
         }
-    });
-
-    document.addEventListener('click', (e) => {
-        if (!e.target.closest('#autocomplete-wrapper')) $('descSuggestions').classList.add('hidden');
-    });
-
-    window.selecionarItemBusca = function(codigo) {
-        const item = dados.itens.find(x => x.codigo === codigo);
-        if (item) {
-            $('movCodigo').value = item.codigo;
-            $('movDescricao').value = item.descricao;
-            const est = dados.estoque.find(x => x.codigo === codigo);
-            $('movSaldo').value = est ? `${fmt(est.saldo)} ${est.unidade}` : '';
-            $('descSuggestions').classList.add('hidden');
-        }
-    };
-
-    $('movCodigo').addEventListener('input', function() {
-        let code = padCode(this.value);
-        const item = dados.itens.find(x => x.codigo === code);
-        if (item) {
-            $('movDescricao').value = item.descricao;
-            const est = dados.estoque.find(x => x.codigo === code);
-            $('movSaldo').value = est ? `${fmt(est.saldo)} ${est.unidade}` : '';
-        } else {
-            $('movSaldo').value = '';
-        }
-    });
-
-    // Forçar Letras Maiúsculas nos forms
-    $('cadDescricao').addEventListener('input', function() { this.value = this.value.toUpperCase(); });
-    $('movDescricao').addEventListener('input', function() { this.value = this.value.toUpperCase(); });
-
-
-    // --- Renderização ---
-    function renderEstoque() {
-        const q = key($('buscaEstoque').value);
-        let lista = dados.estoque.filter(x => !q || key(x.codigo).includes(q) || key(x.descricao).includes(q));
-        lista.sort((a,b) => String(a.codigo).localeCompare(String(b.codigo), undefined, {numeric: true}));
-        
-        const emAlerta = dados.estoque.filter(x => x.saldo <= x.estoqueMinimo);
-        if (emAlerta.length > 0) {
-            let nomesAlerta = emAlerta.map(i => `<b>${i.codigo}</b> (${i.descricao})`).join(', ');
-            $('avisoEstoque').innerHTML = `<div style="background:var(--danger);color:#fff;padding:0.8rem;border-radius:6px;margin-bottom:1rem;text-align:center;font-size:0.8rem;">⚠️ <b>ATENÇÃO:</b> ${emAlerta.length} item(ns) estão zerados ou em estoque mínimo. <br>${nomesAlerta}</div>`;
-        } else {
-            $('avisoEstoque').innerHTML = '';
-        }
-
-        $('tabelaEstoque').innerHTML = lista.length ? lista.map(x => {
-            let classRow = (x.saldo <= x.estoqueMinimo) ? 'row-danger' : '';
-            return `
-            <tr class="${classRow}">
-                <td style="font-family: monospace;">${x.codigo}</td>
-                <td>${x.descricao}</td>
-                <td class="text-right">${fmt(x.saldo)} <span style="font-size:0.7rem">${x.unidade}</span></td>
-            </tr>`;
-        }).join('') : '<tr><td colspan="3" class="text-center text-muted">Nenhum registro.</td></tr>';
     }
 
-    function renderRelatorio() {
-        const filtro = $('filtroRelatorio').value;
-        const lista = filtro ? dados.relatorio.filter(x => x.embarcacao === filtro) : dados.relatorio;
-        $('tabelaRelatorio').innerHTML = lista.length ? lista.map(x => `
-            <tr>
-                <td class="text-muted" style="white-space:nowrap;">${x.data}</td>
-                <td class="bold">${x.embarcacao}</td>
-                <td>${x.produto}</td>
-                <td>${x.requisitante}</td>
-                <td class="text-right bold">${fmt(x.quantidade)}</td>
-            </tr>`).join('') : '<tr><td colspan="5" class="text-center text-muted">Nenhum registro encontrado nos últimos 3 meses.</td></tr>';
+    function resetarCadastro() {
+        $('formCadastro').reset();
+        cadastroEditandoCodigo = null;
+        cadastroBaseFixa = null;
+        $('cadCodigo').readOnly = false;
+        $('cadUsarSubitem').disabled = false;
+        $('cadUsarSubitem').checked = false;
+        $('cadSubitemLetra').readOnly = false;
+        $('cadSubitemLetra').value = '';
+        $('novoSubitemBtn').classList.add('hidden');
+        $('salvarCadastro').textContent = 'Salvar Cadastro';
+        $('cadCodigo').value = sugerirProximoCodigo();
+        $('cadInicial').value = '0';
+        $('cadMinimo').value = '0';
+        $('msgCadastro').textContent = '';
+        atualizarResumoSubitem(false);
     }
 
-    function renderMovimentos() {
-        const filtro = $('filtroHistorico').value;
-        const lista = filtro ? dados.ultimas.filter(x => x.tipo === filtro) : dados.ultimas;
+    function prepararNovoSubitem(base, referencia = null, manterMensagem = false) {
+        const baseNorm = padCode(String(base || '').replace(/[^0-9]/g, ''));
+        if (!baseNorm) { toast('Informe um código-base válido.'); return; }
 
-        $('movimentos').innerHTML = lista.length ? lista.map(x => {
-            let acaoHTML = '';
-            if (x.tipo === 'SAIDA') {
-                acaoHTML = `<button class="btn btn-sm btn-info" onclick="retornarParcial(${x.linha}, ${x.quantidade}, '${x.codigo}')">Retornar</button>`;
-            }
-            return `
-            <tr>
-                <td class="text-muted">${x.data}</td>
-                <td class="bold" style="color: ${x.tipo === 'ENTRADA' || x.tipo === 'RETORNO' ? 'var(--success)' : (x.tipo === 'USO INTERNO' ? 'var(--info)' : 'var(--danger)')}">${x.tipo}</td>
-                <td class="bold" style="font-family: monospace;">${x.codigo}</td>
-                <td>${x.descricao}</td>
-                <td class="text-right">${fmt(x.quantidade)}</td>
-                <td class="text-center">${acaoHTML}</td>
-            </tr>`;
-        }).join('') : '<tr><td colspan="6" class="text-center text-muted">Nenhuma movimentação neste mês.</td></tr>';
-    }
-
-    // --- Retorno Parcial a partir do Histórico ---
-    window.retornarParcial = async function(linha, qtdAtual, codigo) {
-        let qtdRetornoStr = prompt(`Quantos itens você quer retornar do código ${codigo} para o almoxarifado? (Máximo de ${qtdAtual}):`);
-        if (!qtdRetornoStr) return;
-        
-        let qtdRetorno = parseFloat(qtdRetornoStr.replace(',', '.'));
-        if (isNaN(qtdRetorno) || qtdRetorno <= 0) {
-            toast("Quantidade inválida."); return;
-        }
-        if (qtdRetorno > qtdAtual) {
-            toast("A quantidade não pode ser maior que a saída original (" + qtdAtual + ")."); return;
+        const proxima = proximaLetraSubitem(baseNorm);
+        if (!proxima) {
+            toast(`O código ${baseNorm} já utiliza todas as letras de A a Z.`);
+            return;
         }
 
-        toast('Processando retorno...'); 
-        try {
-            const r = await srv('registrarRetornoParcial', { linha: linha, qtd: qtdRetorno });
-            toast(r.message);
-            await carregar();
-        } catch (err) {
-            toast("Erro: " + err.message);
+        cadastroEditandoCodigo = null;
+        cadastroBaseFixa = baseNorm;
+        $('cadCodigo').value = baseNorm;
+        $('cadCodigo').readOnly = true;
+        $('cadUsarSubitem').checked = true;
+        $('cadUsarSubitem').disabled = true;
+        $('cadSubitemLetra').readOnly = false;
+        $('cadSubitemLetra').value = proxima;
+        $('novoSubitemBtn').classList.add('hidden');
+        $('salvarCadastro').textContent = 'Salvar Subitem';
+
+        $('cadDescricao').value = '';
+        $('cadInicial').value = '0';
+        $('cadMinimo').value = '0';
+        if (referencia) {
+            if (referencia.unidade) $('cadUnidade').value = referencia.unidade;
+            if (referencia.categoria) $('cadCategoria').value = referencia.categoria;
         }
-    };
 
-    function renderCadastro() {
-        const q = key($('buscaCadastro').value);
-        let lista = dados.itens.filter(x => !q || key(x.codigo).includes(q) || key(x.descricao).includes(q));
-        lista.sort((a,b) => String(b.codigo).localeCompare(String(a.codigo), undefined, {numeric: true}));
-
-        $('tabelaCadastro').innerHTML = lista.length ? lista.map(x => `
-            <tr>
-                <td class="bold" style="font-family: monospace;">${x.codigo}</td>
-                <td>${x.descricao}</td>
-                <td class="text-right">${fmt(x.estoqueInicial)}</td>
-                <td class="text-right">${fmt(x.estoqueMinimo)}</td>
-                <td>${x.categoria}</td>
-                <td class="text-center" style="white-space: nowrap;">
-                    <button class="btn btn-sm" type="button" onclick="editarCadastro('${x.codigo}')">Editar</button>
-                    <button class="btn btn-sm btn-danger" type="button" onclick="excluirCadastro('${x.codigo}')">Excluir</button>
-                </td>
-            </tr>`).join('') : '<tr><td colspan="6" class="text-center text-muted">Vazio.</td></tr>';
+        atualizarResumoSubitem(false);
+        if (!manterMensagem) {
+            $('msgCadastro').textContent = `Novo subitem de ${baseNorm}. A próxima letra livre foi sugerida automaticamente.`;
+            $('msgCadastro').className = 'status-msg';
+        }
+        $('cadDescricao').focus();
     }
 
-    // Exportação Excel CSV
-    window.exportarEstoqueCSV = function() {
-        let csv = '\uFEFFCódigo,Descrição,Quantidade,Unidade\n'; 
-        const q = key($('buscaEstoque').value);
-        let lista = dados.estoque.filter(x => !q || key(x.codigo).includes(q) || key(x.descricao).includes(q));
-        lista.sort((a,b) => String(a.codigo).localeCompare(String(b.codigo), undefined, {numeric: true}));
-        lista.forEach(row => { csv += `"${row.codigo}","${row.descricao}","${row.saldo}","${row.unidade}"\n`; });
-        baixarArquivo(csv, 'Estoque_Almoxarifado.csv');
-    };
-
-    window.exportarHistoricoCSV = function() {
-        let csv = '\uFEFFData,Tipo,Código,Descrição,Quantidade,Requisitante\n'; 
-        const filtro = $('filtroHistorico').value;
-        const lista = filtro ? dados.ultimas.filter(x => x.tipo === filtro) : dados.ultimas;
-        lista.forEach(row => { csv += `"${row.data}","${row.tipo}","${row.codigo}","${row.descricao}","${row.quantidade}","${row.requisitante || ''}"\n`; });
-        baixarArquivo(csv, 'Historico_Movimentacao_Mes.csv');
-    };
-
-    window.exportarRelatorioCSV = function() {
-        let csv = '\uFEFFData,Embarcação,Produto,Requisitante,Quantidade\n'; 
-        const filtro = $('filtroRelatorio').value;
-        const lista = filtro ? dados.relatorio.filter(x => x.embarcacao === filtro) : dados.relatorio;
-        lista.forEach(row => { csv += `"${row.data}","${row.embarcacao}","${row.produto}","${row.requisitante}","${row.quantidade}"\n`; });
-        baixarArquivo(csv, 'Relatorio_Embarcacoes.csv');
-    };
-
-    function baixarArquivo(csvStr, fileName) {
-        const blob = new Blob([csvStr], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = fileName; link.click();
+    function partesOrdenacaoCodigo(codigo) {
+        const m = String(codigo || '').trim().toUpperCase().match(/^(\d+)([A-Z]?)$/);
+        if (!m) return { numero: Number.MAX_SAFE_INTEGER, sufixo: String(codigo || '') };
+        return { numero: Number(m[1]), sufixo: m[2] || '' };
     }
 
-    // --- Cadastros (Editar/Excluir) ---
-    window.editarCadastro = function(codigo) {
-        const item = dados.itens.find(x => x.codigo === codigo);
-        if (!item) return;
-        $('cadCodigo').value = item.codigo; $('cadCodigo').readOnly = true;
-        $('cadDescricao').value = item.descricao; $('cadUnidade').value = item.unidade;
-        $('cadCategoria').value = item.categoria; $('cadInicial').value = item.estoqueInicial; $('cadMinimo').value = item.estoqueMinimo;
-        $('msgCadastro').textContent = 'Edição habilitada.'; $('msgCadastro').className = 'status-msg';
+    function compararCodigos(a, b, descBase = false) {
+        const pa = partesOrdenacaoCodigo(a), pb = partesOrdenacaoCodigo(b);
+        if (pa.numero !== pb.numero) return descBase ? pb.numero - pa.numero : pa.numero - pb.numero;
+        if (pa.sufixo === pb.sufixo) return 0;
+        if (!pa.sufixo) return -1; // item-base antes dos subitens
+        if (!pb.sufixo) return 1;
+        return pa.sufixo.localeCompare(pb.sufixo, 'pt-BR');
+    }      function toast(mensagem) {         const host = $('toastHost');         const el = document.createElement('div');         el.className = 'toast'; el.textContent = mensagem;         host.appendChild(el);         setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }, 3000);     }      function setSync(estado, texto) {         $('syncDot').className = 'sync-dot ' + estado;         $('atualizacao').textContent = texto;     }      function sugerirProximoCodigo() {         if (!dados.itens || dados.itens.length === 0) return '01';         let max = 0;         dados.itens.forEach(i => {             let n = parseInt(i.codigo, 10);             if (!isNaN(n) && n > max) max = n;         });         return padCode(max + 1);     }      /* --- API Almoxarifado --- */     async function srv(action, payload = {}) {         if (!API_URL || API_URL === 'COLE_A_SUA_URL_AQUI_DEPOIS_DE_FAZER_UMA_NOVA_IMPLANTACAO') {             throw new Error("⚠️ URL DA API NÃO CONFIGURADA.");         }         try {             if (action === 'getAppData') {                 const response = await fetch(API_URL + '?action=getAppData');                 const result = await response.json();                 if (result.error) throw new Error(result.error);                 return result;             } else {                 const response = await fetch(API_URL, {                     method: 'POST',                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },                      body: JSON.stringify({ action: action, data: payload })                 });                 const result = await response.json();                 if (result.error) throw new Error(result.error);                 return result;             }         } catch (e) {             throw new Error("Falha na conexão com o servidor.");         }     }      async function carregar() {         setSync('loading', 'Sincronizando...');         try {             const resp = await srv('getAppData');             dados = {                 itens: resp.itens || [], estoque: resp.estoque || [], ultimas: resp.ultimas || [],                 relatorio: resp.relatorio || [], listas: resp.listas || {embarcacoes: [], requisitantes: [], unidades: [], categorias: []}             };             setSync('ok', 'Atualizado às ' + (resp.atualizadoEm || ''));                          popularSelect('movEmbarcacao', dados.listas.embarcacoes, 'Selecione', $('movEmbarcacao').value);             popularSelect('movRequisitante', dados.listas.requisitantes, 'Selecione', $('movRequisitante').value);             popularSelect('filtroRelatorio', dados.listas.embarcacoes, 'Todas', $('filtroRelatorio').value);             popularSelect('cadUnidade', dados.listas.unidades, 'Selecione', $('cadUnidade').value);             popularSelect('cadCategoria', dados.listas.categorias, 'Selecione', $('cadCategoria').value);                          renderEstoque(); renderRelatorio(); renderMovimentos(); renderCadastro();              if (!cadastroEditandoCodigo && !cadastroBaseFixa && !$('cadCodigo').readOnly && $('cadCodigo').value === '') {                 $('cadCodigo').value = sugerirProximoCodigo();             }             atualizarResumoSubitem(false);          } catch(e) { setSync('error', e.message); }     }      function popularSelect(id, lista, placeholder, valorAtual) {         $(id).innerHTML = `<option value="">${placeholder}</option>` + (lista || []).map(v => `<option value="${v}">${v}</option>`).join('');         if (lista.includes(valorAtual)) $(id).value = valorAtual;     }      /* --- Autocomplete Inteligente --- */     $('movDescricao').addEventListener('input', function() {         const val = normalizeStr(this.value);         const suggBox = $('descSuggestions');         if (val.length < 2) { suggBox.classList.add('hidden'); return; }                  const matches = dados.itens.filter(i => normalizeStr(i.descricao).includes(val) || normalizeStr(i.codigo).includes(val));         if (matches.length > 0) {             suggBox.innerHTML = matches.map(m => `<div class="sugg-item" onclick="selecionarItemBusca('${m.codigo}')"><b>${m.codigo}</b> - ${m.descricao}</div>`).join('');             suggBox.classList.remove('hidden');         } else {             suggBox.classList.add('hidden');         }     });      document.addEventListener('click', (e) => {         if (!e.target.closest('#autocomplete-wrapper')) $('descSuggestions').classList.add('hidden');     });      window.selecionarItemBusca = function(codigo) {         const item = dados.itens.find(x => x.codigo === codigo);         if (item) {             $('movCodigo').value = item.codigo;             $('movDescricao').value = item.descricao;             const est = dados.estoque.find(x => x.codigo === codigo);             $('movSaldo').value = est ? `${fmt(est.saldo)} ${est.unidade}` : '';             $('descSuggestions').classList.add('hidden');         }     };      $('movCodigo').addEventListener('input', function() {         let code = padCode(this.value);         const item = dados.itens.find(x => x.codigo === code);         if (item) {             $('movDescricao').value = item.descricao;             const est = dados.estoque.find(x => x.codigo === code);             $('movSaldo').value = est ? `${fmt(est.saldo)} ${est.unidade}` : '';         } else {             $('movSaldo').value = '';         }     });      /* Forçar Letras Maiúsculas nos forms */     $('cadDescricao').addEventListener('input', function() { this.value = this.value.toUpperCase(); });     $('movDescricao').addEventListener('input', function() { this.value = this.value.toUpperCase(); });       /* --- Renderização --- */     function renderEstoque() {         const q = key($('buscaEstoque').value);         let lista = dados.estoque.filter(x => !q || key(x.codigo).includes(q) || key(x.descricao).includes(q));         lista.sort((a,b) => compararCodigos(a.codigo, b.codigo, false));                  const emAlerta = dados.estoque.filter(x => x.saldo <= x.estoqueMinimo);         if (emAlerta.length > 0) {             let nomesAlerta = emAlerta.map(i => `<b>${i.codigo}</b> (${i.descricao})`).join(', ');             $('avisoEstoque').innerHTML = `<div style="background:var(--danger);color:#fff;padding:0.8rem;border-radius:6px;margin-bottom:1rem;text-align:center;font-size:0.8rem;">⚠️ <b>ATENÇÃO:</b> ${emAlerta.length} item(ns) estão zerados ou em estoque mínimo. <br>${nomesAlerta}</div>`;         } else {             $('avisoEstoque').innerHTML = '';         }          $('tabelaEstoque').innerHTML = lista.length ? lista.map(x => {             let classRow = (x.saldo <= x.estoqueMinimo) ? 'row-danger' : '';             return `             <tr class="${classRow}">                 <td style="font-family: monospace;">${x.codigo}</td>                 <td>${x.descricao}</td>                 <td class="text-right">${fmt(x.saldo)} <span style="font-size:0.7rem">${x.unidade}</span></td>             </tr>`;         }).join('') : '<tr><td colspan="3" class="text-center text-muted">Nenhum registro.</td></tr>';     }      function renderRelatorio() {         const filtro = $('filtroRelatorio').value;         const lista = filtro ? dados.relatorio.filter(x => x.embarcacao === filtro) : dados.relatorio;         $('tabelaRelatorio').innerHTML = lista.length ? lista.map(x => `             <tr>                 <td class="text-muted" style="white-space:nowrap;">${x.data}</td>                 <td class="bold">${x.embarcacao}</td>                 <td>${x.produto}</td>                 <td>${x.requisitante}</td>                 <td class="text-right bold">${fmt(x.quantidade)}</td>             </tr>`).join('') : '<tr><td colspan="5" class="text-center text-muted">Nenhum registro encontrado nos últimos 3 meses.</td></tr>';     }      function renderMovimentos() {         const filtro = $('filtroHistorico').value;         const lista = filtro ? dados.ultimas.filter(x => x.tipo === filtro) : dados.ultimas;          $('movimentos').innerHTML = lista.length ? lista.map(x => {             let acaoHTML = '';             if (x.tipo === 'SAIDA') {                 acaoHTML = `<button class="btn btn-sm btn-info" onclick="retornarParcial(${x.linha}, ${x.quantidade}, '${x.codigo}')">Retornar</button>`;             }             return `             <tr>                 <td class="text-muted">${x.data}</td>                 <td class="bold" style="color: ${x.tipo === 'ENTRADA' || x.tipo === 'RETORNO' ? 'var(--success)' : (x.tipo === 'USO INTERNO' ? 'var(--info)' : 'var(--danger)')}">${x.tipo}</td>                 <td class="bold" style="font-family: monospace;">${x.codigo}</td>                 <td>${x.descricao}</td>                 <td class="text-right">${fmt(x.quantidade)}</td>                 <td class="text-center">${acaoHTML}</td>             </tr>`;         }).join('') : '<tr><td colspan="6" class="text-center text-muted">Nenhuma movimentação neste mês.</td></tr>';     }      /* --- Retorno Parcial a partir do Histórico --- */     window.retornarParcial = async function(linha, qtdAtual, codigo) {         let qtdRetornoStr = prompt(`Quantos itens você quer retornar do código ${codigo} para o almoxarifado? (Máximo de ${qtdAtual}):`);         if (!qtdRetornoStr) return;                  let qtdRetorno = parseFloat(qtdRetornoStr.replace(',', '.'));         if (isNaN(qtdRetorno) || qtdRetorno <= 0) {             toast("Quantidade inválida."); return;         }         if (qtdRetorno > qtdAtual) {             toast("A quantidade não pode ser maior que a saída original (" + qtdAtual + ")."); return;         }          toast('Processando retorno...');          try {             const r = await srv('registrarRetornoParcial', { linha: linha, qtd: qtdRetorno });             toast(r.message);             await carregar();         } catch (err) {             toast("Erro: " + err.message);         }     };      function renderCadastro() {         const q = key($('buscaCadastro').value);         let lista = dados.itens.filter(x => !q || key(x.codigo).includes(q) || key(x.descricao).includes(q));         lista.sort((a,b) => compararCodigos(a.codigo, b.codigo, true));          $('tabelaCadastro').innerHTML = lista.length ? lista.map(x => `             <tr>                 <td class="bold" style="font-family: monospace;">${x.codigo}</td>                 <td>${x.descricao}</td>                 <td class="text-right">${fmt(x.estoqueInicial)}</td>                 <td class="text-right">${fmt(x.estoqueMinimo)}</td>                 <td>${x.categoria}</td>                 <td class="text-center" style="white-space: nowrap;">                     <button class="btn btn-sm" type="button" onclick="editarCadastro('${x.codigo}')">Editar</button>                     <button class="btn btn-sm btn-danger" type="button" onclick="excluirCadastro('${x.codigo}')">Excluir</button>                 </td>             </tr>`).join('') : '<tr><td colspan="6" class="text-center text-muted">Vazio.</td></tr>';     }      /* Exportação Excel CSV */     window.exportarEstoqueCSV = function() {         let csv = '\uFEFFCódigo,Descrição,Quantidade,Unidade\n';          const q = key($('buscaEstoque').value);         let lista = dados.estoque.filter(x => !q || key(x.codigo).includes(q) || key(x.descricao).includes(q));         lista.sort((a,b) => String(a.codigo).localeCompare(String(b.codigo), undefined, {numeric: true}));         lista.forEach(row => { csv += `"${row.codigo}","${row.descricao}","${row.saldo}","${row.unidade}"\n`; });         baixarArquivo(csv, 'Estoque_Almoxarifado.csv');     };      window.exportarHistoricoCSV = function() {         let csv = '\uFEFFData,Tipo,Código,Descrição,Quantidade,Requisitante\n';          const filtro = $('filtroHistorico').value;         const lista = filtro ? dados.ultimas.filter(x => x.tipo === filtro) : dados.ultimas;         lista.forEach(row => { csv += `"${row.data}","${row.tipo}","${row.codigo}","${row.descricao}","${row.quantidade}","${row.requisitante || ''}"\n`; });         baixarArquivo(csv, 'Historico_Movimentacao_Mes.csv');     };      window.exportarRelatorioCSV = function() {         let csv = '\uFEFFData,Embarcação,Produto,Requisitante,Quantidade\n';          const filtro = $('filtroRelatorio').value;         const lista = filtro ? dados.relatorio.filter(x => x.embarcacao === filtro) : dados.relatorio;         lista.forEach(row => { csv += `"${row.data}","${row.embarcacao}","${row.produto}","${row.requisitante}","${row.quantidade}"\n`; });         baixarArquivo(csv, 'Relatorio_Embarcacoes.csv');     };      function baixarArquivo(csvStr, fileName) {         const blob = new Blob([csvStr], { type: 'text/csv;charset=utf-8;' });         const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = fileName; link.click();     }      /* --- Cadastros (Editar/Excluir) --- */     window.editarCadastro = function(codigo) {         const item = dados.itens.find(x => x.codigo === codigo);         if (!item) return;
+        const partes = separarCodigoCadastro(item.codigo);
+        cadastroEditandoCodigo = item.codigo;
+        cadastroBaseFixa = null;
+
+        $('cadCodigo').value = partes.base;
+        $('cadCodigo').readOnly = true;
+        $('cadUsarSubitem').checked = !!partes.letra;
+        $('cadUsarSubitem').disabled = true;
+        $('cadSubitemLetra').value = partes.letra;
+        $('cadSubitemLetra').readOnly = true;
+        $('novoSubitemBtn').textContent = `+ Novo subitem de ${partes.base}`;
+        $('novoSubitemBtn').classList.remove('hidden');
+        $('salvarCadastro').textContent = 'Salvar Alterações';
+
+        $('cadDescricao').value = item.descricao;
+        $('cadUnidade').value = item.unidade;
+        $('cadCategoria').value = item.categoria;
+        $('cadInicial').value = item.estoqueInicial;
+        $('cadMinimo').value = item.estoqueMinimo;
+        atualizarResumoSubitem(false);
+
+        $('msgCadastro').textContent = `Edição habilitada para ${item.codigo}. Use “Novo subitem” para cadastrar outra variação deste código.`;
+        $('msgCadastro').className = 'status-msg';
         window.scrollTo({top: 0, behavior: 'smooth'});
     };
 
-    window.excluirCadastro = async function(codigo) {
-        const confirmacao = confirm(`ATENÇÃO!\n\nVocê está prestes a excluir permanentemente o item código: ${codigo}.\nIsso apagará o item do sistema e afetará o controle de estoque.\n\nDeseja realmente excluir?`);
-        if (!confirmacao) return;
-
-        $('msgCadastro').textContent = 'Excluindo...'; $('msgCadastro').className = 'status-msg';
-        try {
-            const r = await srv('excluirCadastroItem', { codigo: padCode(codigo) });
-            $('msgCadastro').textContent = r.message; $('msgCadastro').className = 'status-msg ok';
-            toast(r.message); await carregar(); 
-        } catch(err) {
-            $('msgCadastro').textContent = err.message; $('msgCadastro').className = 'status-msg erro';
+    window.excluirCadastro = async function(codigo) {         const confirmacao = confirm(`ATENÇÃO!\n\nVocê está prestes a excluir permanentemente o item código: ${codigo}.\nIsso apagará o item do sistema e afetará o controle de estoque.\n\nDeseja realmente excluir?`);         if (!confirmacao) return;          $('msgCadastro').textContent = 'Excluindo...'; $('msgCadastro').className = 'status-msg';         try {             const r = await srv('excluirCadastroItem', { codigo: padCode(codigo) });             $('msgCadastro').textContent = r.message; $('msgCadastro').className = 'status-msg ok';             toast(r.message); await carregar();          } catch(err) {             $('msgCadastro').textContent = err.message; $('msgCadastro').className = 'status-msg erro';         }     };      $('cadUsarSubitem').addEventListener('change', function() {
+        if (cadastroEditandoCodigo || cadastroBaseFixa) return;
+        if (this.checked) {
+            const base = padCode(String($('cadCodigo').value || '').replace(/[^0-9]/g, ''));
+            $('cadCodigo').value = base;
+            $('cadSubitemLetra').value = proximaLetraSubitem(base);
+            $('salvarCadastro').textContent = 'Salvar Subitem';
+        } else {
+            $('cadSubitemLetra').value = '';
+            $('salvarCadastro').textContent = 'Salvar Cadastro';
         }
-    };
-
-    $('limparCadastro').addEventListener('click', () => {
-        $('formCadastro').reset(); $('cadCodigo').readOnly = false;
-        $('cadCodigo').value = sugerirProximoCodigo();
-        $('cadInicial').value = '0'; $('cadMinimo').value = '0'; $('msgCadastro').textContent = '';
+        atualizarResumoSubitem(false);
     });
+
+    $('cadCodigo').addEventListener('input', function() {
+        if (this.readOnly) return;
+        this.value = this.value.replace(/[^0-9]/g, '');
+        if ($('cadUsarSubitem').checked) {
+            $('cadSubitemLetra').value = proximaLetraSubitem(padCode(this.value));
+            atualizarResumoSubitem(false);
+        }
+    });
+
+    $('cadSubitemLetra').addEventListener('input', function() {
+        this.value = this.value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 1);
+        atualizarResumoSubitem(false);
+    });
+
+    $('novoSubitemBtn').addEventListener('click', () => {
+        const origem = cadastroEditandoCodigo ? dados.itens.find(x => x.codigo === cadastroEditandoCodigo) : null;
+        const base = cadastroEditandoCodigo ? baseDoCodigo(cadastroEditandoCodigo) : baseDoCodigo($('cadCodigo').value);
+        prepararNovoSubitem(base, origem);
+    });
+
+    $('limparCadastro').addEventListener('click', resetarCadastro);
 
     $('formCadastro').addEventListener('submit', async e => {
         e.preventDefault();
-        const isEditing = $('cadCodigo').readOnly;
-        const tryCode = padCode($('cadCodigo').value);
+        const isEditing = !!cadastroEditandoCodigo;
+        const usandoSubitem = $('cadUsarSubitem').checked;
+        const baseAtual = padCode(String($('cadCodigo').value || '').replace(/[^0-9]/g, ''));
+        const letraAtual = String($('cadSubitemLetra').value || '').trim().toUpperCase().replace(/[^A-Z]/g, '').slice(0, 1);
+        const tryCode = codigoFinalCadastro();
         const tryDesc = normalizeStr($('cadDescricao').value);
-        
+
+        if (!baseAtual) {
+            toast('Informe um código numérico válido.');
+            $('msgCadastro').textContent = 'Erro: informe o código-base.';
+            $('msgCadastro').className = 'status-msg erro';
+            return;
+        }
+        if (usandoSubitem && !letraAtual) {
+            toast('Escolha uma letra para o subitem.');
+            $('msgCadastro').textContent = 'Erro: o subitem precisa de uma letra de A a Z.';
+            $('msgCadastro').className = 'status-msg erro';
+            $('cadSubitemLetra').focus();
+            return;
+        }
+
         if (!isEditing) {
             const isDup = dados.itens.find(x => x.codigo === tryCode || normalizeStr(x.descricao) === tryDesc);
             if (isDup) {
-                toast("Égua mano, olha direitinho isso aí, tem algum cadastro igual. Vê aí se tá tudo certinho.");
-                $('msgCadastro').textContent = "Erro: Já existe um item com esse Código ou Descrição.";
+                const motivo = isDup.codigo === tryCode ? `O código ${tryCode} já existe.` : 'Já existe um item com essa descrição.';
+                toast(motivo);
+                $('msgCadastro').textContent = 'Erro: ' + motivo;
                 $('msgCadastro').className = 'status-msg erro';
                 return;
             }
         }
 
-        $('salvarCadastro').disabled = true; $('msgCadastro').textContent = 'Enviando...'; $('msgCadastro').className = 'status-msg';
+        const unidadeMantida = $('cadUnidade').value;
+        const categoriaMantida = $('cadCategoria').value;
+        const continuarSubitens = !isEditing && usandoSubitem;
+
+        $('salvarCadastro').disabled = true;
+        $('msgCadastro').textContent = 'Enviando...';
+        $('msgCadastro').className = 'status-msg';
         try {
             const r = await srv('salvarCadastroItem', {
-                codigo: tryCode, descricao: $('cadDescricao').value,
-                unidade: $('cadUnidade').value, categoria: $('cadCategoria').value, 
-                estoqueInicial: Number($('cadInicial').value), estoqueMinimo: Number($('cadMinimo').value)
+                codigo: tryCode,
+                descricao: $('cadDescricao').value,
+                unidade: $('cadUnidade').value,
+                categoria: $('cadCategoria').value,
+                estoqueInicial: Number($('cadInicial').value),
+                estoqueMinimo: Number($('cadMinimo').value)
             });
-            $('msgCadastro').textContent = r.message; $('msgCadastro').className = 'status-msg ok';
-            toast(r.message); 
-            
-            await carregar(); 
-            
-            if (!isEditing) {
-                $('formCadastro').reset();
-                $('cadCodigo').value = sugerirProximoCodigo();
-                $('cadInicial').value = '0'; $('cadMinimo').value = '0';
-            }
-        } catch(err) { $('msgCadastro').textContent = err.message; $('msgCadastro').className = 'status-msg erro'; } 
-        finally { $('salvarCadastro').disabled = false; }
-    });
 
-    $('formMov').addEventListener('submit', async e => {
-        e.preventDefault();
-        $('salvarMov').disabled = true; $('msgMov').textContent = 'Enviando...'; $('msgMov').className = 'status-msg';
-        try {
-            const r = await srv('registrarMovimentacao', {
-                codigo: padCode($('movCodigo').value), descricao: $('movDescricao').value,
-                tipo: $('movTipo').value, quantidade: Number($('movQuantidade').value),
-                embarcacao: $('movEmbarcacao').value, requisitante: $('movRequisitante').value
-            });
-            $('msgMov').textContent = r.message; $('msgMov').className = 'status-msg ok';
+            $('msgCadastro').textContent = r.message;
+            $('msgCadastro').className = 'status-msg ok';
             toast(r.message);
-            
-            $('formMov').reset(); $('movSaldo').value = '';
-            $('movRequisitante').disabled = true; $('movRequisitante').required = false;
-            $('movEmbarcacao').disabled = true; $('movEmbarcacao').required = false;
+            await carregar();
 
-            await carregar(); 
-        } catch(err) { $('msgMov').textContent = err.message; $('msgMov').className = 'status-msg erro'; } 
-        finally { $('salvarMov').disabled = false; }
+            if (continuarSubitens) {
+                prepararNovoSubitem(baseAtual, { unidade: unidadeMantida, categoria: categoriaMantida }, true);
+                const proximo = codigoFinalCadastro();
+                $('msgCadastro').textContent = `Subitem ${tryCode} salvo. Próximo disponível: ${proximo}. Preencha outro ou clique em “Limpar Formulário” para encerrar.`;
+                $('msgCadastro').className = 'status-msg ok';
+            } else {
+                resetarCadastro();
+                $('msgCadastro').textContent = r.message;
+                $('msgCadastro').className = 'status-msg ok';
+            }
+        } catch(err) {
+            $('msgCadastro').textContent = err.message;
+            $('msgCadastro').className = 'status-msg erro';
+        } finally {
+            $('salvarCadastro').disabled = false;
+        }
     });
 
-    $('filtroHistorico').addEventListener('change', renderMovimentos);
-    $('buscaCadastro').addEventListener('input', renderCadastro);
-    $('buscaEstoque').addEventListener('input', renderEstoque);
-    $('filtroRelatorio').addEventListener('change', renderRelatorio);
-
-    // ============================================================================
-    // ITEM CONTRATUAL (CSV)
-    // ============================================================================
-    const CSV_ITENS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS8an6Vae5OUkZVObcjTNcqUaXZKD-AtlJCg1WRK-6Aw2DDOoLZHGTB59oDSBK1iGc3BEGWI4u_6Qh3/pub?gid=439074154&single=true&output=csv';
-    let itensContratoData = [];
-
-    async function initItensContrato() {
-        try {
-            const response = await fetch(`${CSV_ITENS}&t=${Date.now()}`);
-            const text = await response.text();
-            itensContratoData = Papa.parse(text, {header:true}).data.map(i => ({
-                code: i['código']||'', desc: i['descritivo']||'', unit: i['unidade']||'', 
-                val: parseFloat((i['valor']||'').replace(/[^\d,]/g, '').replace(',', '.')) || 0
-            })).filter(i => i.code);
-            renderItensContrato();
-        } catch(e) {
-            $('itensTableBody').innerHTML = '<tr><td colspan="4" class="text-center text-muted">Erro ao carregar itens contratuais.</td></tr>';
-        }
-    }
-
-    function renderItensContrato(filtro = '') {
-        const termo = normalizeStr(filtro);
-        const lista = termo ? itensContratoData.filter(i => normalizeStr(i.desc).includes(termo) || normalizeStr(i.code).includes(termo)) : itensContratoData;
-        const fmtMoeda = v => v.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
-
-        $('itensTableBody').innerHTML = lista.length ? lista.map(i => `<tr>
-            <td class="clickable-cell" onclick="copyText(this)" style="font-family: monospace; font-weight: 700; cursor: pointer;" title="Copiar código">${i.code}</td>
-            <td class="clickable-cell" onclick="copyText(this)" style="cursor: pointer;" title="Copiar descrição">${i.desc}</td>
-            <td class="text-center">${i.unit}</td>
-            <td class="clickable-cell text-right bold" onclick="copyText(this)" style="cursor: pointer;" title="Copiar valor">${fmtMoeda(i.val)}</td>
-        </tr>`).join('') : '<tr><td colspan="4" class="text-center text-muted">Nenhum item encontrado.</td></tr>';
-    }
-
-    $('searchItemContratual').addEventListener('input', function() { renderItensContrato(this.value); });
-    function copyText(el) { navigator.clipboard.writeText(el.innerText).then(() => toast('Copiado para a área de transferência!')); }
-
-    carregar();
-</script>
-</body>
-</html>
+    $('formMov').addEventListener('submit', async e => {         e.preventDefault();         $('salvarMov').disabled = true; $('msgMov').textContent = 'Enviando...'; $('msgMov').className = 'status-msg';         try {             const r = await srv('registrarMovimentacao', {                 codigo: padCode($('movCodigo').value), descricao: $('movDescricao').value,                 tipo: $('movTipo').value, quantidade: Number($('movQuantidade').value),                 embarcacao: $('movEmbarcacao').value, requisitante: $('movRequisitante').value             });             $('msgMov').textContent = r.message; $('msgMov').className = 'status-msg ok';             toast(r.message);                          $('formMov').reset(); $('movSaldo').value = '';             $('movRequisitante').disabled = true; $('movRequisitante').required = false;             $('movEmbarcacao').disabled = true; $('movEmbarcacao').required = false;              await carregar();          } catch(err) { $('msgMov').textContent = err.message; $('msgMov').className = 'status-msg erro'; }          finally { $('salvarMov').disabled = false; }     });      $('filtroHistorico').addEventListener('change', renderMovimentos);     $('buscaCadastro').addEventListener('input', renderCadastro);     $('buscaEstoque').addEventListener('input', renderEstoque);     $('filtroRelatorio').addEventListener('change', renderRelatorio);      /* ============================================================================ */     /* ITEM CONTRATUAL (CSV) */     /* ============================================================================ */     const CSV_ITENS = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS8an6Vae5OUkZVObcjTNcqUaXZKD-AtlJCg1WRK-6Aw2DDOoLZHGTB59oDSBK1iGc3BEGWI4u_6Qh3/pub?gid=439074154&single=true&output=csv';     let itensContratoData = [];      async function initItensContrato() {         try {             const response = await fetch(`${CSV_ITENS}&t=${Date.now()}`);             const text = await response.text();             itensContratoData = Papa.parse(text, {header:true}).data.map(i => ({                 code: i['código']||'', desc: i['descritivo']||'', unit: i['unidade']||'',                  val: parseFloat((i['valor']||'').replace(/[^\d,]/g, '').replace(',', '.')) || 0             })).filter(i => i.code);             renderItensContrato();         } catch(e) {             $('itensTableBody').innerHTML = '<tr><td colspan="4" class="text-center text-muted">Erro ao carregar itens contratuais.</td></tr>';         }     }      function renderItensContrato(filtro = '') {         const termo = normalizeStr(filtro);         const lista = termo ? itensContratoData.filter(i => normalizeStr(i.desc).includes(termo) || normalizeStr(i.code).includes(termo)) : itensContratoData;         const fmtMoeda = v => v.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});          $('itensTableBody').innerHTML = lista.length ? lista.map(i => `<tr>             <td class="clickable-cell" onclick="copyText(this)" style="font-family: monospace; font-weight: 700; cursor: pointer;" title="Copiar código">${i.code}</td>             <td class="clickable-cell" onclick="copyText(this)" style="cursor: pointer;" title="Copiar descrição">${i.desc}</td>             <td class="text-center">${i.unit}</td>             <td class="clickable-cell text-right bold" onclick="copyText(this)" style="cursor: pointer;" title="Copiar valor">${fmtMoeda(i.val)}</td>         </tr>`).join('') : '<tr><td colspan="4" class="text-center text-muted">Nenhum item encontrado.</td></tr>';     }      $('searchItemContratual').addEventListener('input', function() { renderItensContrato(this.value); });     function copyText(el) { navigator.clipboard.writeText(el.innerText).then(() => toast('Copiado para a área de transferência!')); }      carregar(); </script> </body> </html>   
